@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="mn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК—(ИНВОЙС)</title>
+    <style>
+      :root {
+        --ink: #111827;
+        --muted: #6b7280;
+        --line: #d1d5db;
+        --line2: #9ca3af;
+        --bg: #f5f5f5;
+        --light: #fff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: "Times New Roman", Arial, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      .wrap.editor {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 12px;
+      }
+      .card {
+        background: var(--light);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .row > * {
+        flex: 1;
+      }
+      label {
+        font-size: 13px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 4px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 15px;
+      }
+      textarea {
+        min-height: 60px;
+        resize: vertical;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .btn.primary {
+        background: #1f2937;
+        color: #fff;
+        border-color: #1f2937;
+      }
+      .btn.success {
+        background: #065f46;
+        color: #fff;
+        border-color: #065f46;
+      }
+      .actions {
+        position: sticky;
+        bottom: 0;
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(4px);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-top: 10px;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .pill {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      @page {
+        size: A4;
+        margin: 18mm;
+      }
+      .sheet {
+        width: 210mm;
+        min-height: 297mm;
+        background: #fff;
+        margin: 12px auto;
+        padding: 18mm;
+        border: 1px solid #e5e7eb;
+      }
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        width: 700px;
+        margin-left: -40px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .company h2 {
+        margin: 0 0 4px 0;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .company small {
+        display: block;
+        color: #4b5563;
+        line-height: 1.35;
+      }
+      .title {
+        text-align: center;
+        margin: 14px 0 8px;
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: 0.3px;
+      }
+      .meta {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        margin-top: 4px;
+        font-size: 14px;
+      }
+      .meta div:last-child {
+        text-align: right;
+      }
+      table {
+        width: 690px;
+        border-collapse: collapse;
+        margin-top: 14px;
+        font-size: 14px;
+        margin-left: -12px;
+      }
+      thead th {
+        border: 1px solid var(--line2);
+        padding: 8px 6px;
+        text-align: center;
+        background: #f3f4f6;
+        font-weight: 700;
+      }
+      tbody td {
+        border: 1px solid var(--line2);
+        padding: 8px 6px;
+        vertical-align: top;
+      }
+      tfoot td {
+        border: 1px solid var(--line2);
+        padding: 8px 6px;
+        font-weight: 700;
+      }
+      .right {
+        text-align: right;
+      }
+      .center {
+        text-align: center;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .note {
+        margin-top: 10px;
+        border: 1px solid var(--line);
+        padding: 10px;
+        font-size: 13px;
+        background: #f9fafb;
+      }
+      .footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 14px;
+        font-size: 14px;
+      }
+      .stamp-wrap {
+        position: relative;
+        min-height: 160px;
+        margin-right: -40px;
+      }
+      .stamp {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: var(--stamp-h, 120px);
+        opacity: 0.98;
+      }
+      .signatureblock {
+        position: relative;
+        width: 130px;
+        right: -180px;
+        top: 10px;
+        opacity: 70%;
+      }
+      .sign-block {
+        position: absolute;
+        right: 15px;
+        bottom: 33px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-direction: column;
+        opacity: 0.7;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        body * {
+          visibility: hidden !important;
+        }
+        #preview,
+        #preview * {
+          visibility: visible !important;
+        }
+        #preview {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          margin: 0;
+          padding: 18mm;
+          border: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap editor">
+      <div class="card">
+        <div class="row" style="align-items: center; gap: 12px">
+          <div class="logo" style="gap: 10px">
+            <img
+              id="logo_editor"
+              style="height: 56px"
+              alt="ЛОГО"
+              src="images/1000014080.png"
+            />
+            <strong>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</strong>
+          </div>
+
+          <div class="row" style="margin-top: 8px">
+            <div>
+              <label>Баримтын төрөл</label>
+              <select id="docType">
+                <option value="ҮНИЙН САНАЛ">ҮНИЙН САНАЛ</option>
+                <option value="НЭХЭМЖЛЭХ">НЭХЭМЖЛЭХ</option>
+                <option value="ЗАРЛАГЫН БАРИМТ">ЗАРЛАГЫН БАРИМТ</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 8px">
+          <div>
+            <label>Invoice No</label>
+            <input id="inv" value="INV-0001" />
+          </div>
+          <div>
+            <label>Огноо</label>
+            <input id="date" type="date" value="" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Харилцагч</label>
+            <input id="customer" placeholder="Компанийн нэр" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Тэмдэглэл / Нөхцөл</label>
+            <textarea id="note">
+Дээрх үнэд нэмэгдсэн өртгийн албан татвар (НӨАТ) багтсан болно. Бараа нийлүүлэх хугацаа 14 хоног.</textarea
+            >
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 6px">
+          <div>
+            <label class="muted">Лого хэмжээ</label>
+            <input
+              type="range"
+              id="logo_scale"
+              min="150"
+              max="200"
+              value="150"
+            />
+          </div>
+          <div>
+            <label class="muted">Тамга хэмжээ</label>
+            <input
+              type="range"
+              id="stamp_scale"
+              min="100"
+              max="120"
+              value="100"
+            />
+          </div>
+        </div>
+
+        <div style="margin-top: 10px">
+          <label>Мөрүүд</label>
+          <div id="items"></div>
+          <button class="btn" onclick="addRow()">+ Мөр нэмэх</button>
+          <button class="btn" style="margin-left: 6px" onclick="clearRows()">
+            Цэвэрлэх
+          </button>
+        </div>
+
+        <div class="row" style="margin-top: 10px">
+          <div>
+            <label>Дүн бичгээр (автоматаар)</label>
+            <input id="sumWords" readonly />
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="pill">Нийт: <strong id="grandMini">0</strong> ₮</div>
+          <div style="display: flex; gap: 8px">
+            <button class="btn" onclick="scrollToPreview()">
+              Preview рүү очих
+            </button>
+            <button class="btn primary" onclick="window.print()">
+              Хэвлэх / PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="sheet" id="preview">
+      <div class="header">
+        <div class="logo">
+          <img
+            id="logo_preview"
+            style="height: 56px"
+            alt="Partsland logo"
+            src="images/1000014080.png"
+          />
+          <div class="company">
+            <h2>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</h2>
+            <small
+              >Улаанбаатар хот, Сонгинохайрхан дүүрэг,<br />9-р хороо, Баруун
+              баян уул 6-30</small
+            >
+          </div>
+        </div>
+        <div class="right">
+          <div class="title" id="p_docType">ЗАРЛАГЫН БАРИМТ</div>
+
+          <div class="meta">
+            <div></div>
+            <div>
+              Invoice No: <strong id="p_inv">INV-0001</strong><br />
+              Огноо: <strong id="p_date">2025-09-13</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta" style="margin-top: 10px">
+        <div>Харилцагч (Customer): <strong id="p_customer"></strong></div>
+        <div></div>
+      </div>
+
+      <table id="p_table">
+        <thead>
+          <tr>
+            <th style="width: 40px">
+              Д/д<br /><span class="muted">{{Pos}}</span>
+            </th>
+            <th>
+              БҮТЭЭГДЭХҮҮНИЙ НЭР<br /><span class="muted"
+                >{{PRODUCT NAME}}</span
+              >
+            </th>
+            <th style="width: 120px">
+              ХЭМЖИХ НЭГЖ<br /><span class="muted">{{MEASUREMENT}}</span>
+            </th>
+            <th style="width: 120px">
+              НЭГЖИЙН ҮНЭ<br /><span class="muted">{{UNIT PRICE}}</span>
+            </th>
+            <th style="width: 100px">
+              ТОО ШИРХЭГ<br /><span class="muted">{{QTY}}</span>
+            </th>
+            <th style="width: 130px">
+              НИЙТ<br /><span class="muted">{{AMOUNT}}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="p_rows"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" class="right"><strong>НИЙТ (TOTAL)</strong></td>
+            <td class="right"><strong id="p_total">0</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="note" id="p_note"></div>
+
+      <div class="footer">
+        <div>
+          <div><strong>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</strong></div>
+          <div>РД:6622755</div>
+          <div>Хаан банк: 51 66 766 796</div>
+          <div>iban: 70000500</div>
+          <div>E-mail: umgmtrade@gmail.com</div>
+          <div>Холбогдох дугаар: +976 8520-5258</div>
+          <div class="muted" style="margin-top: 6px" id="p_sumWords">
+            Нийт үнэ
+          </div>
+        </div>
+        <div class="stamp-wrap">
+          <img
+            class="stamp"
+            id="stamp_preview"
+            alt="Stamp"
+            src="images/1000014081.jpg"
+          />
+          <img
+            class="signatureblock"
+            src="images/signature-transparent.png"
+            alt=""
+          />
+          <div class="sign-block">
+            <div><strong>Тамга тэмдэг</strong></div>
+            <div class="muted">/Гарын үсэг/</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const itemsEl = document.getElementById("items");
+      const pRows = document.getElementById("p_rows");
+      const grandMini = document.getElementById("grandMini");
+      const logoScale = document.getElementById("logo_scale");
+      const stampScale = document.getElementById("stamp_scale");
+      ["inv", "date", "customer", "note", "docType"].forEach((id) => {
+        document.getElementById(id).addEventListener("input", sync);
+        document.getElementById(id).addEventListener("change", sync);
+      });
+
+      function toWordsMn(n) {
+        n = Math.floor(n);
+        if (n === 0) return "тэг төгрөг";
+        const ones = [
+          "",
+          "нэг",
+          "хоёр",
+          "гурав",
+          "дөрөв",
+          "тав",
+          "зургаа",
+          "долоо",
+          "найм",
+          "ес",
+        ];
+        const tens = [
+          "",
+          "арав",
+          "хорин",
+          "гучин",
+          "дөчин",
+          "тавин",
+          "жаран",
+          "далан",
+          "наян",
+          "ерэн",
+        ];
+        function under1000(x) {
+          let s = "";
+          const h = Math.floor(x / 100),
+            t = Math.floor((x % 100) / 10),
+            o = x % 10;
+          if (h) s += ones[h] + " зуу";
+          const two = x % 100;
+          if (two) {
+            if (s) s += " ";
+            if (two < 10) s += ones[o];
+            else if (two < 20)
+              s += two === 10 ? "арав" : "арван " + ones[two - 10];
+            else {
+              s += tens[t];
+              if (o) s += " " + ones[o];
+            }
+          }
+          return s.trim();
+        }
+        const scales = ["", "мянга", "сая", "тэрбум", "их наяд"];
+        let i = 0,
+          x = n,
+          parts = [];
+        while (x > 0 && i < scales.length) {
+          const chunk = x % 1000;
+          if (chunk) {
+            let p = under1000(chunk);
+            if (scales[i]) p += " " + scales[i];
+            parts.push(p);
+          }
+          x = Math.floor(x / 1000);
+          i++;
+        }
+        return (
+          parts.reverse().join(" ").replace(/\s+/g, " ").trim() + " төгрөг"
+        );
+      }
+      function fmt(n) {
+        return isNaN(n) || n === null
+          ? "0"
+          : new Intl.NumberFormat("mn-MN").format(Math.round(n));
+      }
+
+      function addRow(preset) {
+        const idx = itemsEl.children.length + 1;
+        const row = document.createElement("div");
+        row.className = "card";
+        row.style.marginTop = "8px";
+        row.innerHTML = `
+        <div class="row">
+          <div><label>Бүтээгдэхүүн</label><input class="name" placeholder="Нэр / марк" value="${
+            preset?.name || ""
+          }"/></div>
+        </div>
+        <div class="row">
+          <div style="max-width:120px"><label>Нэгж</label><input class="unit" value="${
+            preset?.unit || "ш"
+          }"/></div>
+          <div><label>Нэгжийн үнэ</label><input class="price" inputmode="decimal" value="${
+            preset?.price || ""
+          }"/></div>
+          <div><label>Тоо ширхэг</label><input class="qty" inputmode="numeric" value="${
+            preset?.qty || 1
+          }"/></div>
+        </div>
+        <div class="row" style="align-items:center;">
+          <div class="muted">Д/д: <span class="pos">${idx}</span></div>
+          <div style="text-align:right; flex:1;">Мөрийн нийт: <strong class="lineTotal">0</strong> ₮</div>
+        </div>
+        <div style="text-align:right; margin-top:4px;">
+          <button class="btn" onclick="this.closest('.card').remove(); sync()">Устгах</button>
+        </div>`;
+        itemsEl.appendChild(row);
+        ["input", "change"].forEach((ev) => row.addEventListener(ev, sync));
+        sync();
+      }
+      function clearRows() {
+        itemsEl.innerHTML = "";
+        sync();
+      }
+      function getRows() {
+        const list = [];
+        itemsEl.querySelectorAll(".card").forEach((card, i) => {
+          const name = card.querySelector(".name").value.trim();
+          const unit = card.querySelector(".unit").value.trim() || "ш";
+          const price =
+            parseFloat(
+              card
+                .querySelector(".price")
+                .value.toString()
+                .replace(/[,\s]/g, "")
+            ) || 0;
+          const qty =
+            parseFloat(
+              card.querySelector(".qty").value.toString().replace(/[,\s]/g, "")
+            ) || 0;
+          const amount = price * qty;
+          list.push({ pos: i + 1, name, unit, price, qty, amount, card });
+        });
+        return list;
+      }
+
+      function sync() {
+        document.getElementById("p_inv").textContent =
+          document.getElementById("inv").value || "";
+        document.getElementById("p_date").textContent =
+          document.getElementById("date").value || "";
+        document.getElementById("p_customer").textContent =
+          document.getElementById("customer").value || "";
+        document.getElementById("p_note").textContent =
+          document.getElementById("note").value || "";
+        document.getElementById("p_docType").textContent =
+          document.getElementById("docType").value;
+
+        const rows = getRows();
+        rows.forEach(
+          (r) =>
+            (r.card.querySelector(".lineTotal").textContent = fmt(r.amount))
+        );
+        pRows.innerHTML = "";
+        let total = 0;
+        rows.forEach((r) => {
+          total += r.amount;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+        <td class="center">${r.pos}</td>
+        <td>${r.name}</td>
+        <td class="center">${r.unit}</td>
+        <td class="right">${fmt(r.price)}</td>
+        <td class="center">${fmt(r.qty)}</td>
+        <td class="right">${fmt(r.amount)}</td>`;
+          pRows.appendChild(tr);
+        });
+        document.getElementById("p_total").textContent = fmt(total);
+        grandMini.textContent = fmt(total);
+        const words = total ? toWordsMn(total) : "";
+        document.getElementById("sumWords").value = words;
+        document.getElementById("p_sumWords").textContent = words;
+      }
+      function scrollToPreview() {
+        document
+          .getElementById("preview")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+      function applyScales() {
+        const l = Number(logoScale.value) / 100,
+          s = Number(stampScale.value) / 100;
+        document.getElementById("logo_editor").style.height = 56 * l + "px";
+        document.getElementById("logo_preview").style.height = 56 * l + "px";
+        document
+          .getElementById("stamp_preview")
+          .style.setProperty("--stamp-h", 120 * s + "px");
+      }
+      logoScale.addEventListener("input", applyScales);
+      stampScale.addEventListener("input", applyScales);
+
+      addRow({ name: "Бараа", unit: "ш", price: 1, qty: 1 });
+      ["inv", "date", "customer", "note"].forEach((id) => {
+        document.getElementById(id).addEventListener("input", sync);
+        document.getElementById(id).addEventListener("change", sync);
+      });
+      sync();
+      applyScales();
+    </script>
+  </body>
+</html>
