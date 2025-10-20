@@ -355,6 +355,29 @@
             <button class="btn primary" onclick="window.print()">
               Хэвлэх / PDF
             </button>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <select id="tmplSelect" class="btn" style="min-width: 220px">
+                <option value="">— Загвар сонгох —</option>
+              </select>
+              <input
+                id="tmplName"
+                class="btn"
+                style="min-width: 200px"
+                placeholder="Загварын нэр"
+              />
+              <button class="btn success" onclick="saveTemplate()">
+                Загвар хадгалах
+              </button>
+              <button class="btn" onclick="loadTemplate()">Дуудах</button>
+              <button class="btn" onclick="deleteTemplate()">Устгах</button>
+            </div>
           </div>
         </div>
       </div>
@@ -664,6 +687,142 @@
       });
       sync();
       applyScales();
+      const LS_KEY = "umgm_templates_v1";
+
+      function getTemplates() {
+        try {
+          return JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+        } catch {
+          return {};
+        }
+      }
+      function setTemplates(obj) {
+        localStorage.setItem(LS_KEY, JSON.stringify(obj));
+      }
+      function refreshTemplateSelect() {
+        const sel = document.getElementById("tmplSelect");
+        const saved = getTemplates();
+        const current = sel.value;
+        sel.innerHTML = '<option value="">— Загвар сонгох —</option>';
+        Object.keys(saved)
+          .sort()
+          .forEach((name) => {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel.appendChild(opt);
+          });
+        // сэргээх
+        if (current && saved[current]) sel.value = current;
+      }
+
+      function collectState() {
+        const rows = getRows().map((r) => ({
+          name: r.name,
+          unit: r.unit,
+          price: r.price,
+          qty: r.qty,
+        }));
+        return {
+          inv: document.getElementById("inv").value || "",
+          date: document.getElementById("date").value || "",
+          customer: document.getElementById("customer").value || "",
+          note: document.getElementById("note").value || "",
+          docType: document.getElementById("docType").value,
+          logo_scale: Number(document.getElementById("logo_scale").value),
+          stamp_scale: Number(document.getElementById("stamp_scale").value),
+          rows,
+        };
+      }
+
+      function applyState(state) {
+        // талбарууд
+        document.getElementById("inv").value = state.inv || "";
+        document.getElementById("date").value = state.date || "";
+        document.getElementById("customer").value = state.customer || "";
+        document.getElementById("note").value = state.note || "";
+        document.getElementById("docType").value =
+          state.docType || "ҮНИЙН САНАЛ";
+
+        document.getElementById("logo_scale").value = state.logo_scale || 150;
+        document.getElementById("stamp_scale").value = state.stamp_scale || 100;
+
+        // мөрүүд
+        clearRows();
+        (state.rows || []).forEach((r) => addRow(r));
+
+        applyScales();
+        sync();
+      }
+
+      function saveTemplate() {
+        const nameInput = document.getElementById("tmplName");
+        let name = (nameInput.value || "").trim();
+
+        if (!name) {
+          // нэр өгөөгүй бол Invoice No + Date-ээр автоматаар нэрлэнэ
+          const inv = document.getElementById("inv").value || "INV";
+          const date =
+            document.getElementById("date").value ||
+            new Date().toISOString().slice(0, 10);
+          name = `${inv} • ${date}`;
+          nameInput.value = name;
+        }
+
+        const templates = getTemplates();
+        templates[name] = collectState();
+        setTemplates(templates);
+        refreshTemplateSelect();
+        document.getElementById("tmplSelect").value = name;
+        alert(`“${name}” загварыг хадгаллаа.`);
+      }
+
+      function loadTemplate() {
+        const sel = document.getElementById("tmplSelect");
+        const name =
+          sel.value || (document.getElementById("tmplName").value || "").trim();
+        if (!name) {
+          alert("Эхлээд загварын нэрээ сонгоно уу.");
+          return;
+        }
+
+        const templates = getTemplates();
+        const st = templates[name];
+        if (!st) {
+          alert(`“${name}” нэртэй загвар алга.`);
+          return;
+        }
+
+        applyState(st);
+        alert(`“${name}” загварыг дуудаж хэрэглэв.`);
+      }
+
+      function deleteTemplate() {
+        const sel = document.getElementById("tmplSelect");
+        const name =
+          sel.value || (document.getElementById("tmplName").value || "").trim();
+        if (!name) {
+          alert("Устгах загвараа сонгоно уу.");
+          return;
+        }
+
+        const templates = getTemplates();
+        if (!templates[name]) {
+          alert(`“${name}” нэртэй загвар байхгүй.`);
+          return;
+        }
+
+        if (!confirm(`“${name}” загварыг устгах уу?`)) return;
+
+        delete templates[name];
+        setTemplates(templates);
+        refreshTemplateSelect();
+        document.getElementById("tmplName").value = "";
+        alert("Устгагдлаа.");
+      }
+
+      // Анх ачаалах үед select-ийг дүүргэнэ
+      document.addEventListener("DOMContentLoaded", refreshTemplateSelect);
     </script>
   </body>
 </html>
