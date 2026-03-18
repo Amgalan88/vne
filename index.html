@@ -1031,14 +1031,37 @@
         display: none !important;
       }
 
+      /* ── Хэвлэлтэнд mobile override-г цуцал ── */
       #preview {
         display: block !important;
-        width: 210mm;
-        margin: 0;
-        border: 0;
-        box-shadow: none;
-        overflow: visible;
+        width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        font-size: 13px !important;
       }
+      #preview .sh-body { padding: 13mm 15mm 11mm !important; }
+      #preview .sh-header { flex-direction: row !important; gap: 20px !important; }
+      #preview .sh-right { text-align: right !important; }
+      #preview .sh-logo-wrap img { height: 58px !important; }
+      #preview .sh-co-name { font-size: 16px !important; }
+      #preview .sh-co-info { font-size: 10.5px !important; }
+      #preview .sh-doc-type { font-size: 17px !important; letter-spacing: 2px !important; }
+      #preview .sh-inv-badge { font-size: 12px !important; }
+      #preview .sh-cust-name { font-size: 14px !important; }
+      #preview .sh-table { font-size: 12.5px !important; }
+      #preview .sh-table thead th { padding: 8px 7px !important; font-size: 11px !important; }
+      #preview .sh-table tbody td { padding: 9px 7px !important; }
+      #preview .sh-total-val { font-size: 16px !important; }
+      #preview .sh-footer { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
+      #preview .sh-stamp-wrap { min-height: 150px !important; }
+      #preview .sh-stamp { height: var(--stamp-h, 120px) !important; }
+      #preview .sh-sig { display: block !important; }
+      #preview .sh-note { font-size: 11.5px !important; }
+      #preview .sh-bank-name { font-size: 13px !important; }
+      #preview .sh-bank-row { font-size: 12px !important; }
     }
 
     /* ══ Mobile ══ */
