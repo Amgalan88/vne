@@ -1042,31 +1042,67 @@
     }
 
     /* ══ Mobile ══ */
-    @media (max-width: 600px) {
-      .topbar-brand small {
-        display: none;
-      }
+    @media (max-width: 640px) {
+      /* Топ бар */
+      .topbar { padding: 0 12px; height: 50px; }
+      .topbar-brand small { display: none; }
+      .topbar-brand span { font-size: 13px; }
+      .topbar-brand img { height: 26px; }
+      .tb-btn { padding: 0 8px; font-size: 12px; height: 30px; }
 
-      .topbar-brand span {
-        font-size: 12px;
-      }
+      /* Layout */
+      .page { padding: 10px 8px 100px; }
+      .card-head { padding: 11px 12px; }
+      .card-body { padding: 12px; }
 
-      .page {
-        padding: 12px 10px 40px;
-      }
+      /* Grid → нэг багана */
+      .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 8px; }
 
+      /* Мөр карт */
+      .item-card { padding: 10px; }
+
+      /* Actions bar */
+      .actions-bar { padding: 10px 12px; border-radius: 12px; bottom: 10px; }
+      .actions-bar .total-info .val { font-size: 16px; }
+
+      /* Preview sheet — гар утасны дэлгэцэнд багасгах */
       .sheet {
         width: 100%;
         min-height: unset;
+        font-size: 11px;
+        margin: 12px auto;
       }
+      .sh-body { padding: 4mm 4mm 4mm; }
+      .sh-header { flex-direction: column; gap: 8px; }
+      .sh-right { text-align: left; }
+      .sh-logo-wrap { gap: 8px; }
+      .sh-logo-wrap img { height: 36px !important; }
+      .sh-co-name { font-size: 13px; }
+      .sh-co-info { font-size: 10px; }
+      .sh-doc-type { font-size: 14px; letter-spacing: 1px; }
+      .sh-inv-badge { font-size: 11px; padding: 2px 8px; }
+      .sh-cust-box { padding: 7px 10px; }
+      .sh-cust-name { font-size: 12px; }
+      .sh-table { font-size: 10px; }
+      .sh-table thead th { padding: 6px 4px; font-size: 9px; }
+      .sh-table tbody td { padding: 6px 4px; }
+      .sh-table tfoot td { padding: 7px 4px; }
+      .sh-total-val { font-size: 13px; }
+      .sh-footer { grid-template-columns: 1fr; gap: 10px; }
+      .sh-stamp-wrap { min-height: 90px; }
+      .sh-stamp { height: 80px !important; }
+      .sh-sig { display: none; }
+      .sh-note { font-size: 10px; padding: 7px 10px; }
+      .sh-bank-name { font-size: 11px; }
+      .sh-bank-row { font-size: 10px; line-height: 1.7; }
 
-      .sh-header {
-        flex-direction: column;
-      }
+      /* Drawer */
+      .drawer { width: 100vw; }
 
-      .sh-right {
-        text-align: left;
-      }
+      /* Modal */
+      .modal-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .modal-btn { padding: 12px 8px; font-size: 13px; }
+      .modal-body { padding: 12px 14px 28px; }
     }
 
     /* ══ Animations ══ */
