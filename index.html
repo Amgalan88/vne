@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="mn">
+<html lang="mn" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,947 +10,841 @@
     <meta name="apple-mobile-web-app-title" content="УМГМ Инвойс" />
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="images/1000014080.png" />
-    <title>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК—(ИНВОЙС)</title>
+    <title>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК — ИНВОЙС</title>
     <style>
+      /* ── Өнгө ── */
       :root {
-        --ink: #111827;
-        --muted: #6b7280;
-        --line: #d1d5db;
-        --line2: #9ca3af;
-        --bg: #f5f5f5;
-        --light: #fff;
+        --ink: #111827; --muted: #6b7280; --line: #d1d5db; --line2: #9ca3af;
+        --bg: #f3f4f6; --light: #fff; --card: #fff;
+        --accent: #1f2937; --accent2: #065f46;
+        --danger: #dc2626; --warn: #d97706;
+        --shadow: 0 2px 8px rgba(0,0,0,.08);
       }
-      * {
-        box-sizing: border-box;
+      [data-theme="dark"] {
+        --ink: #f9fafb; --muted: #9ca3af; --line: #374151; --line2: #4b5563;
+        --bg: #111827; --light: #1f2937; --card: #1f2937;
+        --accent: #e5e7eb; --accent2: #34d399;
+        --shadow: 0 2px 8px rgba(0,0,0,.4);
       }
-      html,
-      body {
-        height: 100%;
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body { margin: 0; font-family: "Times New Roman", Arial, sans-serif; color: var(--ink); background: var(--bg); transition: background .2s, color .2s; }
+
+      /* ── Топ навигаци ── */
+      .topbar {
+        position: sticky; top: 0; z-index: 100;
+        background: var(--accent); color: #fff;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 16px; height: 52px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.2);
       }
-      body {
-        margin: 0;
-        font-family: "Times New Roman", Arial, sans-serif;
-        color: var(--ink);
-        background: var(--bg);
+      .topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+      .topbar .brand img { height: 32px; border-radius: 6px; }
+      .topbar-actions { display: flex; gap: 6px; align-items: center; }
+      .icon-btn {
+        background: rgba(255,255,255,.15); border: none; color: #fff;
+        border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 16px;
+        transition: background .15s;
       }
-      .wrap.editor {
-        max-width: 850px;
-        margin: 0 auto;
-        padding: 12px;
+      .icon-btn:hover { background: rgba(255,255,255,.28); }
+
+      /* ── Суурь элементүүд ── */
+      .wrap { max-width: 880px; margin: 0 auto; padding: 12px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+      .row { display: flex; gap: 10px; flex-wrap: wrap; }
+      .row > * { flex: 1; min-width: 0; }
+      label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+      input, textarea, select {
+        width: 100%; padding: 9px 12px;
+        border: 1px solid var(--line); border-radius: 10px;
+        font-size: 15px; font-family: inherit;
+        background: var(--light); color: var(--ink);
+        transition: border-color .15s;
       }
-      .card {
-        background: var(--light);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 12px;
-      }
-      .row {
-        display: flex;
-        gap: 10px;
-      }
-      .row > * {
-        flex: 1;
-      }
-      label {
-        font-size: 13px;
-        color: var(--muted);
-        display: block;
-        margin-bottom: 4px;
-      }
-      input,
-      textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        font-size: 15px;
-      }
-      textarea {
-        min-height: 60px;
-        resize: vertical;
-      }
+      input:focus, textarea:focus, select:focus { outline: none; border-color: #6b7280; }
+      textarea { min-height: 58px; resize: vertical; }
       .btn {
-        display: inline-block;
-        padding: 10px 14px;
-        border: 1px solid var(--line);
-        background: #fff;
-        border-radius: 10px;
-        cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+        padding: 9px 14px; border: 1px solid var(--line);
+        background: var(--card); color: var(--ink);
+        border-radius: 10px; cursor: pointer; font-size: 14px;
+        font-family: inherit; transition: background .15s, box-shadow .15s;
+        white-space: nowrap;
       }
-      .btn.primary {
-        background: #1f2937;
-        color: #fff;
-        border-color: #1f2937;
-      }
-      .btn.success {
-        background: #065f46;
-        color: #fff;
-        border-color: #065f46;
-      }
+      .btn:hover { box-shadow: var(--shadow); }
+      .btn.primary { background: #1f2937; color: #fff; border-color: #1f2937; }
+      .btn.primary:hover { background: #374151; }
+      .btn.success { background: #065f46; color: #fff; border-color: #065f46; }
+      .btn.success:hover { background: #047857; }
+      .btn.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+      .section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin: 14px 0 6px; }
+
+      /* ── Баримт хэсэг ── */
       .actions {
-        position: sticky;
-        bottom: 0;
-        display: flex;
-        gap: 8px;
+        position: sticky; bottom: 0;
+        display: flex; gap: 8px; flex-wrap: wrap;
         padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(4px);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        margin-top: 10px;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
+        background: rgba(255,255,255,.9);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--line); border-radius: 14px;
+        margin-top: 10px; align-items: center; justify-content: space-between;
       }
-      .pill {
-        font-size: 12px;
-        color: var(--muted);
+      [data-theme="dark"] .actions { background: rgba(31,41,55,.92); }
+      .pill { font-size: 13px; color: var(--muted); }
+      .pill strong { color: var(--ink); font-size: 15px; }
+
+      /* ── Мөр карт ── */
+      .item-card {
+        background: var(--bg); border: 1px solid var(--line);
+        border-radius: 10px; padding: 10px; margin-top: 8px;
       }
-      @page {
-        size: A4;
-        margin: 18mm;
+      .item-card .row { gap: 8px; }
+
+      /* ── Түүх panel ── */
+      .drawer-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,.5); z-index: 200;
+        animation: fadeIn .2s;
       }
+      .drawer-overlay.open { display: flex; justify-content: flex-end; }
+      .drawer {
+        background: var(--card); width: min(420px, 100vw);
+        height: 100%; overflow-y: auto; padding: 16px;
+        box-shadow: -4px 0 24px rgba(0,0,0,.2);
+        animation: slideIn .25s;
+      }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .drawer h3 { margin: 0 0 12px; font-size: 17px; }
+      .drawer-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink); }
+      .hist-search { width: 100%; margin-bottom: 10px; }
+      .hist-item {
+        border: 1px solid var(--line); border-radius: 10px;
+        padding: 10px 12px; margin-bottom: 8px; cursor: pointer;
+        transition: background .15s; background: var(--bg);
+      }
+      .hist-item:hover { background: var(--line); }
+      .hist-item .hi-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+      .hist-item .hi-inv { font-weight: 700; font-size: 15px; }
+      .hist-item .hi-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 16px; padding: 0 4px; }
+      .hist-item .hi-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+      .hist-item .hi-total { font-size: 13px; font-weight: 700; color: var(--accent2); }
+      .hist-empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 14px; }
+
+      /* ── Харилцагч datalist ── */
+      .cust-wrap { position: relative; }
+      .cust-save { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 18px; }
+
+      /* ── Хэвлэх хуудас ── */
+      @page { size: A4; margin: 18mm; }
       .sheet {
-        width: 210mm;
-        min-height: 297mm;
-        background: #fff;
-        margin: 12px auto;
-        padding: 18mm;
+        width: 210mm; min-height: 297mm;
+        background: #fff; color: #111;
+        margin: 16px auto; padding: 18mm;
         border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 16px rgba(0,0,0,.08);
       }
-      .header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        width: 700px;
-        margin-left: -40px;
-      }
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .company h2 {
-        margin: 0 0 4px 0;
-        font-size: 18px;
-        font-weight: 700;
-        letter-spacing: 0.2px;
-      }
-      .company small {
-        display: block;
-        color: #4b5563;
-        line-height: 1.35;
-      }
-      .title {
-        text-align: center;
-        margin: 14px 0 8px;
-        font-weight: 800;
-        font-size: 22px;
-        letter-spacing: 0.3px;
-      }
-      .meta {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 8px;
-        margin-top: 4px;
-        font-size: 14px;
-      }
-      .meta div:last-child {
-        text-align: right;
-      }
-      table {
-        width: 690px;
-        border-collapse: collapse;
-        margin-top: 14px;
-        font-size: 14px;
-        margin-left: -12px;
-      }
-      thead th {
-        border: 1px solid var(--line2);
-        padding: 8px 6px;
-        text-align: center;
-        background: #f3f4f6;
-        font-weight: 700;
-      }
-      tbody td {
-        border: 1px solid var(--line2);
-        padding: 8px 6px;
-        vertical-align: top;
-      }
-      tfoot td {
-        border: 1px solid var(--line2);
-        padding: 8px 6px;
-        font-weight: 700;
-      }
-      .right {
-        text-align: right;
-      }
-      .center {
-        text-align: center;
-      }
-      .muted {
-        color: var(--muted);
-        font-size: 12px;
-      }
-      .note {
-        margin-top: 10px;
-        border: 1px solid var(--line);
-        padding: 10px;
-        font-size: 13px;
-        background: #f9fafb;
-      }
-      .footer {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-top: 14px;
-        font-size: 14px;
-      }
-      .stamp-wrap {
-        position: relative;
-        min-height: 160px;
-        margin-right: -40px;
-      }
-      .stamp {
-        position: absolute;
-        right: 0;
-        top: 0;
-        height: var(--stamp-h, 120px);
-        opacity: 0.98;
-      }
-      .signatureblock {
-        position: relative;
-        width: 130px;
-        right: -180px;
-        top: 10px;
-        opacity: 70%;
-      }
-      .sign-block {
-        position: absolute;
-        right: 15px;
-        bottom: 33px;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        flex-direction: column;
-        opacity: 0.7;
-      }
+      .sh-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+      .sh-logo { display: flex; align-items: center; gap: 12px; }
+      .sh-company h2 { margin: 0 0 4px; font-size: 18px; font-weight: 700; }
+      .sh-company small { display: block; color: #4b5563; line-height: 1.35; font-size: 13px; }
+      .sh-title { text-align: right; }
+      .sh-title .doc-type { font-weight: 800; font-size: 22px; letter-spacing: .3px; margin-bottom: 6px; }
+      .sh-meta { font-size: 14px; text-align: right; line-height: 1.7; }
+      .sh-customer { margin-top: 10px; font-size: 14px; border-bottom: 1px solid #d1d5db; padding-bottom: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }
+      thead th { border: 1px solid #9ca3af; padding: 8px 6px; text-align: center; background: #f3f4f6; font-weight: 700; }
+      tbody td { border: 1px solid #9ca3af; padding: 8px 6px; vertical-align: top; }
+      tfoot td { border: 1px solid #9ca3af; padding: 8px 6px; font-weight: 700; }
+      .right { text-align: right; } .center { text-align: center; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .sh-note { margin-top: 10px; border: 1px solid #d1d5db; padding: 10px; font-size: 13px; background: #f9fafb; }
+      .sh-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; font-size: 14px; }
+      .stamp-wrap { position: relative; min-height: 160px; }
+      .stamp { position: absolute; right: 0; top: 0; height: var(--stamp-h, 120px); opacity: .98; }
+      .signatureblock { position: relative; width: 130px; right: -180px; top: 10px; opacity: 70%; }
+      .sign-block { position: absolute; right: 15px; bottom: 33px; text-align: center; display: flex; justify-content: center; gap: 10px; flex-direction: column; opacity: .7; }
+
+      /* ── Print ── */
       @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        body * {
-          visibility: hidden !important;
-        }
-        #preview,
-        #preview * {
-          visibility: visible !important;
-        }
-        #preview {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          margin: 0;
-          padding: 18mm;
-          border: 0;
-        }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body * { visibility: hidden !important; }
+        #preview, #preview * { visibility: visible !important; }
+        #preview { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 18mm; border: 0; box-shadow: none; }
+        .topbar, .wrap, .actions { display: none !important; }
       }
+
+      /* ── Mobile ── */
+      @media (max-width: 600px) {
+        .topbar .brand span { display: none; }
+        .wrap { padding: 8px; }
+        .sheet { width: 100%; min-height: unset; padding: 12px; }
+        .sh-header { flex-direction: column; gap: 8px; }
+        .sh-title { text-align: left; }
+        table { font-size: 12px; }
+        .actions { gap: 6px; }
+        .actions .btn { padding: 8px 10px; font-size: 13px; }
+        .row { flex-direction: column; gap: 8px; }
+        .row > * { min-width: unset; }
+      }
+
+      /* ── Нэвтрэх дэлгэц ── */
+      #lockScreen {
+        position: fixed; inset: 0;
+        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999;
+        animation: fadeIn .3s;
+      }
+      #lockScreen.hidden { display: none; }
+      .lock-box {
+        background: #fff; border-radius: 20px;
+        padding: 44px 40px; text-align: center;
+        max-width: 360px; width: 92%;
+        box-shadow: 0 20px 60px rgba(0,0,0,.5);
+        animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+      }
+      @keyframes popIn { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      .lock-box img { height: 72px; margin-bottom: 16px; border-radius: 12px; }
+      .lock-box h2 { margin: 0 0 4px; font-size: 19px; color: #111827; }
+      .lock-box p { margin: 0 0 24px; color: #6b7280; font-size: 14px; }
+      .lock-input-wrap { position: relative; margin-bottom: 12px; }
+      .lock-input-wrap input {
+        width: 100%; padding: 13px 44px 13px 14px;
+        border: 1.5px solid #d1d5db; border-radius: 12px;
+        font-size: 20px; letter-spacing: 5px; text-align: center;
+        transition: border-color .2s;
+      }
+      .lock-input-wrap input:focus { outline: none; border-color: #1f2937; }
+      .lock-input-wrap input.error { border-color: #ef4444; animation: shake .4s; }
+      @keyframes shake {
+        0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+        40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
+      }
+      .eye-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 18px; }
+      .lock-box .err-msg { color: #ef4444; font-size: 13px; margin-bottom: 12px; min-height: 18px; }
+      .lock-box .login-btn {
+        width: 100%; padding: 13px;
+        background: #1f2937; color: #fff; border: none;
+        border-radius: 12px; font-size: 16px; font-weight: 600;
+        cursor: pointer; transition: background .15s, transform .1s;
+      }
+      .lock-box .login-btn:hover { background: #374151; }
+      .lock-box .login-btn:active { transform: scale(.98); }
     </style>
-  <style>
-    #lockScreen {
-      position: fixed;
-      inset: 0;
-      background: #111827;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-    #lockScreen.hidden { display: none; }
-    .lock-box {
-      background: #fff;
-      border-radius: 16px;
-      padding: 40px 36px;
-      text-align: center;
-      max-width: 340px;
-      width: 90%;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    .lock-box img { height: 64px; margin-bottom: 16px; }
-    .lock-box h2 { margin: 0 0 4px; font-size: 18px; }
-    .lock-box p { margin: 0 0 20px; color: #6b7280; font-size: 14px; }
-    .lock-box input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 18px;
-      letter-spacing: 4px;
-      text-align: center;
-      margin-bottom: 12px;
-      box-sizing: border-box;
-    }
-    .lock-box input.error { border-color: #ef4444; }
-    .lock-box .err-msg { color: #ef4444; font-size: 13px; margin-bottom: 10px; min-height: 18px; }
-    .lock-box button {
-      width: 100%;
-      padding: 12px;
-      background: #1f2937;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .lock-box button:hover { background: #374151; }
-  </style>
   </head>
   <body>
+
+  <!-- ── Нэвтрэх дэлгэц ── -->
   <div id="lockScreen">
     <div class="lock-box">
       <img src="images/1000014080.png" alt="Лого" />
       <h2>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</h2>
       <p>Нэвтрэхийн тулд кодоо оруулна уу</p>
-      <input type="password" id="lockInput" placeholder="••••••••" maxlength="20" />
+      <div class="lock-input-wrap">
+        <input type="password" id="lockInput" placeholder="••••••••" maxlength="20" autocomplete="off" />
+        <button class="eye-btn" id="eyeBtn" onclick="toggleEye()" type="button">👁</button>
+      </div>
       <div class="err-msg" id="lockErr"></div>
-      <button onclick="checkLock()">Нэвтрэх</button>
+      <button class="login-btn" onclick="checkLock()">Нэвтрэх</button>
     </div>
   </div>
-    <div class="wrap editor">
-      <div class="card">
-        <div class="row" style="align-items: center; gap: 12px">
-          <div class="logo" style="gap: 10px">
-            <img
-              id="logo_editor"
-              style="height: 56px"
-              alt="ЛОГО"
-              src="images/1000014080.png"
-            />
-            <strong>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</strong>
-          </div>
 
-          <div class="row" style="margin-top: 8px">
-            <div>
-              <label>Баримтын төрөл</label>
-              <select id="docType">
-                <option value="ҮНИЙН САНАЛ">ҮНИЙН САНАЛ</option>
-                <option value="НЭХЭМЖЛЭХ">НЭХЭМЖЛЭХ</option>
-                <option value="ЗАРЛАГЫН БАРИМТ">ЗАРЛАГЫН БАРИМТ</option>
-              </select>
-            </div>
+  <!-- ── Топ бар ── -->
+  <div class="topbar">
+    <div class="brand">
+      <img src="images/1000014080.png" alt="лого" />
+      <span>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="openHistory()" title="Түүх">🗂</button>
+      <button class="icon-btn" onclick="toggleDark()" id="darkBtn" title="Харанхуй горим">🌙</button>
+      <button class="icon-btn" id="installBtn" style="display:none" title="Апп суулгах">📲</button>
+    </div>
+  </div>
+
+  <!-- ── Түүхийн drawer ── -->
+  <div class="drawer-overlay" id="histDrawer" onclick="closeHistoryOutside(event)">
+    <div class="drawer">
+      <button class="drawer-close" onclick="closeHistory()">✕</button>
+      <h3>📋 Хадгалсан баримтууд</h3>
+      <input class="hist-search" id="histSearch" placeholder="🔍 Хайх: харилцагч, огноо, дугаар..." oninput="renderHistory()" />
+      <div id="histList"></div>
+    </div>
+  </div>
+
+  <!-- ── Үндсэн редактор ── -->
+  <div class="wrap">
+    <div class="card">
+
+      <div class="row" style="align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="logo" style="display:flex; align-items:center; gap:10px;">
+          <img id="logo_editor" style="height:52px" alt="Лого" src="images/1000014080.png" />
+          <strong style="font-size:15px;">ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</strong>
+        </div>
+        <div style="flex:1; min-width:160px;">
+          <label>Баримтын төрөл</label>
+          <select id="docType">
+            <option value="ҮНИЙН САНАЛ">ҮНИЙН САНАЛ</option>
+            <option value="НЭХЭМЖЛЭХ">НЭХЭМЖЛЭХ</option>
+            <option value="ЗАРЛАГЫН БАРИМТ">ЗАРЛАГЫН БАРИМТ</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>Invoice No</label>
+          <div style="display:flex; gap:6px;">
+            <input id="inv" value="INV-0001" style="flex:1;" />
+            <button class="btn" onclick="autoInvNo()" title="Автомат дугаар">🔄</button>
           </div>
         </div>
+        <div>
+          <label>Огноо</label>
+          <input id="date" type="date" />
+        </div>
+      </div>
 
-        <div class="row" style="margin-top: 8px">
-          <div>
-            <label>Invoice No</label>
-            <input id="inv" value="INV-0001" />
-          </div>
-          <div>
-            <label>Огноо</label>
-            <input id="date" type="date" value="" />
+      <div class="row" style="margin-top:8px;">
+        <div>
+          <label>Харилцагч</label>
+          <div class="cust-wrap">
+            <input id="customer" placeholder="Компанийн нэр" list="custList" autocomplete="off" />
+            <button class="cust-save" onclick="saveCustomer()" title="Харилцагч хадгалах">＋</button>
+            <datalist id="custList"></datalist>
           </div>
         </div>
+      </div>
 
-        <div class="row">
-          <div>
-            <label>Харилцагч</label>
-            <input id="customer" placeholder="Компанийн нэр" />
-          </div>
+      <div class="row" style="margin-top:8px;">
+        <div>
+          <label>Тэмдэглэл / Нөхцөл</label>
+          <textarea id="note">Дээрх үнэд нэмэгдсэн өртгийн албан татвар (НӨАТ) багтсан болно. Бараа нийлүүлэх хугацаа 14 хоног.</textarea>
         </div>
+      </div>
 
-        <div class="row">
-          <div>
-            <label>Тэмдэглэл / Нөхцөл</label>
-            <textarea id="note">
-Дээрх үнэд нэмэгдсэн өртгийн албан татвар (НӨАТ) багтсан болно. Бараа нийлүүлэх хугацаа 14 хоног.</textarea
-            >
-          </div>
+      <div class="row" style="margin-top:8px;">
+        <div>
+          <label class="muted">Лого хэмжээ</label>
+          <input type="range" id="logo_scale" min="100" max="200" value="150" />
         </div>
-
-        <div class="row" style="margin-top: 6px">
-          <div>
-            <label class="muted">Лого хэмжээ</label>
-            <input
-              type="range"
-              id="logo_scale"
-              min="150"
-              max="200"
-              value="150"
-            />
-          </div>
-          <div>
-            <label class="muted">Тамга хэмжээ</label>
-            <input
-              type="range"
-              id="stamp_scale"
-              min="100"
-              max="120"
-              value="100"
-            />
-          </div>
+        <div>
+          <label class="muted">Тамга хэмжээ</label>
+          <input type="range" id="stamp_scale" min="80" max="140" value="100" />
         </div>
+      </div>
 
-        <div style="margin-top: 10px">
-          <label>Мөрүүд</label>
-          <div id="items"></div>
-          <button class="btn" onclick="addRow()">+ Мөр нэмэх</button>
-          <button class="btn" style="margin-left: 6px" onclick="clearRows()">
-            Цэвэрлэх
-          </button>
+      <div style="margin-top:12px;">
+        <div class="section-title">Бараа / Үйлчилгээний мөрүүд</div>
+        <div id="items"></div>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" onclick="addRow()">＋ Мөр нэмэх</button>
+          <button class="btn" onclick="clearRows()">🗑 Цэвэрлэх</button>
         </div>
+      </div>
 
-        <div class="row" style="margin-top: 10px">
-          <div>
-            <label>Дүн бичгээр (автоматаар)</label>
-            <input id="sumWords" readonly />
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>Дүн бичгээр (автоматаар)</label>
+          <input id="sumWords" readonly />
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="pill">Нийт: <strong id="grandMini">0</strong> ₮</div>
+        <button class="btn primary" onclick="openFinish()">Дуусгах ▶</button>
+      </div>
+
+      <!-- Дуусгах modal -->
+      <div id="finishModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; align-items:flex-end; justify-content:center;">
+        <div style="background:var(--card); border-radius:20px 20px 0 0; padding:24px 20px 32px; width:100%; max-width:520px; animation:slideUp .25s;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <strong style="font-size:17px;">Дуусгах</strong>
+            <button onclick="closeFinish()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink);">✕</button>
           </div>
-        </div>
 
-        <div class="actions">
-          <div class="pill">Нийт: <strong id="grandMini">0</strong> ₮</div>
-          <div style="display: flex; gap: 8px">
-            <button class="btn" onclick="scrollToPreview()">
-              Preview рүү очих
-            </button>
-            <button class="btn primary" onclick="window.print()">
-              Хэвлэх / PDF
-            </button>
-            <div
-              style="
-                display: flex;
-                gap: 8px;
-                align-items: center;
-                flex-wrap: wrap;
-              "
-            >
-              <select id="tmplSelect" class="btn" style="min-width: 220px">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+            <button class="btn" onclick="scrollToPreview();closeFinish();" style="padding:14px; font-size:15px;">👁 Preview харах</button>
+            <button class="btn success" onclick="saveToHistory();closeFinish();" style="padding:14px; font-size:15px;">💾 Хадгалах</button>
+            <button class="btn primary" onclick="window.print();" style="padding:14px; font-size:15px;">🖨 Хэвлэх / PDF</button>
+            <button class="btn" onclick="newInvoice();" style="padding:14px; font-size:15px;">＋ Шинэ баримт</button>
+          </div>
+
+          <div style="border-top:1px solid var(--line); padding-top:14px;">
+            <div style="font-size:12px; color:var(--muted); margin-bottom:8px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;">Загвар</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <select id="tmplSelect" class="btn" style="flex:1; min-width:140px;">
                 <option value="">— Загвар сонгох —</option>
               </select>
-              <input
-                id="tmplName"
-                class="btn"
-                style="min-width: 200px"
-                placeholder="Загварын нэр"
-              />
-              <button class="btn success" onclick="saveTemplate()">
-                Загвар хадгалах
-              </button>
-              <button class="btn" onclick="loadTemplate()">Дуудах</button>
-              <button class="btn" onclick="deleteTemplate()">Устгах</button>
+              <input id="tmplName" class="btn" style="flex:1; min-width:120px;" placeholder="Загварын нэр" />
+            </div>
+            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+              <button class="btn success" onclick="saveTemplate()" style="flex:1;">Хадгалах</button>
+              <button class="btn" onclick="loadTemplate()" style="flex:1;">Дуудах</button>
+              <button class="btn" onclick="deleteTemplate()" style="flex:1;">Устгах</button>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <main class="sheet" id="preview">
-      <div class="header">
-        <div class="logo">
-          <img
-            id="logo_preview"
-            style="height: 56px"
-            alt="Partsland logo"
-            src="images/1000014080.png"
-          />
-          <div class="company">
-            <h2>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</h2>
-            <small
-              >Улаанбаатар хот, Сонгинохайрхан дүүрэг,<br />9-р хороо, Баруун
-              баян уул 6-30</small
-            >
+  <!-- ── Preview / Хэвлэх хуудас ── -->
+  <main class="sheet" id="preview">
+    <div class="sh-header">
+      <div class="sh-logo">
+        <img id="logo_preview" style="height:56px" alt="Лого" src="images/1000014080.png" />
+        <div class="sh-company">
+          <h2>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</h2>
+          <small>Улаанбаатар хот, Сонгинохайрхан дүүрэг,<br />9-р хороо, Баруун баян уул 6-30</small>
+        </div>
+      </div>
+      <div class="sh-title">
+        <div class="doc-type" id="p_docType">ЗАРЛАГЫН БАРИМТ</div>
+        <div class="sh-meta">
+          Invoice No: <strong id="p_inv">INV-0001</strong><br />
+          Огноо: <strong id="p_date"></strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh-customer">
+      Харилцагч (Customer): <strong id="p_customer"></strong>
+    </div>
+
+    <table id="p_table">
+      <thead>
+        <tr>
+          <th style="width:36px">Д/д<br/><span class="muted">Pos</span></th>
+          <th>БҮТЭЭГДЭХҮҮНИЙ НЭР<br/><span class="muted">Product Name</span></th>
+          <th style="width:110px">ХЭМЖИХ НЭГЖ<br/><span class="muted">Unit</span></th>
+          <th style="width:110px">НЭГЖИЙН ҮНЭ<br/><span class="muted">Unit Price</span></th>
+          <th style="width:90px">ТОО<br/><span class="muted">Qty</span></th>
+          <th style="width:120px">НИЙТ<br/><span class="muted">Amount</span></th>
+        </tr>
+      </thead>
+      <tbody id="p_rows"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" class="right"><strong>НИЙТ (TOTAL)</strong></td>
+          <td class="right"><strong id="p_total">0</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="sh-note" id="p_note"></div>
+
+    <div class="sh-footer">
+      <div>
+        <div><strong>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</strong></div>
+        <div>РД: 6622755</div>
+        <div>Хаан банк: 51 66 766 796</div>
+        <div>IBAN: 70000500</div>
+        <div>E-mail: umgmtrade@gmail.com</div>
+        <div>Утас: +976 8520-5258</div>
+        <div class="muted" style="margin-top:6px;" id="p_sumWords"></div>
+      </div>
+      <div class="stamp-wrap">
+        <img class="stamp" id="stamp_preview" alt="Тамга" src="images/1000014081.jpg" />
+        <img class="signatureblock" src="images/signature-transparent.png" alt="" />
+        <div class="sign-block">
+          <div><strong>Тамга тэмдэг</strong></div>
+          <div class="muted">/Гарын үсэг/</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ── Тогтмолууд ──
+    const AUTH_CODE    = "GEGEE0808";
+    const LS_TMPL      = "umgm_templates_v1";
+    const LS_HIST      = "umgm_history_v1";
+    const LS_CUST      = "umgm_customers_v1";
+    const LS_COUNTER   = "umgm_inv_counter_v1";
+    const LS_DARK      = "umgm_dark_v1";
+
+    // ── Нэвтрэх (доор init хэсэгт дуудагдана) ──
+
+    document.getElementById("lockInput").addEventListener("keydown", e => { if (e.key === "Enter") checkLock(); });
+
+    function checkLock() {
+      const val = document.getElementById("lockInput").value;
+      if (val === AUTH_CODE) { sessionStorage.setItem("umgm_unlocked","1"); unlock(); }
+      else {
+        const inp = document.getElementById("lockInput");
+        inp.classList.add("error");
+        document.getElementById("lockErr").textContent = "Код буруу байна. Дахин оролдоно уу.";
+        inp.value = "";
+        setTimeout(() => inp.classList.remove("error"), 600);
+      }
+    }
+    function unlock() {
+      document.getElementById("lockScreen").classList.add("hidden");
+      // анх нэвтрэхэд өнөөдрийн огноог тавих
+      const d = document.getElementById("date");
+      if (!d.value) d.value = new Date().toISOString().slice(0,10);
+      refreshCustList();
+      refreshTemplateSelect();
+      sync();
+    }
+    function toggleEye() {
+      const inp = document.getElementById("lockInput");
+      inp.type = inp.type === "password" ? "text" : "password";
+    }
+
+    // ── Dark mode ──
+    function applyDark(on) {
+      document.documentElement.setAttribute("data-theme", on ? "dark" : "light");
+      document.getElementById("darkBtn").textContent = on ? "☀️" : "🌙";
+    }
+    function toggleDark() {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      applyDark(!isDark);
+      localStorage.setItem(LS_DARK, isDark ? "0" : "1");
+    }
+
+    // ── Харилцагч ──
+    function getCustomers() { try { return JSON.parse(localStorage.getItem(LS_CUST) || "[]"); } catch { return []; } }
+    function saveCustomer() {
+      const val = document.getElementById("customer").value.trim();
+      if (!val) return;
+      const list = getCustomers();
+      if (!list.includes(val)) {
+        list.push(val);
+        localStorage.setItem(LS_CUST, JSON.stringify(list));
+        refreshCustList();
+      }
+    }
+    function refreshCustList() {
+      const dl = document.getElementById("custList");
+      dl.innerHTML = "";
+      getCustomers().forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        dl.appendChild(opt);
+      });
+    }
+
+    // ── Автомат Invoice дугаар ──
+    function autoInvNo() {
+      let n = parseInt(localStorage.getItem(LS_COUNTER) || "0") + 1;
+      localStorage.setItem(LS_COUNTER, n);
+      document.getElementById("inv").value = "INV-" + String(n).padStart(4,"0");
+      sync();
+    }
+
+    // ── Шинэ баримт ──
+    function newInvoice() {
+      if (!confirm("Шинэ баримт үүсгэх үү? Одоогийн өгөгдөл арилна.")) return;
+      clearRows();
+      document.getElementById("customer").value = "";
+      document.getElementById("note").value = "Дээрх үнэд нэмэгдсэн өртгийн албан татвар (НӨАТ) багтсан болно. Бараа нийлүүлэх хугацаа 14 хоног.";
+      document.getElementById("date").value = new Date().toISOString().slice(0,10);
+      autoInvNo();
+      addRow();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    // ── Мөрүүд ──
+    const itemsEl  = document.getElementById("items");
+    const pRows    = document.getElementById("p_rows");
+    const grandMini = document.getElementById("grandMini");
+    const logoScale = document.getElementById("logo_scale");
+    const stampScale = document.getElementById("stamp_scale");
+
+    function addRow(preset) {
+      const idx = itemsEl.children.length + 1;
+      const div = document.createElement("div");
+      div.className = "item-card";
+      div.innerHTML = `
+        <div class="row">
+          <div style="flex:2"><label>Бүтээгдэхүүн / Үйлчилгээ</label>
+            <input class="name" placeholder="Нэр / марк" value="${preset?.name||""}" /></div>
+          <div style="max-width:100px"><label>Нэгж</label>
+            <input class="unit" value="${preset?.unit||"ш"}" /></div>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <div><label>Нэгжийн үнэ ₮</label>
+            <input class="price" inputmode="decimal" placeholder="0" value="${preset?.price||""}" /></div>
+          <div><label>Тоо ширхэг</label>
+            <input class="qty" inputmode="numeric" value="${preset?.qty||1}" /></div>
+          <div style="max-width:140px; display:flex; flex-direction:column; justify-content:flex-end;">
+            <label class="muted">Мөрийн нийт</label>
+            <div style="padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-weight:700;">
+              <span class="lineTotal">0</span> ₮</div>
           </div>
         </div>
-        <div class="right">
-          <div class="title" id="p_docType">ЗАРЛАГЫН БАРИМТ</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <span class="muted" style="font-size:12px;">Д/д: <span class="pos">${idx}</span></span>
+          <button class="btn danger" style="padding:5px 10px; font-size:13px;"
+            onclick="this.closest('.item-card').remove(); reindex(); sync()">🗑 Устгах</button>
+        </div>`;
+      itemsEl.appendChild(div);
+      ["input","change"].forEach(ev => div.addEventListener(ev, sync));
+      sync();
+    }
+    function clearRows() { itemsEl.innerHTML = ""; sync(); }
+    function reindex() {
+      itemsEl.querySelectorAll(".pos").forEach((s,i) => s.textContent = i+1);
+    }
+    function getRows() {
+      return [...itemsEl.querySelectorAll(".item-card")].map((card, i) => {
+        const name  = card.querySelector(".name").value.trim();
+        const unit  = card.querySelector(".unit").value.trim() || "ш";
+        const price = parseFloat(card.querySelector(".price").value.toString().replace(/[,\s]/g,"")) || 0;
+        const qty   = parseFloat(card.querySelector(".qty").value.toString().replace(/[,\s]/g,"")) || 0;
+        return { pos: i+1, name, unit, price, qty, amount: price*qty, card };
+      });
+    }
 
-          <div class="meta">
-            <div></div>
+    // ── Sync ──
+    function sync() {
+      document.getElementById("p_inv").textContent      = document.getElementById("inv").value || "";
+      document.getElementById("p_date").textContent     = document.getElementById("date").value || "";
+      document.getElementById("p_customer").textContent = document.getElementById("customer").value || "";
+      document.getElementById("p_note").textContent     = document.getElementById("note").value || "";
+      document.getElementById("p_docType").textContent  = document.getElementById("docType").value;
+
+      const rows = getRows();
+      rows.forEach(r => r.card.querySelector(".lineTotal").textContent = fmt(r.amount));
+      pRows.innerHTML = "";
+      let total = 0;
+      rows.forEach(r => {
+        total += r.amount;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td class="center">${r.pos}</td><td>${r.name}</td>
+          <td class="center">${r.unit}</td><td class="right">${fmt(r.price)}</td>
+          <td class="center">${fmt(r.qty)}</td><td class="right">${fmt(r.amount)}</td>`;
+        pRows.appendChild(tr);
+      });
+      document.getElementById("p_total").textContent = fmt(total);
+      grandMini.textContent = fmt(total);
+      const words = total ? toWordsMn(total) : "";
+      document.getElementById("sumWords").value = words;
+      document.getElementById("p_sumWords").textContent = words;
+    }
+
+    function scrollToPreview() {
+      document.getElementById("preview").scrollIntoView({behavior:"smooth"});
+    }
+    function applyScales() {
+      const l = Number(logoScale.value)/100, s = Number(stampScale.value)/100;
+      document.getElementById("logo_editor").style.height  = 52*l+"px";
+      document.getElementById("logo_preview").style.height = 56*l+"px";
+      document.getElementById("stamp_preview").style.setProperty("--stamp-h", 120*s+"px");
+    }
+    logoScale.addEventListener("input", applyScales);
+    stampScale.addEventListener("input", applyScales);
+
+    ["inv","date","customer","note","docType"].forEach(id => {
+      document.getElementById(id).addEventListener("input", sync);
+      document.getElementById(id).addEventListener("change", sync);
+    });
+
+    // ── Түүх ──
+    function getHistory() { try { return JSON.parse(localStorage.getItem(LS_HIST)||"[]"); } catch { return []; } }
+    function setHistory(arr) { localStorage.setItem(LS_HIST, JSON.stringify(arr)); }
+
+    function saveToHistory() {
+      const state = collectState();
+      const total = getRows().reduce((s,r) => s+r.amount, 0);
+      const hist  = getHistory();
+      const id    = Date.now();
+      hist.unshift({ id, savedAt: new Date().toLocaleString("mn-MN"), inv: state.inv, date: state.date, customer: state.customer, docType: state.docType, total, state });
+      setHistory(hist);
+      showToast("💾 Хадгалагдлаа: " + (state.inv || "—"));
+    }
+
+    function openHistory() {
+      renderHistory();
+      document.getElementById("histDrawer").classList.add("open");
+    }
+    function closeHistory() { document.getElementById("histDrawer").classList.remove("open"); }
+    function closeHistoryOutside(e) { if (e.target === document.getElementById("histDrawer")) closeHistory(); }
+
+    function renderHistory() {
+      const q    = (document.getElementById("histSearch").value || "").toLowerCase();
+      const hist = getHistory().filter(h =>
+        !q || [h.inv,h.date,h.customer,h.docType].some(v => (v||"").toLowerCase().includes(q))
+      );
+      const el = document.getElementById("histList");
+      if (!hist.length) { el.innerHTML = '<div class="hist-empty">Хадгалсан баримт байхгүй</div>'; return; }
+      el.innerHTML = hist.map(h => `
+        <div class="hist-item" onclick="loadFromHistory(${h.id})">
+          <div class="hi-top">
             <div>
-              Invoice No: <strong id="p_inv">INV-0001</strong><br />
-              Огноо: <strong id="p_date">2025-09-13</strong>
+              <div class="hi-inv">${h.inv || "—"} <span style="font-weight:400; font-size:13px; color:var(--muted);">${h.docType||""}</span></div>
+              <div class="hi-sub">📅 ${h.date||"—"} &nbsp;|&nbsp; 🏢 ${h.customer||"—"}</div>
+              <div class="hi-sub" style="color:var(--muted)">Хадгалсан: ${h.savedAt}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="hi-total">${fmt(h.total)} ₮</div>
+              <button class="hi-del" onclick="deleteHistory(event,${h.id})" title="Устгах">🗑</button>
             </div>
           </div>
-        </div>
-      </div>
+        </div>`).join("");
+    }
 
-      <div class="meta" style="margin-top: 10px">
-        <div>Харилцагч (Customer): <strong id="p_customer"></strong></div>
-        <div></div>
-      </div>
+    function loadFromHistory(id) {
+      const h = getHistory().find(x => x.id === id);
+      if (!h) return;
+      applyState(h.state);
+      closeHistory();
+      window.scrollTo({top:0,behavior:"smooth"});
+      showToast("📂 Дуудагдлаа: " + (h.inv||"—"));
+    }
 
-      <table id="p_table">
-        <thead>
-          <tr>
-            <th style="width: 40px">
-              Д/д<br /><span class="muted">{{Pos}}</span>
-            </th>
-            <th>
-              БҮТЭЭГДЭХҮҮНИЙ НЭР<br /><span class="muted"
-                >{{PRODUCT NAME}}</span
-              >
-            </th>
-            <th style="width: 120px">
-              ХЭМЖИХ НЭГЖ<br /><span class="muted">{{MEASUREMENT}}</span>
-            </th>
-            <th style="width: 120px">
-              НЭГЖИЙН ҮНЭ<br /><span class="muted">{{UNIT PRICE}}</span>
-            </th>
-            <th style="width: 100px">
-              ТОО ШИРХЭГ<br /><span class="muted">{{QTY}}</span>
-            </th>
-            <th style="width: 130px">
-              НИЙТ<br /><span class="muted">{{AMOUNT}}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody id="p_rows"></tbody>
-        <tfoot>
-          <tr>
-            <td colspan="5" class="right"><strong>НИЙТ (TOTAL)</strong></td>
-            <td class="right"><strong id="p_total">0</strong></td>
-          </tr>
-        </tfoot>
-      </table>
+    function deleteHistory(e, id) {
+      e.stopPropagation();
+      if (!confirm("Энэ баримтыг устгах уу?")) return;
+      setHistory(getHistory().filter(h => h.id !== id));
+      renderHistory();
+    }
 
-      <div class="note" id="p_note"></div>
+    // ── Дуусгах modal ──
+    function openFinish() {
+      const m = document.getElementById("finishModal");
+      m.style.display = "flex";
+    }
+    function closeFinish() {
+      document.getElementById("finishModal").style.display = "none";
+    }
+    document.getElementById("finishModal").addEventListener("click", function(e) {
+      if (e.target === this) closeFinish();
+    });
 
-      <div class="footer">
-        <div>
-          <div><strong>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</strong></div>
-          <div>РД:6622755</div>
-          <div>Хаан банк: 51 66 766 796</div>
-          <div>iban: 70000500</div>
-          <div>E-mail: umgmtrade@gmail.com</div>
-          <div>Холбогдох дугаар: +976 8520-5258</div>
-          <div class="muted" style="margin-top: 6px" id="p_sumWords">
-            Нийт үнэ
-          </div>
-        </div>
-        <div class="stamp-wrap">
-          <img
-            class="stamp"
-            id="stamp_preview"
-            alt="Stamp"
-            src="images/1000014081.jpg"
-          />
-          <img
-            class="signatureblock"
-            src="images/signature-transparent.png"
-            alt=""
-          />
-          <div class="sign-block">
-            <div><strong>Тамга тэмдэг</strong></div>
-            <div class="muted">/Гарын үсэг/</div>
-          </div>
-        </div>
-      </div>
-    </main>
+    // ── Toast мессеж ──
+    function showToast(msg) {
+      let t = document.getElementById("toast");
+      if (!t) {
+        t = document.createElement("div");
+        t.id = "toast";
+        t.style.cssText = "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 20px;border-radius:12px;font-size:14px;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:opacity .3s;";
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = "1";
+      clearTimeout(t._to);
+      t._to = setTimeout(() => t.style.opacity = "0", 2500);
+    }
 
-    <script>
-      const itemsEl = document.getElementById("items");
-      const pRows = document.getElementById("p_rows");
-      const grandMini = document.getElementById("grandMini");
-      const logoScale = document.getElementById("logo_scale");
-      const stampScale = document.getElementById("stamp_scale");
-      ["inv", "date", "customer", "note", "docType"].forEach((id) => {
-        document.getElementById(id).addEventListener("input", sync);
-        document.getElementById(id).addEventListener("change", sync);
+    // ── Загвар ──
+    function getTemplates() { try { return JSON.parse(localStorage.getItem(LS_TMPL)||"{}"); } catch { return {}; } }
+    function setTemplates(o) { localStorage.setItem(LS_TMPL, JSON.stringify(o)); }
+
+    function refreshTemplateSelect() {
+      const sel = document.getElementById("tmplSelect");
+      const saved = getTemplates(), cur = sel.value;
+      sel.innerHTML = '<option value="">— Загвар сонгох —</option>';
+      Object.keys(saved).sort().forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = name;
+        sel.appendChild(opt);
       });
+      if (cur && saved[cur]) sel.value = cur;
+    }
 
-      function toWordsMn(n) {
-        n = Math.floor(n);
-        if (n === 0) return "тэг төгрөг";
-        const ones = [
-          "",
-          "нэг",
-          "хоёр",
-          "гурав",
-          "дөрөв",
-          "тав",
-          "зургаа",
-          "долоо",
-          "найм",
-          "ес",
-        ];
-        const tens = [
-          "",
-          "арав",
-          "хорин",
-          "гучин",
-          "дөчин",
-          "тавин",
-          "жаран",
-          "далан",
-          "наян",
-          "ерэн",
-        ];
-        function under1000(x) {
-          let s = "";
-          const h = Math.floor(x / 100),
-            t = Math.floor((x % 100) / 10),
-            o = x % 10;
-          if (h) s += ones[h] + " зуу";
-          const two = x % 100;
-          if (two) {
-            if (s) s += " ";
-            if (two < 10) s += ones[o];
-            else if (two < 20)
-              s += two === 10 ? "арав" : "арван " + ones[two - 10];
-            else {
-              s += tens[t];
-              if (o) s += " " + ones[o];
-            }
-          }
-          return s.trim();
-        }
-        const scales = ["", "мянга", "сая", "тэрбум", "их наяд"];
-        let i = 0,
-          x = n,
-          parts = [];
-        while (x > 0 && i < scales.length) {
-          const chunk = x % 1000;
-          if (chunk) {
-            let p = under1000(chunk);
-            if (scales[i]) p += " " + scales[i];
-            parts.push(p);
-          }
-          x = Math.floor(x / 1000);
-          i++;
-        }
-        return (
-          parts.reverse().join(" ").replace(/\s+/g, " ").trim() + " төгрөг"
-        );
+    function collectState() {
+      return {
+        inv:         document.getElementById("inv").value||"",
+        date:        document.getElementById("date").value||"",
+        customer:    document.getElementById("customer").value||"",
+        note:        document.getElementById("note").value||"",
+        docType:     document.getElementById("docType").value,
+        logo_scale:  Number(document.getElementById("logo_scale").value),
+        stamp_scale: Number(document.getElementById("stamp_scale").value),
+        rows: getRows().map(r=>({name:r.name,unit:r.unit,price:r.price,qty:r.qty})),
+      };
+    }
+    function applyState(s) {
+      document.getElementById("inv").value         = s.inv||"";
+      document.getElementById("date").value        = s.date||"";
+      document.getElementById("customer").value    = s.customer||"";
+      document.getElementById("note").value        = s.note||"";
+      document.getElementById("docType").value     = s.docType||"ҮНИЙН САНАЛ";
+      document.getElementById("logo_scale").value  = s.logo_scale||150;
+      document.getElementById("stamp_scale").value = s.stamp_scale||100;
+      clearRows();
+      (s.rows||[]).forEach(r => addRow(r));
+      applyScales(); sync();
+    }
+
+    function saveTemplate() {
+      const ni = document.getElementById("tmplName");
+      let name = (ni.value||"").trim();
+      if (!name) {
+        name = (document.getElementById("inv").value||"INV") + " • " + (document.getElementById("date").value||new Date().toISOString().slice(0,10));
+        ni.value = name;
       }
-      function fmt(n) {
-        return isNaN(n) || n === null
-          ? "0"
-          : new Intl.NumberFormat("mn-MN").format(Math.round(n));
+      const t = getTemplates(); t[name] = collectState(); setTemplates(t);
+      refreshTemplateSelect();
+      document.getElementById("tmplSelect").value = name;
+      showToast("✅ Загвар хадгаллаа: " + name);
+    }
+    function loadTemplate() {
+      const name = document.getElementById("tmplSelect").value || document.getElementById("tmplName").value.trim();
+      if (!name) { showToast("⚠️ Загварын нэр сонгоно уу."); return; }
+      const st = getTemplates()[name];
+      if (!st) { showToast("⚠️ Загвар олдсонгүй."); return; }
+      applyState(st); showToast("📂 Загвар дуудагдлаа: " + name);
+    }
+    function deleteTemplate() {
+      const name = document.getElementById("tmplSelect").value || document.getElementById("tmplName").value.trim();
+      if (!name) { showToast("⚠️ Устгах загвараа сонгоно уу."); return; }
+      if (!confirm(`"${name}" загварыг устгах уу?`)) return;
+      const t = getTemplates(); delete t[name]; setTemplates(t);
+      refreshTemplateSelect();
+      document.getElementById("tmplName").value = "";
+      showToast("🗑 Устгагдлаа.");
+    }
+
+    // ── Тоо үгээр ──
+    function toWordsMn(n) {
+      n = Math.floor(n);
+      if (n===0) return "тэг төгрөг";
+      const ones=["","нэг","хоёр","гурав","дөрөв","тав","зургаа","долоо","найм","ес"];
+      const tens=["","арав","хорин","гучин","дөчин","тавин","жаран","далан","наян","ерэн"];
+      function u1k(x){
+        let s=""; const h=Math.floor(x/100),t=Math.floor((x%100)/10),o=x%10;
+        if(h) s+=ones[h]+" зуу";
+        const two=x%100;
+        if(two){ if(s)s+=" "; if(two<10)s+=ones[o]; else if(two<20)s+=two===10?"арав":"арван "+ones[two-10]; else{s+=tens[t];if(o)s+=" "+ones[o];} }
+        return s.trim();
       }
+      const sc=["","мянга","сая","тэрбум","их наяд"];
+      let i=0,x=n,parts=[];
+      while(x>0&&i<sc.length){ const c=x%1000; if(c){let p=u1k(c);if(sc[i])p+=" "+sc[i];parts.push(p);} x=Math.floor(x/1000);i++; }
+      return parts.reverse().join(" ").replace(/\s+/g," ").trim()+" төгрөг";
+    }
+    function fmt(n) {
+      return isNaN(n)||n===null ? "0" : new Intl.NumberFormat("mn-MN").format(Math.round(n));
+    }
 
-      const AUTH_CODE = "GEGEE0808";
+    // ── PWA ──
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
+    let deferredPrompt = null;
+    const installBtn = document.getElementById("installBtn");
+    window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt=e; installBtn.style.display="inline-block"; });
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const {outcome} = await deferredPrompt.userChoice;
+      if (outcome==="accepted") installBtn.style.display="none";
+      deferredPrompt=null;
+    });
+    window.addEventListener("appinstalled", () => { installBtn.style.display="none"; deferredPrompt=null; });
 
-      // Нэвтрэх хаалт
-      (function() {
-        const unlocked = sessionStorage.getItem("umgm_unlocked");
-        if (unlocked === "1") {
-          document.getElementById("lockScreen").classList.add("hidden");
-        }
-      })();
-
-      document.getElementById("lockInput").addEventListener("keydown", function(e) {
-        if (e.key === "Enter") checkLock();
-      });
-
-      function checkLock() {
-        const val = document.getElementById("lockInput").value;
-        if (val === AUTH_CODE) {
-          sessionStorage.setItem("umgm_unlocked", "1");
-          document.getElementById("lockScreen").classList.add("hidden");
-        } else {
-          const inp = document.getElementById("lockInput");
-          const err = document.getElementById("lockErr");
-          inp.classList.add("error");
-          err.textContent = "Код буруу байна. Дахин оролдоно уу.";
-          inp.value = "";
-          setTimeout(() => inp.classList.remove("error"), 1200);
-        }
-      }
-
-      function addRow(preset) {
-        const idx = itemsEl.children.length + 1;
-        const row = document.createElement("div");
-        row.className = "card";
-        row.style.marginTop = "8px";
-        row.innerHTML = `
-        <div class="row">
-          <div><label>Бүтээгдэхүүн</label><input class="name" placeholder="Нэр / марк" value="${
-            preset?.name || ""
-          }"/></div>
-        </div>
-        <div class="row">
-          <div style="max-width:120px"><label>Нэгж</label><input class="unit" value="${
-            preset?.unit || "ш"
-          }"/></div>
-          <div><label>Нэгжийн үнэ</label><input class="price" inputmode="decimal" value="${
-            preset?.price || ""
-          }"/></div>
-          <div><label>Тоо ширхэг</label><input class="qty" inputmode="numeric" value="${
-            preset?.qty || 1
-          }"/></div>
-        </div>
-        <div class="row" style="align-items:center;">
-          <div class="muted">Д/д: <span class="pos">${idx}</span></div>
-          <div style="text-align:right; flex:1;">Мөрийн нийт: <strong class="lineTotal">0</strong> ₮</div>
-        </div>
-        <div style="text-align:right; margin-top:4px;">
-          <button class="btn" onclick="this.closest('.card').remove(); sync()">Устгах</button>
-        </div>`;
-        itemsEl.appendChild(row);
-        ["input", "change"].forEach((ev) => row.addEventListener(ev, sync));
-        sync();
-      }
-      function clearRows() {
-        itemsEl.innerHTML = "";
-        sync();
-      }
-      function getRows() {
-        const list = [];
-        itemsEl.querySelectorAll(".card").forEach((card, i) => {
-          const name = card.querySelector(".name").value.trim();
-          const unit = card.querySelector(".unit").value.trim() || "ш";
-          const price =
-            parseFloat(
-              card
-                .querySelector(".price")
-                .value.toString()
-                .replace(/[,\s]/g, "")
-            ) || 0;
-          const qty =
-            parseFloat(
-              card.querySelector(".qty").value.toString().replace(/[,\s]/g, "")
-            ) || 0;
-          const amount = price * qty;
-          list.push({ pos: i + 1, name, unit, price, qty, amount, card });
-        });
-        return list;
-      }
-
-      function sync() {
-        document.getElementById("p_inv").textContent =
-          document.getElementById("inv").value || "";
-        document.getElementById("p_date").textContent =
-          document.getElementById("date").value || "";
-        document.getElementById("p_customer").textContent =
-          document.getElementById("customer").value || "";
-        document.getElementById("p_note").textContent =
-          document.getElementById("note").value || "";
-        document.getElementById("p_docType").textContent =
-          document.getElementById("docType").value;
-
-        const rows = getRows();
-        rows.forEach(
-          (r) =>
-            (r.card.querySelector(".lineTotal").textContent = fmt(r.amount))
-        );
-        pRows.innerHTML = "";
-        let total = 0;
-        rows.forEach((r) => {
-          total += r.amount;
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-        <td class="center">${r.pos}</td>
-        <td>${r.name}</td>
-        <td class="center">${r.unit}</td>
-        <td class="right">${fmt(r.price)}</td>
-        <td class="center">${fmt(r.qty)}</td>
-        <td class="right">${fmt(r.amount)}</td>`;
-          pRows.appendChild(tr);
-        });
-        document.getElementById("p_total").textContent = fmt(total);
-        grandMini.textContent = fmt(total);
-        const words = total ? toWordsMn(total) : "";
-        document.getElementById("sumWords").value = words;
-        document.getElementById("p_sumWords").textContent = words;
-      }
-      function scrollToPreview() {
-        document
-          .getElementById("preview")
-          .scrollIntoView({ behavior: "smooth" });
-      }
-      function applyScales() {
-        const l = Number(logoScale.value) / 100,
-          s = Number(stampScale.value) / 100;
-        document.getElementById("logo_editor").style.height = 56 * l + "px";
-        document.getElementById("logo_preview").style.height = 56 * l + "px";
-        document
-          .getElementById("stamp_preview")
-          .style.setProperty("--stamp-h", 120 * s + "px");
-      }
-      logoScale.addEventListener("input", applyScales);
-      stampScale.addEventListener("input", applyScales);
-
-      addRow({ name: "Бараа", unit: "ш", price: 1, qty: 1 });
-      ["inv", "date", "customer", "note"].forEach((id) => {
-        document.getElementById(id).addEventListener("input", sync);
-        document.getElementById(id).addEventListener("change", sync);
-      });
-      sync();
-      applyScales();
-      const LS_KEY = "umgm_templates_v1";
-
-      function getTemplates() {
-        try {
-          return JSON.parse(localStorage.getItem(LS_KEY) || "{}");
-        } catch {
-          return {};
-        }
-      }
-      function setTemplates(obj) {
-        localStorage.setItem(LS_KEY, JSON.stringify(obj));
-      }
-      function refreshTemplateSelect() {
-        const sel = document.getElementById("tmplSelect");
-        const saved = getTemplates();
-        const current = sel.value;
-        sel.innerHTML = '<option value="">— Загвар сонгох —</option>';
-        Object.keys(saved)
-          .sort()
-          .forEach((name) => {
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
-            sel.appendChild(opt);
-          });
-        // сэргээх
-        if (current && saved[current]) sel.value = current;
-      }
-
-      function collectState() {
-        const rows = getRows().map((r) => ({
-          name: r.name,
-          unit: r.unit,
-          price: r.price,
-          qty: r.qty,
-        }));
-        return {
-          inv: document.getElementById("inv").value || "",
-          date: document.getElementById("date").value || "",
-          customer: document.getElementById("customer").value || "",
-          note: document.getElementById("note").value || "",
-          docType: document.getElementById("docType").value,
-          logo_scale: Number(document.getElementById("logo_scale").value),
-          stamp_scale: Number(document.getElementById("stamp_scale").value),
-          rows,
-        };
-      }
-
-      function applyState(state) {
-        // талбарууд
-        document.getElementById("inv").value = state.inv || "";
-        document.getElementById("date").value = state.date || "";
-        document.getElementById("customer").value = state.customer || "";
-        document.getElementById("note").value = state.note || "";
-        document.getElementById("docType").value =
-          state.docType || "ҮНИЙН САНАЛ";
-
-        document.getElementById("logo_scale").value = state.logo_scale || 150;
-        document.getElementById("stamp_scale").value = state.stamp_scale || 100;
-
-        // мөрүүд
-        clearRows();
-        (state.rows || []).forEach((r) => addRow(r));
-
-        applyScales();
-        sync();
-      }
-
-      function saveTemplate() {
-        const nameInput = document.getElementById("tmplName");
-        let name = (nameInput.value || "").trim();
-
-        if (!name) {
-          // нэр өгөөгүй бол Invoice No + Date-ээр автоматаар нэрлэнэ
-          const inv = document.getElementById("inv").value || "INV";
-          const date =
-            document.getElementById("date").value ||
-            new Date().toISOString().slice(0, 10);
-          name = `${inv} • ${date}`;
-          nameInput.value = name;
-        }
-
-        const templates = getTemplates();
-        templates[name] = collectState();
-        setTemplates(templates);
-        refreshTemplateSelect();
-        document.getElementById("tmplSelect").value = name;
-        alert(`“${name}” загварыг хадгаллаа.`);
-      }
-
-      function loadTemplate() {
-        const sel = document.getElementById("tmplSelect");
-        const name =
-          sel.value || (document.getElementById("tmplName").value || "").trim();
-        if (!name) {
-          alert("Эхлээд загварын нэрээ сонгоно уу.");
-          return;
-        }
-
-        const templates = getTemplates();
-        const st = templates[name];
-        if (!st) {
-          alert(`“${name}” нэртэй загвар алга.`);
-          return;
-        }
-
-        applyState(st);
-        alert(`“${name}” загварыг дуудаж хэрэглэв.`);
-      }
-
-      function deleteTemplate() {
-        const sel = document.getElementById("tmplSelect");
-        const name =
-          sel.value || (document.getElementById("tmplName").value || "").trim();
-        if (!name) {
-          alert("Устгах загвараа сонгоно уу.");
-          return;
-        }
-
-        const templates = getTemplates();
-        if (!templates[name]) {
-          alert(`“${name}” нэртэй загвар байхгүй.`);
-          return;
-        }
-
-        if (!confirm(`“${name}” загварыг устгах уу?`)) return;
-
-        delete templates[name];
-        setTemplates(templates);
-        refreshTemplateSelect();
-        document.getElementById("tmplName").value = "";
-        alert("Устгагдлаа.");
-      }
-
-      // Анх ачаалах үед select-ийг дүүргэнэ
-      document.addEventListener("DOMContentLoaded", refreshTemplateSelect);
-
-      // PWA: Service Worker бүртгэх
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js");
-      }
-
-      // PWA: Install товч
-      let deferredPrompt = null;
-      const installBtn = document.createElement("button");
-      installBtn.className = "btn";
-      installBtn.textContent = "📲 Апп суулгах";
-      installBtn.style.display = "none";
-      document.querySelector(".actions div:last-child").prepend(installBtn);
-
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.style.display = "inline-block";
-      });
-
-      installBtn.addEventListener("click", async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") {
-          installBtn.style.display = "none";
-        }
-        deferredPrompt = null;
-      });
-
-      window.addEventListener("appinstalled", () => {
-        installBtn.style.display = "none";
-        deferredPrompt = null;
-      });
-    </script>
+    // ── Анхны ачаалал ──
+    if (localStorage.getItem(LS_DARK) === "1") applyDark(true);
+    if (sessionStorage.getItem("umgm_unlocked") === "1") {
+      unlock();
+    }
+    addRow({name:"Бараа",unit:"ш",price:1,qty:1});
+    applyScales();
+    sync();
+  </script>
   </body>
 </html>
