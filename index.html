@@ -1775,24 +1775,6 @@
     });
     window.addEventListener("appinstalled", () => { installBtn.style.display = "none"; });
 
-    /* ── Preview scale (утасны дэлгэцэнд A4 хэлбэрийг хэвээр харуул) ── */
-    function scalePreview() {
-      const sheet = document.getElementById("preview");
-      const wrap  = sheet.parentElement;
-      const sheetW = sheet.offsetWidth; // 210mm px-д
-      const wrapW  = wrap.clientWidth;
-      if (wrapW < sheetW) {
-        const scale = wrapW / sheetW;
-        sheet.style.transform = `scale(${scale})`;
-        sheet.style.marginBottom = `-${sheetW * (1 - scale)}px`;
-        wrap.style.height = sheet.offsetHeight * scale + 40 + "px";
-      } else {
-        sheet.style.transform = "";
-        sheet.style.marginBottom = "";
-        wrap.style.height = "";
-      }
-    }
-    window.addEventListener("resize", scalePreview);
 
     /* ── Init ── */
     if (localStorage.getItem(LS_DARK) === "1") applyDark(true);
@@ -1800,7 +1782,6 @@
     addRow({ name: "", unit: "ш", price: "", qty: 1 });
     applyScales();
     sync();
-    setTimeout(scalePreview, 100);
   </script>
 </body>
 
