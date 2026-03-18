@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1f2937" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="УМГМ Инвойс" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="images/1000014080.png" />
     <title>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК—(ИНВОЙС)</title>
     <style>
       :root {
@@ -253,8 +260,66 @@
         }
       }
     </style>
+  <style>
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #lockScreen.hidden { display: none; }
+    .lock-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      text-align: center;
+      max-width: 340px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .lock-box img { height: 64px; margin-bottom: 16px; }
+    .lock-box h2 { margin: 0 0 4px; font-size: 18px; }
+    .lock-box p { margin: 0 0 20px; color: #6b7280; font-size: 14px; }
+    .lock-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 18px;
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    .lock-box input.error { border-color: #ef4444; }
+    .lock-box .err-msg { color: #ef4444; font-size: 13px; margin-bottom: 10px; min-height: 18px; }
+    .lock-box button {
+      width: 100%;
+      padding: 12px;
+      background: #1f2937;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .lock-box button:hover { background: #374151; }
+  </style>
   </head>
   <body>
+  <div id="lockScreen">
+    <div class="lock-box">
+      <img src="images/1000014080.png" alt="Лого" />
+      <h2>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</h2>
+      <p>Нэвтрэхийн тулд кодоо оруулна уу</p>
+      <input type="password" id="lockInput" placeholder="••••••••" maxlength="20" />
+      <div class="err-msg" id="lockErr"></div>
+      <button onclick="checkLock()">Нэвтрэх</button>
+    </div>
+  </div>
     <div class="wrap editor">
       <div class="card">
         <div class="row" style="align-items: center; gap: 12px">
@@ -567,6 +632,35 @@
           : new Intl.NumberFormat("mn-MN").format(Math.round(n));
       }
 
+      const AUTH_CODE = "GEGEE0808";
+
+      // Нэвтрэх хаалт
+      (function() {
+        const unlocked = sessionStorage.getItem("umgm_unlocked");
+        if (unlocked === "1") {
+          document.getElementById("lockScreen").classList.add("hidden");
+        }
+      })();
+
+      document.getElementById("lockInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") checkLock();
+      });
+
+      function checkLock() {
+        const val = document.getElementById("lockInput").value;
+        if (val === AUTH_CODE) {
+          sessionStorage.setItem("umgm_unlocked", "1");
+          document.getElementById("lockScreen").classList.add("hidden");
+        } else {
+          const inp = document.getElementById("lockInput");
+          const err = document.getElementById("lockErr");
+          inp.classList.add("error");
+          err.textContent = "Код буруу байна. Дахин оролдоно уу.";
+          inp.value = "";
+          setTimeout(() => inp.classList.remove("error"), 1200);
+        }
+      }
+
       function addRow(preset) {
         const idx = itemsEl.children.length + 1;
         const row = document.createElement("div");
@@ -823,6 +917,40 @@
 
       // Анх ачаалах үед select-ийг дүүргэнэ
       document.addEventListener("DOMContentLoaded", refreshTemplateSelect);
+
+      // PWA: Service Worker бүртгэх
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js");
+      }
+
+      // PWA: Install товч
+      let deferredPrompt = null;
+      const installBtn = document.createElement("button");
+      installBtn.className = "btn";
+      installBtn.textContent = "📲 Апп суулгах";
+      installBtn.style.display = "none";
+      document.querySelector(".actions div:last-child").prepend(installBtn);
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = "inline-block";
+      });
+
+      installBtn.addEventListener("click", async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          installBtn.style.display = "none";
+        }
+        deferredPrompt = null;
+      });
+
+      window.addEventListener("appinstalled", () => {
+        installBtn.style.display = "none";
+        deferredPrompt = null;
+      });
     </script>
   </body>
 </html>

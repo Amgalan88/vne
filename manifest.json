@@ -1,0 +1,22 @@
+{
+  "name": "ЮУ ЭМ ЖИ ЭМ ТРЕЙД — Инвойс",
+  "short_name": "УМГМ Инвойс",
+  "description": "ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК — Инвойс үүсгэх апп",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#1f2937",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/1000014080.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/1000014080.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
