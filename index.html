@@ -771,16 +771,21 @@
       margin: 0;
     }
 
+    .sheet-wrap {
+      overflow-x: auto;
+      padding: 20px 0 40px;
+    }
     .sheet {
       width: 210mm;
       min-height: 297mm;
       background: #fff;
       color: #0f172a;
-      margin: 24px auto;
+      margin: 0 auto;
       border: 1px solid #e2e8f0;
       box-shadow: 0 4px 24px rgba(0, 0, 0, .1);
       font-family: "Segoe UI", "Arial Unicode MS", "Arial", sans-serif;
       font-size: 13px;
+      transform-origin: top center;
     }
 
     .sh-accent-bar {
@@ -1088,37 +1093,6 @@
       .actions-bar { padding: 10px 12px; border-radius: 12px; bottom: 10px; }
       .actions-bar .total-info .val { font-size: 16px; }
 
-      /* Preview sheet — гар утасны дэлгэцэнд багасгах */
-      .sheet {
-        width: 100%;
-        min-height: unset;
-        font-size: 11px;
-        margin: 12px auto;
-      }
-      .sh-body { padding: 4mm 4mm 4mm; }
-      .sh-header { flex-direction: column; gap: 8px; }
-      .sh-right { text-align: left; }
-      .sh-logo-wrap { gap: 8px; }
-      .sh-logo-wrap img { height: 36px !important; }
-      .sh-co-name { font-size: 13px; }
-      .sh-co-info { font-size: 10px; }
-      .sh-doc-type { font-size: 14px; letter-spacing: 1px; }
-      .sh-inv-badge { font-size: 11px; padding: 2px 8px; }
-      .sh-cust-box { padding: 7px 10px; }
-      .sh-cust-name { font-size: 12px; }
-      .sh-table { font-size: 10px; }
-      .sh-table thead th { padding: 6px 4px; font-size: 9px; }
-      .sh-table tbody td { padding: 6px 4px; }
-      .sh-table tfoot td { padding: 7px 4px; }
-      .sh-total-val { font-size: 13px; }
-      .sh-footer { grid-template-columns: 1fr; gap: 10px; }
-      .sh-stamp-wrap { min-height: 90px; }
-      .sh-stamp { height: 80px !important; }
-      .sh-sig { display: none; }
-      .sh-note { font-size: 10px; padding: 7px 10px; }
-      .sh-bank-name { font-size: 11px; }
-      .sh-bank-row { font-size: 10px; line-height: 1.7; }
-
       /* Drawer */
       .drawer { width: 100vw; }
 
@@ -1376,6 +1350,7 @@
   </div><!-- /page -->
 
   <!-- ══ Preview / Print ══ -->
+  <div class="sheet-wrap">
   <main class="sheet" id="preview">
     <div class="sh-accent-bar"></div>
     <div class="sh-body">
@@ -1448,6 +1423,7 @@
       <div class="sh-bottom-bar"></div>
     </div>
   </main>
+  </div><!-- /sheet-wrap -->
 
   <div id="toast"></div>
 
@@ -1799,12 +1775,32 @@
     });
     window.addEventListener("appinstalled", () => { installBtn.style.display = "none"; });
 
+    /* ── Preview scale (утасны дэлгэцэнд A4 хэлбэрийг хэвээр харуул) ── */
+    function scalePreview() {
+      const sheet = document.getElementById("preview");
+      const wrap  = sheet.parentElement;
+      const sheetW = sheet.offsetWidth; // 210mm px-д
+      const wrapW  = wrap.clientWidth;
+      if (wrapW < sheetW) {
+        const scale = wrapW / sheetW;
+        sheet.style.transform = `scale(${scale})`;
+        sheet.style.marginBottom = `-${sheetW * (1 - scale)}px`;
+        wrap.style.height = sheet.offsetHeight * scale + 40 + "px";
+      } else {
+        sheet.style.transform = "";
+        sheet.style.marginBottom = "";
+        wrap.style.height = "";
+      }
+    }
+    window.addEventListener("resize", scalePreview);
+
     /* ── Init ── */
     if (localStorage.getItem(LS_DARK) === "1") applyDark(true);
     if (sessionStorage.getItem("umgm_unlocked") === "1") unlock();
     addRow({ name: "", unit: "ш", price: "", qty: 1 });
     applyScales();
     sync();
+    setTimeout(scalePreview, 100);
   </script>
 </body>
 
