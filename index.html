@@ -1224,10 +1224,11 @@
         <div class="grid-2">
           <div class="field">
             <label>Баримтын төрөл</label>
-            <select id="docType">
+            <select id="docType" onchange="onDocTypeChange()">
               <option value="ҮНИЙН САНАЛ">ҮНИЙН САНАЛ</option>
               <option value="НЭХЭМЖЛЭХ">НЭХЭМЖЛЭХ</option>
               <option value="ЗАРЛАГЫН БАРИМТ">ЗАРЛАГЫН БАРИМТ</option>
+              <option value="АЛБАН БИЧИГ">АЛБАН БИЧИГ</option>
             </select>
           </div>
           <div class="field">
@@ -1272,10 +1273,37 @@
       </div>
     </div>
 
+    <!-- Албан бичгийн хэсэг -->
+    <div class="card" style="margin-bottom:14px; display:none;" id="letterCard">
+      <div class="card-head">
+        <span class="icon">✉️</span>
+        <h3>Албан бичгийн мэдээлэл</h3>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Хаягласан (Хэнд)</label>
+          <input id="letterTo" placeholder="Жишээ: Захирал Б.Болд" />
+        </div>
+        <div class="field">
+          <label>Байгууллага</label>
+          <input id="letterOrg" placeholder="Байгууллагын нэр" />
+        </div>
+        <div class="field">
+          <label>Сэдэв</label>
+          <input id="letterSubject" placeholder="Бичгийн сэдэв" />
+        </div>
+        <div class="field">
+          <label>Бие бичвэр</label>
+          <textarea id="letterBody" style="min-height:160px;" placeholder="Албан бичгийн үндсэн агуулга..."></textarea>
+        </div>
+      </div>
+    </div>
+
     <!-- Бараа мөрүүд -->
-    <div class="card" style="margin-bottom:14px;">
+    <div class="card" style="margin-bottom:14px;" id="invoiceCard">
       <div class="card-head">
         <span class="icon">📦</span>
+
         <h3>Бараа / Үйлчилгээ</h3>
         <div style="margin-left:auto; display:flex; gap:6px;">
           <button class="btn btn-sm" onclick="addRow()">＋ Мөр нэмэх</button>
@@ -1373,9 +1401,27 @@
         </div>
       </div>
 
-      <div class="sh-cust-box">
+      <!-- Invoice: харилцагч -->
+      <div class="sh-cust-box" id="p_cust_box">
         <div class="sh-cust-lbl">Харилцагч / Customer</div>
         <div class="sh-cust-name" id="p_customer"></div>
+      </div>
+
+      <!-- Албан бичиг: хаягласан -->
+      <div id="p_letter_section" style="display:none;">
+        <div style="margin-top:14px; display:flex; justify-content:space-between; gap:20px; font-size:13px;">
+          <div>
+            <div style="color:#94a3b8; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Хаягласан</div>
+            <div style="font-weight:700; font-size:14px;" id="p_letterTo"></div>
+            <div style="color:#475569;" id="p_letterOrg"></div>
+          </div>
+        </div>
+        <div style="margin-top:14px; padding:10px 14px; background:#f1f5f9; border-left:4px solid #1e3a5f; border-radius:4px;">
+          <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;">Сэдэв</div>
+          <div style="font-weight:700; font-size:14px;" id="p_letterSubject"></div>
+        </div>
+        <div style="margin-top:18px; font-size:13px; line-height:2; white-space:pre-wrap;" id="p_letterBody"></div>
+        <div style="margin-top:24px; font-size:13px;">Хүндэтгэсэн,</div>
       </div>
 
       <table class="sh-table" id="p_table">
@@ -1567,35 +1613,54 @@
       });
     }
 
+    /* ── Баримтын төрөл солих ── */
+    function onDocTypeChange() {
+      const isLetter = document.getElementById("docType").value === "АЛБАН БИЧИГ";
+      document.getElementById("letterCard").style.display   = isLetter ? "" : "none";
+      document.getElementById("invoiceCard").style.display  = isLetter ? "none" : "";
+      document.getElementById("p_cust_box").style.display   = isLetter ? "none" : "";
+      document.getElementById("p_table").style.display      = isLetter ? "none" : "";
+      document.getElementById("p_letter_section").style.display = isLetter ? "" : "none";
+      sync();
+    }
+
     /* ── Sync ── */
     function sync() {
       const inv = document.getElementById("inv").value || "";
-      document.getElementById("p_inv").textContent = inv;
-      document.getElementById("p_date").textContent = document.getElementById("date").value || "";
+      const isLetter = document.getElementById("docType").value === "АЛБАН БИЧИГ";
+      document.getElementById("p_inv").textContent      = inv;
+      document.getElementById("p_date").textContent     = document.getElementById("date").value || "";
       document.getElementById("p_customer").textContent = document.getElementById("customer").value || "";
-      document.getElementById("p_note").textContent = document.getElementById("note").value || "";
-      document.getElementById("p_docType").textContent = document.getElementById("docType").value;
+      document.getElementById("p_note").textContent     = document.getElementById("note").value || "";
+      document.getElementById("p_docType").textContent  = document.getElementById("docType").value;
+
+      if (isLetter) {
+        document.getElementById("p_letterTo").textContent      = document.getElementById("letterTo").value || "";
+        document.getElementById("p_letterOrg").textContent     = document.getElementById("letterOrg").value || "";
+        document.getElementById("p_letterSubject").textContent = document.getElementById("letterSubject").value || "";
+        document.getElementById("p_letterBody").textContent    = document.getElementById("letterBody").value || "";
+        return;
+      }
 
       const rows = getRows();
       rows.forEach(r => r.card.querySelector(".lineTotal").textContent = fmt(r.amount));
       pRows.innerHTML = "";
-      let total = 0;
-      let printPos = 0;
+      let total = 0, printPos = 0;
       rows.forEach(r => {
         total += r.amount;
-        if (!r.name && r.amount === 0) return; // хоосон мөр хэвлэхгүй
+        if (!r.name && r.amount === 0) return;
         printPos++;
         const tr = document.createElement("tr");
         tr.innerHTML = `<td class="c">${printPos}</td><td class="left">${r.name}</td>
-        <td class="c">${r.unit}</td><td class="r">${fmt(r.price)}</td>
-        <td class="c">${fmt(r.qty)}</td><td class="r">${fmt(r.amount)}</td>`;
+          <td class="c">${r.unit}</td><td class="r">${fmt(r.price)}</td>
+          <td class="c">${fmt(r.qty)}</td><td class="r">${fmt(r.amount)}</td>`;
         pRows.appendChild(tr);
       });
-      document.getElementById("p_total").textContent = fmt(total);
-      document.getElementById("grandMini").textContent = fmt(total) + " ₮";
+      document.getElementById("p_total").textContent    = fmt(total);
+      document.getElementById("grandMini").textContent  = fmt(total) + " ₮";
       document.getElementById("grandMini2").textContent = fmt(total) + " ₮";
       const words = total ? toWordsMn(total) : "";
-      document.getElementById("sumWords").textContent = words;
+      document.getElementById("sumWords").textContent   = words;
       document.getElementById("p_sumWords").textContent = words;
     }
 
@@ -1612,6 +1677,9 @@
     ["inv", "date", "customer", "note", "docType"].forEach(id => {
       document.getElementById(id).addEventListener("input", sync);
       document.getElementById(id).addEventListener("change", sync);
+    });
+    ["letterTo", "letterOrg", "letterSubject", "letterBody"].forEach(id => {
+      document.getElementById(id).addEventListener("input", sync);
     });
 
     /* ── Түүх ── */
@@ -1693,27 +1761,36 @@
     }
     function collectState() {
       return {
-        inv: document.getElementById("inv").value || "",
-        date: document.getElementById("date").value || "",
-        customer: document.getElementById("customer").value || "",
-        note: document.getElementById("note").value || "",
-        docType: document.getElementById("docType").value,
-        logo_scale: Number(logoScale.value),
-        stamp_scale: Number(stampScale.value),
-        rows: getRows().map(r => ({ name: r.name, unit: r.unit, price: r.price, qty: r.qty })),
+        inv:           document.getElementById("inv").value || "",
+        date:          document.getElementById("date").value || "",
+        customer:      document.getElementById("customer").value || "",
+        note:          document.getElementById("note").value || "",
+        docType:       document.getElementById("docType").value,
+        logo_scale:    Number(logoScale.value),
+        stamp_scale:   Number(stampScale.value),
+        rows:          getRows().map(r => ({ name: r.name, unit: r.unit, price: r.price, qty: r.qty })),
+        letterTo:      document.getElementById("letterTo").value || "",
+        letterOrg:     document.getElementById("letterOrg").value || "",
+        letterSubject: document.getElementById("letterSubject").value || "",
+        letterBody:    document.getElementById("letterBody").value || "",
       };
     }
     function applyState(s) {
-      document.getElementById("inv").value = s.inv || "";
-      document.getElementById("date").value = s.date || "";
+      document.getElementById("inv").value      = s.inv || "";
+      document.getElementById("date").value     = s.date || "";
       document.getElementById("customer").value = s.customer || "";
-      document.getElementById("note").value = s.note || "";
-      document.getElementById("docType").value = s.docType || "ҮНИЙН САНАЛ";
-      logoScale.value = s.logo_scale || 150;
+      document.getElementById("note").value     = s.note || "";
+      document.getElementById("docType").value  = s.docType || "ҮНИЙН САНАЛ";
+      logoScale.value  = s.logo_scale || 150;
       stampScale.value = s.stamp_scale || 100;
+      document.getElementById("letterTo").value      = s.letterTo || "";
+      document.getElementById("letterOrg").value     = s.letterOrg || "";
+      document.getElementById("letterSubject").value = s.letterSubject || "";
+      document.getElementById("letterBody").value    = s.letterBody || "";
       clearRows();
       (s.rows || []).forEach(r => addRow(r));
-      applyScales(); sync();
+      onDocTypeChange();
+      applyScales();
     }
     function saveTemplate() {
       const ni = document.getElementById("tmplName");
