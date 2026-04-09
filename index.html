@@ -1280,21 +1280,28 @@
         <h3>Албан бичгийн мэдээлэл</h3>
       </div>
       <div class="card-body">
+        <div class="grid-2">
+          <div class="field">
+            <label>Бичгийн дугаар</label>
+            <input id="letterNum" placeholder="УМГМ/2026-001" />
+          </div>
+          <div class="field" style="display:none;"><input id="letterTo" /><input id="letterOrg" /><input id="letterSubject" /><textarea id="letterBody"></textarea></div>
+        </div>
         <div class="field">
-          <label>Хаягласан (Хэнд)</label>
-          <input id="letterTo" placeholder="Жишээ: Захирал Б.Болд" />
+          <label>Хэнд (Албан тушаал, Нэр)</label>
+          <input id="letterToReal" placeholder="Захирал Б.Болд" />
         </div>
         <div class="field">
           <label>Байгууллага</label>
-          <input id="letterOrg" placeholder="Байгууллагын нэр" />
+          <input id="letterOrgReal" placeholder="Байгууллагын нэр" />
         </div>
         <div class="field">
           <label>Сэдэв</label>
-          <input id="letterSubject" placeholder="Бичгийн сэдэв" />
+          <input id="letterSubjectReal" placeholder="Бичгийн сэдэв" />
         </div>
         <div class="field">
           <label>Бие бичвэр</label>
-          <textarea id="letterBody" style="min-height:160px;" placeholder="Албан бичгийн үндсэн агуулга..."></textarea>
+          <textarea id="letterBodyReal" style="min-height:200px;" placeholder="Дараах байдлаар мэдэгдэж байна..."></textarea>
         </div>
       </div>
     </div>
@@ -1396,7 +1403,8 @@
         </div>
         <div class="sh-right">
           <div class="sh-doc-type" id="p_docType">ЗАРЛАГЫН БАРИМТ</div>
-          <div class="sh-inv-badge" id="p_inv">INV-0001</div><br />
+          <div class="sh-inv-badge" id="p_inv" style="margin-bottom:4px;">INV-0001</div><br />
+          <div id="p_inv_lbl" style="display:none; font-size:11.5px; color:#475569; margin-bottom:4px;">Дугаар: <strong id="p_lnum"></strong></div>
           <div class="sh-date">Огноо: <strong id="p_date"></strong></div>
         </div>
       </div>
@@ -1407,21 +1415,38 @@
         <div class="sh-cust-name" id="p_customer"></div>
       </div>
 
-      <!-- Албан бичиг: хаягласан -->
+      <!-- ══ АЛБАН БИЧИГ preview ══ -->
       <div id="p_letter_section" style="display:none;">
-        <div style="margin-top:14px; display:flex; justify-content:space-between; gap:20px; font-size:13px;">
-          <div>
-            <div style="color:#94a3b8; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Хаягласан</div>
-            <div style="font-weight:700; font-size:14px;" id="p_letterTo"></div>
-            <div style="color:#475569;" id="p_letterOrg"></div>
+
+        <!-- Хэнд блок — баруун дээд -->
+        <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+          <div style="text-align:right; font-size:12.5px; line-height:1.9;">
+            <div style="font-weight:700;" id="p_letterTo"></div>
+            <div id="p_letterOrg"></div>
           </div>
         </div>
-        <div style="margin-top:14px; padding:10px 14px; background:#f1f5f9; border-left:4px solid #1e3a5f; border-radius:4px;">
-          <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;">Сэдэв</div>
-          <div style="font-weight:700; font-size:14px;" id="p_letterSubject"></div>
+
+        <!-- Сэдэв — голлуулсан -->
+        <div style="text-align:center; margin:22px 0 18px; font-size:14px; font-weight:800;
+                    text-decoration:underline; text-underline-offset:4px; letter-spacing:.3px;" id="p_letterSubject"></div>
+
+        <!-- Бие бичвэр -->
+        <div style="font-size:13px; line-height:2; white-space:pre-wrap; text-indent:2em;" id="p_letterBody"></div>
+
+        <!-- Хаалт -->
+        <div style="margin-top:28px; font-size:13px;">Хүндэтгэсэн,</div>
+
+        <!-- Гарын үсэг -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:32px;">
+          <div style="font-size:12.5px; line-height:2; border-top:1px solid #cbd5e1; padding-top:8px; min-width:180px;">
+            <div style="color:#64748b; font-size:11px;">Захирал</div>
+            <div style="font-weight:700;">Ю.Амгалан</div>
+          </div>
+          <div class="sh-stamp-wrap" style="min-height:110px; min-width:160px; position:relative; margin-right:-10mm;">
+            <img class="sh-stamp" id="stamp_preview_letter" alt="Тамга" src="images/1000014081.jpg"
+                 style="position:absolute; right:0; top:0; height:var(--stamp-h,110px); opacity:.95;" />
+          </div>
         </div>
-        <div style="margin-top:18px; font-size:13px; line-height:2; white-space:pre-wrap;" id="p_letterBody"></div>
-        <div style="margin-top:24px; font-size:13px;">Хүндэтгэсэн,</div>
       </div>
 
       <table class="sh-table" id="p_table">
@@ -1446,7 +1471,7 @@
 
       <div class="sh-note" id="p_note"></div>
 
-      <div class="sh-footer">
+      <div class="sh-footer" id="p_invoice_footer">
         <div>
           <div class="sh-bank-name">ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</div>
           <div class="sh-bank-row">
@@ -1616,11 +1641,17 @@
     /* ── Баримтын төрөл солих ── */
     function onDocTypeChange() {
       const isLetter = document.getElementById("docType").value === "АЛБАН БИЧИГ";
-      document.getElementById("letterCard").style.display   = isLetter ? "" : "none";
-      document.getElementById("invoiceCard").style.display  = isLetter ? "none" : "";
-      document.getElementById("p_cust_box").style.display   = isLetter ? "none" : "";
-      document.getElementById("p_table").style.display      = isLetter ? "none" : "";
+      // Editor хэсэг
+      document.getElementById("letterCard").style.display  = isLetter ? "" : "none";
+      document.getElementById("invoiceCard").style.display = isLetter ? "none" : "";
+      // Preview хэсэг
+      document.getElementById("p_cust_box").style.display       = isLetter ? "none" : "";
+      document.getElementById("p_table").style.display          = isLetter ? "none" : "";
+      document.getElementById("p_note").style.display           = isLetter ? "none" : "";
+      document.getElementById("p_invoice_footer").style.display = isLetter ? "none" : "";
       document.getElementById("p_letter_section").style.display = isLetter ? "" : "none";
+      document.getElementById("p_inv").style.display     = isLetter ? "none" : "";
+      document.getElementById("p_inv_lbl").style.display = isLetter ? "" : "none";
       sync();
     }
 
@@ -1635,10 +1666,12 @@
       document.getElementById("p_docType").textContent  = document.getElementById("docType").value;
 
       if (isLetter) {
-        document.getElementById("p_letterTo").textContent      = document.getElementById("letterTo").value || "";
-        document.getElementById("p_letterOrg").textContent     = document.getElementById("letterOrg").value || "";
-        document.getElementById("p_letterSubject").textContent = document.getElementById("letterSubject").value || "";
-        document.getElementById("p_letterBody").textContent    = document.getElementById("letterBody").value || "";
+        document.getElementById("p_letterTo").textContent      = document.getElementById("letterToReal").value || "";
+        document.getElementById("p_letterOrg").textContent     = document.getElementById("letterOrgReal").value || "";
+        document.getElementById("p_letterSubject").textContent = document.getElementById("letterSubjectReal").value || "";
+        document.getElementById("p_letterBody").textContent    = document.getElementById("letterBodyReal").value || "";
+        const lnum = document.getElementById("letterNum").value || "";
+        document.getElementById("p_lnum").textContent = lnum;
         return;
       }
 
@@ -1678,7 +1711,7 @@
       document.getElementById(id).addEventListener("input", sync);
       document.getElementById(id).addEventListener("change", sync);
     });
-    ["letterTo", "letterOrg", "letterSubject", "letterBody"].forEach(id => {
+    ["letterNum", "letterToReal", "letterOrgReal", "letterSubjectReal", "letterBodyReal"].forEach(id => {
       document.getElementById(id).addEventListener("input", sync);
     });
 
@@ -1769,10 +1802,11 @@
         logo_scale:    Number(logoScale.value),
         stamp_scale:   Number(stampScale.value),
         rows:          getRows().map(r => ({ name: r.name, unit: r.unit, price: r.price, qty: r.qty })),
-        letterTo:      document.getElementById("letterTo").value || "",
-        letterOrg:     document.getElementById("letterOrg").value || "",
-        letterSubject: document.getElementById("letterSubject").value || "",
-        letterBody:    document.getElementById("letterBody").value || "",
+        letterNum:     document.getElementById("letterNum").value || "",
+        letterTo:      document.getElementById("letterToReal").value || "",
+        letterOrg:     document.getElementById("letterOrgReal").value || "",
+        letterSubject: document.getElementById("letterSubjectReal").value || "",
+        letterBody:    document.getElementById("letterBodyReal").value || "",
       };
     }
     function applyState(s) {
@@ -1783,10 +1817,11 @@
       document.getElementById("docType").value  = s.docType || "ҮНИЙН САНАЛ";
       logoScale.value  = s.logo_scale || 150;
       stampScale.value = s.stamp_scale || 100;
-      document.getElementById("letterTo").value      = s.letterTo || "";
-      document.getElementById("letterOrg").value     = s.letterOrg || "";
-      document.getElementById("letterSubject").value = s.letterSubject || "";
-      document.getElementById("letterBody").value    = s.letterBody || "";
+      document.getElementById("letterNum").value         = s.letterNum || "";
+      document.getElementById("letterToReal").value      = s.letterTo || "";
+      document.getElementById("letterOrgReal").value     = s.letterOrg || "";
+      document.getElementById("letterSubjectReal").value = s.letterSubject || "";
+      document.getElementById("letterBodyReal").value    = s.letterBody || "";
       clearRows();
       (s.rows || []).forEach(r => addRow(r));
       onDocTypeChange();
