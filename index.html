@@ -1303,6 +1303,16 @@
           <label>Бие бичвэр</label>
           <textarea id="letterBodyReal" style="min-height:200px;" placeholder="Дараах байдлаар мэдэгдэж байна..."></textarea>
         </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Албан тушаал</label>
+            <input id="letterPosition" placeholder="Захирал" value="Захирал" />
+          </div>
+          <div class="field">
+            <label>Нэр</label>
+            <input id="letterSignName" placeholder="Ю.Амгалан" value="Ю.Амгалан" />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1436,15 +1446,19 @@
         <!-- Хаалт -->
         <div style="margin-top:28px; font-size:13px;">Хүндэтгэсэн,</div>
 
-        <!-- Гарын үсэг -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:32px;">
-          <div style="font-size:12.5px; line-height:2; border-top:1px solid #cbd5e1; padding-top:8px; min-width:180px;">
-            <div style="color:#64748b; font-size:11px;">Захирал</div>
-            <div style="font-weight:700;">Ю.Амгалан</div>
+        <!-- Гарын үсэг + Тамга -->
+        <div class="sh-footer" style="border-top:1px solid #e2e8f0; margin-top:28px; padding-top:14px;">
+          <div style="font-size:12.5px; line-height:2;">
+            <div style="color:#64748b; font-size:11px;" id="p_letterPosition">Захирал</div>
+            <div style="font-weight:700;" id="p_letterSignName">Ю.Амгалан</div>
           </div>
-          <div class="sh-stamp-wrap" style="min-height:110px; min-width:160px; position:relative; margin-right:-10mm;">
-            <img class="sh-stamp" id="stamp_preview_letter" alt="Тамга" src="images/1000014081.jpg"
-                 style="position:absolute; right:0; top:0; height:var(--stamp-h,110px); opacity:.95;" />
+          <div class="sh-stamp-wrap">
+            <img class="sh-stamp" id="stamp_preview_letter" alt="Тамга" src="images/1000014081.jpg" />
+            <img class="sh-sig" src="images/signature-transparent.png" alt="" />
+            <div class="sh-sign-label">
+              <strong>Тамга тэмдэг</strong><br/>
+              <span style="color:#94a3b8;">/Гарын үсэг/</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1666,12 +1680,13 @@
       document.getElementById("p_docType").textContent  = document.getElementById("docType").value;
 
       if (isLetter) {
-        document.getElementById("p_letterTo").textContent      = document.getElementById("letterToReal").value || "";
-        document.getElementById("p_letterOrg").textContent     = document.getElementById("letterOrgReal").value || "";
-        document.getElementById("p_letterSubject").textContent = document.getElementById("letterSubjectReal").value || "";
-        document.getElementById("p_letterBody").textContent    = document.getElementById("letterBodyReal").value || "";
-        const lnum = document.getElementById("letterNum").value || "";
-        document.getElementById("p_lnum").textContent = lnum;
+        document.getElementById("p_letterTo").textContent       = document.getElementById("letterToReal").value || "";
+        document.getElementById("p_letterOrg").textContent      = document.getElementById("letterOrgReal").value || "";
+        document.getElementById("p_letterSubject").textContent  = document.getElementById("letterSubjectReal").value || "";
+        document.getElementById("p_letterBody").textContent     = document.getElementById("letterBodyReal").value || "";
+        document.getElementById("p_letterPosition").textContent = document.getElementById("letterPosition").value || "Захирал";
+        document.getElementById("p_letterSignName").textContent = document.getElementById("letterSignName").value || "";
+        document.getElementById("p_lnum").textContent           = document.getElementById("letterNum").value || "";
         return;
       }
 
@@ -1704,6 +1719,7 @@
       document.getElementById("logo_editor").style.height = 36 * l + "px";
       document.getElementById("logo_preview").style.height = 58 * l + "px";
       document.getElementById("stamp_preview").style.setProperty("--stamp-h", 120 * s + "px");
+      document.getElementById("stamp_preview_letter").style.setProperty("--stamp-h", 120 * s + "px");
     }
     logoScale.addEventListener("input", applyScales);
     stampScale.addEventListener("input", applyScales);
@@ -1711,7 +1727,7 @@
       document.getElementById(id).addEventListener("input", sync);
       document.getElementById(id).addEventListener("change", sync);
     });
-    ["letterNum", "letterToReal", "letterOrgReal", "letterSubjectReal", "letterBodyReal"].forEach(id => {
+    ["letterNum","letterToReal","letterOrgReal","letterSubjectReal","letterBodyReal","letterPosition","letterSignName"].forEach(id => {
       document.getElementById(id).addEventListener("input", sync);
     });
 
@@ -1802,11 +1818,13 @@
         logo_scale:    Number(logoScale.value),
         stamp_scale:   Number(stampScale.value),
         rows:          getRows().map(r => ({ name: r.name, unit: r.unit, price: r.price, qty: r.qty })),
-        letterNum:     document.getElementById("letterNum").value || "",
-        letterTo:      document.getElementById("letterToReal").value || "",
-        letterOrg:     document.getElementById("letterOrgReal").value || "",
-        letterSubject: document.getElementById("letterSubjectReal").value || "",
-        letterBody:    document.getElementById("letterBodyReal").value || "",
+        letterNum:      document.getElementById("letterNum").value || "",
+        letterTo:       document.getElementById("letterToReal").value || "",
+        letterOrg:      document.getElementById("letterOrgReal").value || "",
+        letterSubject:  document.getElementById("letterSubjectReal").value || "",
+        letterBody:     document.getElementById("letterBodyReal").value || "",
+        letterPosition: document.getElementById("letterPosition").value || "",
+        letterSignName: document.getElementById("letterSignName").value || "",
       };
     }
     function applyState(s) {
@@ -1817,11 +1835,13 @@
       document.getElementById("docType").value  = s.docType || "ҮНИЙН САНАЛ";
       logoScale.value  = s.logo_scale || 150;
       stampScale.value = s.stamp_scale || 100;
-      document.getElementById("letterNum").value         = s.letterNum || "";
-      document.getElementById("letterToReal").value      = s.letterTo || "";
-      document.getElementById("letterOrgReal").value     = s.letterOrg || "";
-      document.getElementById("letterSubjectReal").value = s.letterSubject || "";
-      document.getElementById("letterBodyReal").value    = s.letterBody || "";
+      document.getElementById("letterNum").value          = s.letterNum || "";
+      document.getElementById("letterToReal").value       = s.letterTo || "";
+      document.getElementById("letterOrgReal").value      = s.letterOrg || "";
+      document.getElementById("letterSubjectReal").value  = s.letterSubject || "";
+      document.getElementById("letterBodyReal").value     = s.letterBody || "";
+      document.getElementById("letterPosition").value     = s.letterPosition || "Захирал";
+      document.getElementById("letterSignName").value     = s.letterSignName || "Ю.Амгалан";
       clearRows();
       (s.rows || []).forEach(r => addRow(r));
       onDocTypeChange();
