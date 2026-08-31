@@ -1019,6 +1019,171 @@
       margin-top: 14px;
     }
 
+    /* ══ Албан ёсны маягт (НХМаягт БМ-3 / ТМ-1) ══ */
+    .of-sheet {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      color: #000;
+      margin: 0 auto;
+      padding: 12mm 14mm;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .1);
+      font-family: "Times New Roman", "Arial Unicode MS", serif;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .of-code {
+      text-align: right;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .of-legal {
+      text-align: right;
+      font-size: 9.5px;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    .of-title {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin: 12px 0 10px;
+    }
+
+    /* Бөглөх зураас */
+    .of-fill {
+      display: inline-block;
+      border-bottom: 1px solid #000;
+      min-width: 46px;
+      padding: 0 5px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .of-fill.grow {
+      min-width: 60%;
+    }
+
+    /* Блок хэлбэрийн зураас — багана дүүрэн */
+    .of-fill.block {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      padding: 0 4px;
+    }
+
+    /* Зэрэгцээ 2 багана: нэр бүр өөрийн РД-гийн яг дээр байрлана */
+    .of-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 26px;
+    }
+
+    .of-cap {
+      text-align: center;
+      font-size: 9px;
+      line-height: 1.3;
+    }
+
+    .of-row {
+      margin-top: 7px;
+    }
+
+    /* Хоёр баганат толгой (ТМ-1) */
+    .of-parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 22px;
+      margin-top: 10px;
+    }
+
+    .of-party-h {
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .of-kv {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-bottom: 3px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .of-kv > .of-fill {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+      font-size: 11px;
+    }
+
+    /* Маягтын хүснэгт */
+    .of-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 11px;
+    }
+
+    .of-table th,
+    .of-table td {
+      border: 1px solid #000;
+      padding: 2px 4px;
+      font-size: 10.5px;
+    }
+
+    .of-table th {
+      text-align: center;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .of-table td {
+      height: 17px;
+    }
+
+    .of-table td.c { text-align: center; }
+    .of-table td.r { text-align: right; }
+    .of-table td.sum { font-weight: 700; }
+
+    /* Гарын үсгийн зураас */
+    .of-signs {
+      margin-top: 16px;
+      position: relative;
+      /* Тамга блокоос гарч хүснэгтийн "Дүн" мөрийг халхлахаас сэргийлнэ */
+      min-height: 124px;
+    }
+
+    .of-sign-row {
+      margin-bottom: 9px;
+      font-size: 11.5px;
+      white-space: nowrap;
+    }
+
+    .of-sign {
+      display: inline-block;
+      border-bottom: 1px dotted #000;
+      min-width: 190px;
+      padding: 0 6px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .of-stamp {
+      position: absolute;
+      right: 8px;
+      bottom: 0;
+      height: var(--stamp-h, 105px);
+      opacity: .92;
+      pointer-events: none;
+    }
+
     /* ══ Print ══ */
     @media print {
       body {
@@ -1036,9 +1201,15 @@
         display: none !important;
       }
 
-      /* ── Хэвлэлтэнд mobile override-г цуцал ── */
+      /* Хуудсыг тойрсон зай хоосон 2-р хуудас үүсгэдэг тул цэвэрлэнэ */
+      .sheet-wrap {
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+
+      /* ── Хэвлэлтэнд mobile override-г цуцал ──
+         display-г ЗААВАЛ бүү тааруул: идэвхгүй хуудсууд inline display:none-тэй байна */
       #preview {
-        display: block !important;
         width: 210mm !important;
         min-height: 297mm !important;
         margin: 0 !important;
@@ -1047,6 +1218,16 @@
         overflow: visible !important;
         font-size: 13px !important;
       }
+      .of-sheet {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 10mm 12mm !important;
+      }
+      .of-table { page-break-inside: auto; }
+      .of-table tr { page-break-inside: avoid; }
       #preview .sh-body { padding: 13mm 15mm 11mm !important; }
       #preview .sh-header { flex-direction: row !important; gap: 20px !important; }
       #preview .sh-right { text-align: right !important; }
@@ -1238,7 +1419,7 @@
         </div>
         <div class="grid-2">
           <div class="field">
-            <label>Invoice No</label>
+            <label>Баримтын дугаар</label>
             <div style="display:flex; gap:6px;">
               <input id="inv" value="INV-0001" style="flex:1;" />
               <button class="btn btn-icon" onclick="autoInvNo()" title="Автомат дугаар">🔄</button>
@@ -1268,6 +1449,101 @@
           <div class="field">
             <label>Тамга хэмжээ</label>
             <input type="range" id="stamp_scale" min="70" max="140" value="100" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Нэхэмжлэхийн нэмэлт мэдээлэл (ТМ-1 маягт) -->
+    <div class="card" style="margin-bottom:14px; display:none;" id="invoiceExtraCard">
+      <div class="card-head">
+        <span class="icon">🧾</span>
+        <h3>Нэхэмжлэх — Төлөгчийн мэдээлэл (ТМ-1)</h3>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="field">
+            <label>Төлөгчийн РД</label>
+            <input id="custRD" placeholder="Регистрийн дугаар" />
+          </div>
+          <div class="field">
+            <label>Төлөгчийн хаяг</label>
+            <input id="custAddress" placeholder="Заавал биш" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Төлөгчийн утас, факс</label>
+            <input id="custPhone" placeholder="Заавал биш" />
+          </div>
+          <div class="field">
+            <label>Төлөгчийн э-шуудан</label>
+            <input id="custEmail" placeholder="Заавал биш" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Гэрээний №</label>
+            <input id="contractNo" placeholder="Заавал биш" />
+          </div>
+          <div class="field">
+            <label>Төлбөр хийх хугацаа</label>
+            <input id="payDue" placeholder="Жишээ: 7 хоногт" />
+          </div>
+          <div class="field">
+            <label>НӨАТ</label>
+            <select id="vatMode">
+              <option value="none">Задлахгүй (маягт дээрх шиг)</option>
+              <option value="incl">Үнэд багтсан — 10% задлах</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Дарга</label>
+            <input id="invDirector" placeholder="Нэр" value="Ю.Амгалан" />
+          </div>
+          <div class="field">
+            <label>Хүлээн авсан</label>
+            <input id="invReceiver" placeholder="Нэр" />
+          </div>
+          <div class="field">
+            <label>Нягтлан бодогч</label>
+            <input id="invAccountant" placeholder="Нэр" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Зарлагын баримтын нэмэлт мэдээлэл (БМ-3 маягт) -->
+    <div class="card" style="margin-bottom:14px; display:none;" id="expenseExtraCard">
+      <div class="card-head">
+        <span class="icon">📤</span>
+        <h3>Зарлагын баримтын нэмэлт мэдээлэл</h3>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="field">
+            <label>Худалдан авагчийн РД</label>
+            <input id="buyerRD" placeholder="Регистрийн дугаар" />
+          </div>
+          <div class="field">
+            <label>Тээвэрлэгчийн хаяг, албан тушаал, нэр</label>
+            <input id="carrierInfo" placeholder="Заавал биш" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Хүлээлгэн өгсөн эд хариуцагч</label>
+            <input id="issuerName" placeholder="Нэр" value="Ю.Амгалан" />
+          </div>
+          <div class="field">
+            <label>Хүлээн авагч</label>
+            <input id="receiverName" placeholder="Нэр" />
+          </div>
+          <div class="field">
+            <label>Шалгасан нягтлан бодогч</label>
+            <input id="accountantName" placeholder="Нэр" />
           </div>
         </div>
       </div>
@@ -1505,9 +1781,150 @@
           </div>
         </div>
       </div>
+
       <div class="sh-bottom-bar"></div>
     </div>
   </main>
+
+  <!-- ══ НХМаягт БМ-3 · ЗАРЛАГЫН БАРИМТ ══ -->
+  <section class="of-sheet" id="of_bm3" style="display:none;">
+    <div class="of-code">НХМаягт БМ-3</div>
+    <div class="of-legal">
+      Сангийн сайдын 2017 оны 12 дугаар сарын<br />
+      5-ны өдрийн 347 тоот тушаалын хавсралт
+    </div>
+
+    <div class="of-title">ЗАРЛАГЫН БАРИМТ № <span class="of-fill" id="of3_num"></span></div>
+
+    <div class="of-row of-two">
+      <div>
+        <div class="of-fill block" id="of3_org"></div>
+        <div class="of-cap">(байгууллагын нэр)</div>
+        <div style="margin-top:7px;">Регистрийн № <span class="of-fill" id="of3_orgRD"></span></div>
+      </div>
+      <div>
+        <div class="of-fill block" id="of3_buyer"></div>
+        <div class="of-cap">(худалдан авагчийн нэр)</div>
+        <div style="margin-top:7px;">Регистрийн № <span class="of-fill" id="of3_buyerRD"></span></div>
+      </div>
+    </div>
+
+    <div class="of-row">
+      20<span class="of-fill" id="of3_yy"></span> оны
+      <span class="of-fill" id="of3_mm"></span> сарын
+      <span class="of-fill" id="of3_dd"></span> өдөр
+    </div>
+
+    <div class="of-row" style="text-align:center;">
+      <span class="of-fill grow" id="of3_carrier"></span>
+      <div class="of-cap">(тээвэрлэгчийн хаяг, албан тушаал, нэр)</div>
+    </div>
+
+    <table class="of-table">
+      <thead>
+        <tr>
+          <th rowspan="2" style="width:26px;">№</th>
+          <th rowspan="2">Материалын үнэт зүйлийн нэр, зэрэг, дугаар</th>
+          <th rowspan="2" style="width:44px;">Код</th>
+          <th rowspan="2" style="width:50px;">Хэмжих нэгж</th>
+          <th rowspan="2" style="width:42px;">Тоо</th>
+          <th colspan="2">Худалдах</th>
+        </tr>
+        <tr>
+          <th style="width:82px;">Нэгжийн үнэ</th>
+          <th style="width:92px;">Нийт дүн</th>
+        </tr>
+      </thead>
+      <tbody id="of3_rows"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" class="r sum">Дүн</td>
+          <td class="r sum" id="of3_total"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="of-signs">
+      <div class="of-sign-row">Хүлээлгэн өгсөн эд хариуцагч <span class="of-sign" id="of3_issuer"></span></div>
+      <div class="of-sign-row">Хүлээн авагч <span class="of-sign" id="of3_receiver"></span></div>
+      <div class="of-sign-row">Шалгасан нягтлан бодогч <span class="of-sign" id="of3_accountant"></span></div>
+      <img class="of-stamp" id="stamp_of3" alt="Тамга" src="images/1000014081.jpg" />
+    </div>
+  </section>
+
+  <!-- ══ НХМаягт ТМ-1 · НЭХЭМЖЛЭХ ══ -->
+  <section class="of-sheet" id="of_tm1" style="display:none;">
+    <div class="of-code">НХМаягт ТМ-1</div>
+    <div class="of-legal">
+      Сангийн сайдын 2017 оны 12 дугаар сарын<br />
+      5-ны өдрийн 347 тоот тушаалын хавсралт
+    </div>
+
+    <div class="of-title">НЭХЭМЖЛЭХ № <span class="of-fill" id="of1_num"></span></div>
+
+    <div class="of-parties">
+      <div>
+        <div class="of-party-h">Нэхэмжлэгч:</div>
+        <div class="of-kv">Байгууллагын нэр:<span class="of-fill" id="of1_sName"></span></div>
+        <div class="of-kv">Хаяг:<span class="of-fill" id="of1_sAddr"></span></div>
+        <div class="of-kv">Утас, факс:<span class="of-fill" id="of1_sPhone"></span></div>
+        <div class="of-kv">Э-шуудан:<span class="of-fill" id="of1_sEmail"></span></div>
+        <div class="of-kv">Банкны нэр:<span class="of-fill" id="of1_sBank"></span></div>
+        <div class="of-kv">Банкны дансны дугаар:<span class="of-fill" id="of1_sAcc"></span></div>
+        <div class="of-kv">Регистрийн №:<span class="of-fill" id="of1_sRD"></span></div>
+      </div>
+      <div>
+        <div class="of-party-h">Төлөгч:</div>
+        <div class="of-kv">Байгууллагын нэр:<span class="of-fill" id="of1_bName"></span></div>
+        <div class="of-kv">Хаяг:<span class="of-fill" id="of1_bAddr"></span></div>
+        <div class="of-kv">Утас, факс:<span class="of-fill" id="of1_bPhone"></span></div>
+        <div class="of-kv">Э-шуудан:<span class="of-fill" id="of1_bEmail"></span></div>
+        <div class="of-kv">Регистрийн №:<span class="of-fill" id="of1_bRD"></span></div>
+        <div class="of-kv" id="of1_contractRow">Гэрээний №:<span class="of-fill" id="of1_contract"></span></div>
+        <div class="of-kv">Нэхэмжилсэн огноо:<span class="of-fill" id="of1_date"></span></div>
+        <div class="of-kv">Төлбөр хийх хугацаа:<span class="of-fill" id="of1_due"></span></div>
+      </div>
+    </div>
+
+    <table class="of-table">
+      <thead>
+        <tr>
+          <th style="width:26px;">№</th>
+          <th>Гүйлгээний утга</th>
+          <th style="width:66px;">Тоо хэмжээ</th>
+          <th style="width:92px;">Нэгжийн үнэ</th>
+          <th style="width:100px;">Нийт үнэ</th>
+        </tr>
+      </thead>
+      <tbody id="of1_rows"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" class="r sum">Дүн</td>
+          <td class="r sum" id="of1_sub"></td>
+        </tr>
+        <tr>
+          <td colspan="4" class="r sum">НӨАТ</td>
+          <td class="r sum" id="of1_vat"></td>
+        </tr>
+        <tr>
+          <td colspan="4" class="r sum">Нийт дүн</td>
+          <td class="r sum" id="of1_total"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="of-row" style="margin-top:12px;">
+      Мөнгөн дүн <span class="of-sign" style="min-width:64%;" id="of1_words"></span> болно.
+      <div class="of-cap" style="text-align:left; padding-left:78px;">(үгээр)</div>
+    </div>
+
+    <div class="of-signs">
+      <div class="of-sign-row">Дарга <span class="of-sign" id="of1_director"></span></div>
+      <div class="of-sign-row">Хүлээн авсан <span class="of-sign" id="of1_receiver"></span></div>
+      <div class="of-sign-row">Нягтлан бодогч <span class="of-sign" id="of1_accountant"></span></div>
+      <img class="of-stamp" id="stamp_of1" alt="Тамга" src="images/1000014081.jpg" />
+    </div>
+  </section>
   </div><!-- /sheet-wrap -->
 
   <div id="toast"></div>
@@ -1521,11 +1938,36 @@
     const LS_CNT = "umgm_inv_counter_v1";
     const LS_DARK = "umgm_dark_v1";
 
+    /* ── Манай байгууллагын мэдээлэл (албан маягтад бөглөгдөнө) ── */
+    const CO = {
+      name:    "ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК",
+      rd:      "6622755",
+      address: "Улаанбаатар хот, Сонгинохайрхан дүүрэг, 9-р хороо, Баруун баян уул 6-30",
+      phone:   "+976 8520-5258",
+      email:   "umgmtrade@gmail.com",
+      bank:    "Хаан банк",
+      account: "5166766796",
+    };
+
+    /* Албан маягтын хоосон мөрийн доод хэмжээ (хэвлэмэл маягттай адил харагдуулна) */
+    const BM3_MIN_ROWS = 20;
+    const TM1_MIN_ROWS = 10;
+
+    /* Албан маягтын талбарууд — хадгалах/сэргээх/цэвэрлэх бүгд эндээс явна */
+    const OFFICIAL_FIELDS = [
+      "custRD", "custAddress", "custPhone", "custEmail", "contractNo", "payDue", "vatMode",
+      "invDirector", "invReceiver", "invAccountant",
+      "buyerRD", "carrierInfo", "issuerName", "receiverName", "accountantName",
+    ];
+    const OFFICIAL_DEFAULTS = { vatMode: "none", invDirector: "Ю.Амгалан", issuerName: "Ю.Амгалан" };
+
     /* ── DOM refs ── */
     const itemsEl = document.getElementById("items");
     const pRows = document.getElementById("p_rows");
     const logoScale = document.getElementById("logo_scale");
     const stampScale = document.getElementById("stamp_scale");
+
+    const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
     /* ── Нэвтрэх ── */
     document.getElementById("lockInput").addEventListener("keydown", e => { if (e.key === "Enter") checkLock(); });
@@ -1580,11 +2022,19 @@
       getCusts().forEach(c => { const o = document.createElement("option"); o.value = c; dl.appendChild(o); });
     }
 
-    /* ── Invoice дугаар ── */
+    /* ── Баримтын дугаар ──
+       Албан ёсны маягт дээр дугаарыг "040" гэх мэт цэвэр тоогоор бичдэг,
+       үнийн санал дээр INV-0001 хэлбэрээр үлдээнэ. */
+    function isOfficialType(type) {
+      return type === "НЭХЭМЖЛЭХ" || type === "ЗАРЛАГЫН БАРИМТ";
+    }
     function autoInvNo() {
       const n = parseInt(localStorage.getItem(LS_CNT) || "0") + 1;
       localStorage.setItem(LS_CNT, n);
-      document.getElementById("inv").value = "INV-" + String(n).padStart(4, "0");
+      const official = isOfficialType(document.getElementById("docType").value);
+      document.getElementById("inv").value = official
+        ? String(n).padStart(3, "0")
+        : "INV-" + String(n).padStart(4, "0");
       sync();
     }
 
@@ -1595,6 +2045,9 @@
       document.getElementById("customer").value = "";
       document.getElementById("note").value = "Дээрх үнэд нэмэгдсэн өртгийн албан татвар (НӨАТ) багтсан болно. Бараа нийлүүлэх хугацаа 14 хоног.";
       document.getElementById("date").value = today();
+      OFFICIAL_FIELDS.forEach(id => {
+        document.getElementById(id).value = OFFICIAL_DEFAULTS[id] || "";
+      });
       autoInvNo();
       addRow();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1654,30 +2107,132 @@
 
     /* ── Баримтын төрөл солих ── */
     function onDocTypeChange() {
-      const isLetter = document.getElementById("docType").value === "АЛБАН БИЧИГ";
+      const type = document.getElementById("docType").value;
+      const isLetter  = type === "АЛБАН БИЧИГ";
+      const isInvoice = type === "НЭХЭМЖЛЭХ";
+      const isExpense = type === "ЗАРЛАГЫН БАРИМТ";
+
+      // Дугаарыг маягтын хэлбэрт тааруулна — гараар бичсэн дугаарт хүрэхгүй
+      const invEl = document.getElementById("inv");
+      if (isOfficialType(type) && /^INV-\d+$/.test(invEl.value)) {
+        invEl.value = String(parseInt(invEl.value.slice(4), 10)).padStart(3, "0");
+      } else if (!isOfficialType(type) && /^\d+$/.test(invEl.value)) {
+        invEl.value = "INV-" + invEl.value.padStart(4, "0");
+      }
+
       // Editor хэсэг
-      document.getElementById("letterCard").style.display  = isLetter ? "" : "none";
-      document.getElementById("invoiceCard").style.display = isLetter ? "none" : "";
-      // Preview хэсэг
+      document.getElementById("letterCard").style.display       = isLetter  ? "" : "none";
+      document.getElementById("invoiceCard").style.display      = isLetter  ? "none" : "";
+      document.getElementById("invoiceExtraCard").style.display = isInvoice ? "" : "none";
+      document.getElementById("expenseExtraCard").style.display = isExpense ? "" : "none";
+
+      // Аль хуудсыг харуулах: албан ёсны маягт эсвэл брэнд загвар
+      const isOfficial = isInvoice || isExpense;
+      document.getElementById("preview").style.display = isOfficial ? "none" : "";
+      document.getElementById("of_bm3").style.display  = isExpense ? "" : "none";
+      document.getElementById("of_tm1").style.display  = isInvoice ? "" : "none";
+
+      // Брэнд загварын дотоод хэсгүүд (ҮНИЙН САНАЛ / АЛБАН БИЧИГ)
       document.getElementById("p_cust_box").style.display       = isLetter ? "none" : "";
       document.getElementById("p_table").style.display          = isLetter ? "none" : "";
       document.getElementById("p_note").style.display           = isLetter ? "none" : "";
       document.getElementById("p_invoice_footer").style.display = isLetter ? "none" : "";
       document.getElementById("p_letter_section").style.display = isLetter ? "" : "none";
-      document.getElementById("p_inv").style.display     = isLetter ? "none" : "";
-      document.getElementById("p_inv_lbl").style.display = isLetter ? "" : "none";
+      document.getElementById("p_inv").style.display            = isLetter ? "none" : "";
+      document.getElementById("p_inv_lbl").style.display        = isLetter ? "" : "none";
+
       sync();
+    }
+
+    /* ── Албан маягтын мөр зурах ── */
+    function renderOfficialRows(tbody, rows, minRows, cols) {
+      tbody.innerHTML = "";
+      const n = Math.max(minRows, rows.length);
+      for (let i = 0; i < n; i++) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td class="c">${i + 1}</td>` + cols(rows[i]);
+        tbody.appendChild(tr);
+      }
+    }
+
+    /* НХМаягт БМ-3 — Зарлагын баримт */
+    function renderBm3(rows, total) {
+      const d = (document.getElementById("date").value || "").split("-");
+      document.getElementById("of3_num").textContent     = document.getElementById("inv").value || "";
+      document.getElementById("of3_org").textContent     = CO.name;
+      document.getElementById("of3_orgRD").textContent   = CO.rd;
+      document.getElementById("of3_buyer").textContent   = document.getElementById("customer").value || "";
+      document.getElementById("of3_buyerRD").textContent = document.getElementById("buyerRD").value || "";
+      document.getElementById("of3_yy").textContent      = d[0] ? d[0].slice(2) : "";
+      document.getElementById("of3_mm").textContent      = d[1] || "";
+      document.getElementById("of3_dd").textContent      = d[2] || "";
+      document.getElementById("of3_carrier").textContent = document.getElementById("carrierInfo").value || "";
+
+      renderOfficialRows(document.getElementById("of3_rows"), rows, BM3_MIN_ROWS, r => r
+        ? `<td>${esc(r.name)}</td><td></td><td class="c">${esc(r.unit)}</td>
+           <td class="c">${fmt(r.qty)}</td><td class="r">${fmt(r.price)}</td><td class="r">${fmt(r.amount)}</td>`
+        : `<td></td><td></td><td></td><td></td><td></td><td></td>`);
+
+      document.getElementById("of3_total").textContent      = total ? fmt(total) : "";
+      document.getElementById("of3_issuer").textContent     = document.getElementById("issuerName").value || "";
+      document.getElementById("of3_receiver").textContent   = document.getElementById("receiverName").value || "";
+      document.getElementById("of3_accountant").textContent = document.getElementById("accountantName").value || "";
+    }
+
+    /* НХМаягт ТМ-1 — Нэхэмжлэх */
+    function renderTm1(rows, total, words) {
+      document.getElementById("of1_num").textContent    = document.getElementById("inv").value || "";
+      document.getElementById("of1_sName").textContent  = CO.name;
+      document.getElementById("of1_sAddr").textContent  = CO.address;
+      document.getElementById("of1_sPhone").textContent = CO.phone;
+      document.getElementById("of1_sEmail").textContent = CO.email;
+      document.getElementById("of1_sBank").textContent  = CO.bank;
+      document.getElementById("of1_sAcc").textContent   = CO.account;
+      document.getElementById("of1_sRD").textContent    = CO.rd;
+
+      document.getElementById("of1_bName").textContent  = document.getElementById("customer").value || "";
+      document.getElementById("of1_bAddr").textContent  = document.getElementById("custAddress").value || "";
+      document.getElementById("of1_bPhone").textContent = document.getElementById("custPhone").value || "";
+      document.getElementById("of1_bEmail").textContent = document.getElementById("custEmail").value || "";
+      document.getElementById("of1_bRD").textContent    = document.getElementById("custRD").value || "";
+      document.getElementById("of1_date").textContent   = document.getElementById("date").value || "";
+      document.getElementById("of1_due").textContent    = document.getElementById("payDue").value || "";
+
+      // Гэрээний № зөвхөн бөглөсөн үед харуулна (хэвлэмэл маягт дээр байдаггүй)
+      const contractNo = document.getElementById("contractNo").value || "";
+      document.getElementById("of1_contractRow").style.display = contractNo ? "" : "none";
+      document.getElementById("of1_contract").textContent = contractNo;
+
+      renderOfficialRows(document.getElementById("of1_rows"), rows, TM1_MIN_ROWS, r => r
+        ? `<td>${esc(r.name)}</td><td class="c">${fmt(r.qty)}</td>
+           <td class="r">${fmt(r.price)}</td><td class="r">${fmt(r.amount)}</td>`
+        : `<td></td><td></td><td></td><td></td>`);
+
+      // НӨАТ: "none" = маягт дээрх шиг задлахгүй, "incl" = үнэд багтсан 10%-г задална
+      const split = document.getElementById("vatMode").value === "incl";
+      const net = split ? total / 1.1 : total;
+      document.getElementById("of1_sub").textContent   = total ? fmt(net) : "";
+      document.getElementById("of1_vat").textContent   = (total && split) ? fmt(total - net) : "";
+      document.getElementById("of1_total").textContent = total ? fmt(total) : "";
+      document.getElementById("of1_words").textContent = words;
+
+      document.getElementById("of1_director").textContent   = document.getElementById("invDirector").value || "";
+      document.getElementById("of1_receiver").textContent    = document.getElementById("invReceiver").value || "";
+      document.getElementById("of1_accountant").textContent = document.getElementById("invAccountant").value || "";
     }
 
     /* ── Sync ── */
     function sync() {
       const inv = document.getElementById("inv").value || "";
-      const isLetter = document.getElementById("docType").value === "АЛБАН БИЧИГ";
+      const type = document.getElementById("docType").value;
+      const isLetter  = type === "АЛБАН БИЧИГ";
+      const isInvoice = type === "НЭХЭМЖЛЭХ";
+      const isExpense = type === "ЗАРЛАГЫН БАРИМТ";
       document.getElementById("p_inv").textContent      = inv;
       document.getElementById("p_date").textContent     = document.getElementById("date").value || "";
       document.getElementById("p_customer").textContent = document.getElementById("customer").value || "";
       document.getElementById("p_note").textContent     = document.getElementById("note").value || "";
-      document.getElementById("p_docType").textContent  = document.getElementById("docType").value;
+      document.getElementById("p_docType").textContent  = type;
 
       if (isLetter) {
         document.getElementById("p_letterTo").textContent       = document.getElementById("letterToReal").value || "";
@@ -1692,27 +2247,35 @@
 
       const rows = getRows();
       rows.forEach(r => r.card.querySelector(".lineTotal").textContent = fmt(r.amount));
+      const total = rows.reduce((s, r) => s + r.amount, 0);
+      const filled = rows.filter(r => r.name || r.amount);
+      const words = total ? toWordsMn(total) : "";
+
+      document.getElementById("grandMini").textContent  = fmt(total) + " ₮";
+      document.getElementById("grandMini2").textContent = fmt(total) + " ₮";
+      document.getElementById("sumWords").textContent   = words;
+
+      if (isExpense) { renderBm3(filled, total); return; }
+      if (isInvoice) { renderTm1(filled, total, words); return; }
+
+      // ── Брэнд загвар (ҮНИЙН САНАЛ) ──
       pRows.innerHTML = "";
-      let total = 0, printPos = 0;
-      rows.forEach(r => {
-        total += r.amount;
-        if (!r.name && r.amount === 0) return;
-        printPos++;
+      filled.forEach((r, i) => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td class="c">${printPos}</td><td class="left">${r.name}</td>
-          <td class="c">${r.unit}</td><td class="r">${fmt(r.price)}</td>
+        tr.innerHTML = `<td class="c">${i + 1}</td><td class="left">${esc(r.name)}</td>
+          <td class="c">${esc(r.unit)}</td><td class="r">${fmt(r.price)}</td>
           <td class="c">${fmt(r.qty)}</td><td class="r">${fmt(r.amount)}</td>`;
         pRows.appendChild(tr);
       });
       document.getElementById("p_total").textContent    = fmt(total);
-      document.getElementById("grandMini").textContent  = fmt(total) + " ₮";
-      document.getElementById("grandMini2").textContent = fmt(total) + " ₮";
-      const words = total ? toWordsMn(total) : "";
-      document.getElementById("sumWords").textContent   = words;
       document.getElementById("p_sumWords").textContent = words;
     }
 
-    function scrollToPreview() { document.getElementById("preview").scrollIntoView({ behavior: "smooth" }); }
+    function scrollToPreview() {
+      const el = [document.getElementById("preview"), document.getElementById("of_bm3"), document.getElementById("of_tm1")]
+        .find(x => x.style.display !== "none");
+      (el || document.getElementById("preview")).scrollIntoView({ behavior: "smooth" });
+    }
 
     function applyScales() {
       const l = Number(logoScale.value) / 100, s = Number(stampScale.value) / 100;
@@ -1720,6 +2283,8 @@
       document.getElementById("logo_preview").style.height = 58 * l + "px";
       document.getElementById("stamp_preview").style.setProperty("--stamp-h", 120 * s + "px");
       document.getElementById("stamp_preview_letter").style.setProperty("--stamp-h", 120 * s + "px");
+      document.getElementById("stamp_of3").style.setProperty("--stamp-h", 105 * s + "px");
+      document.getElementById("stamp_of1").style.setProperty("--stamp-h", 105 * s + "px");
     }
     logoScale.addEventListener("input", applyScales);
     stampScale.addEventListener("input", applyScales);
@@ -1729,6 +2294,11 @@
     });
     ["letterNum","letterToReal","letterOrgReal","letterSubjectReal","letterBodyReal","letterPosition","letterSignName"].forEach(id => {
       document.getElementById(id).addEventListener("input", sync);
+    });
+    OFFICIAL_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener("input", sync);
+      el.addEventListener("change", sync);
     });
 
     /* ── Түүх ── */
@@ -1809,7 +2379,7 @@
       if (cur && saved[cur]) sel.value = cur;
     }
     function collectState() {
-      return {
+      const st = {
         inv:           document.getElementById("inv").value || "",
         date:          document.getElementById("date").value || "",
         customer:      document.getElementById("customer").value || "",
@@ -1826,6 +2396,8 @@
         letterPosition: document.getElementById("letterPosition").value || "",
         letterSignName: document.getElementById("letterSignName").value || "",
       };
+      OFFICIAL_FIELDS.forEach(id => st[id] = document.getElementById(id).value || "");
+      return st;
     }
     function applyState(s) {
       document.getElementById("inv").value      = s.inv || "";
@@ -1842,6 +2414,9 @@
       document.getElementById("letterBodyReal").value     = s.letterBody || "";
       document.getElementById("letterPosition").value     = s.letterPosition || "Захирал";
       document.getElementById("letterSignName").value     = s.letterSignName || "Ю.Амгалан";
+      OFFICIAL_FIELDS.forEach(id => {
+        document.getElementById(id).value = s[id] || OFFICIAL_DEFAULTS[id] || "";
+      });
       clearRows();
       (s.rows || []).forEach(r => addRow(r));
       onDocTypeChange();
