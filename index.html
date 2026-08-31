@@ -1154,7 +1154,8 @@
 
     /* Гарын үсгийн зураас */
     .of-signs {
-      margin-top: 16px;
+      /* Гарын үсэг зурааснаас дээш цухуйдаг тул дээрээс нь зай үлдээв */
+      margin-top: 28px;
       position: relative;
       /* Тамга блокоос гарч хүснэгтийн "Дүн" мөрийг халхлахаас сэргийлнэ */
       min-height: 124px;
@@ -1181,6 +1182,27 @@
       bottom: 0;
       height: var(--stamp-h, 105px);
       opacity: .92;
+      pointer-events: none;
+    }
+
+    /* Гарын үсэг зурааса дээр — нэрийг барууны талд түлхэж давхцахгүй болгоно */
+    .of-sign-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .of-sign-signed {
+      min-width: 230px;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .of-sig {
+      position: absolute;
+      left: 8px;
+      bottom: 1px;
+      width: 112px;
+      opacity: .8;
       pointer-events: none;
     }
 
@@ -1919,7 +1941,12 @@
     </div>
 
     <div class="of-signs">
-      <div class="of-sign-row">Дарга <span class="of-sign" id="of1_director"></span></div>
+      <div class="of-sign-row">Дарга
+        <span class="of-sign-wrap">
+          <span class="of-sign of-sign-signed" id="of1_director"></span>
+          <img class="of-sig" id="sig_of1" src="images/signature-transparent.png" alt="" />
+        </span>
+      </div>
       <div class="of-sign-row">Хүлээн авсан <span class="of-sign" id="of1_receiver"></span></div>
       <div class="of-sign-row">Нягтлан бодогч <span class="of-sign" id="of1_accountant"></span></div>
       <img class="of-stamp" id="stamp_of1" alt="Тамга" src="images/1000014081.jpg" />
