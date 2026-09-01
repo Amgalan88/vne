@@ -1019,6 +1019,28 @@
       margin-top: 14px;
     }
 
+    /* ══ Байгууллагын зураг сонгох ══ */
+    .co-img-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .co-img {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      flex: none;
+    }
+
+    .co-img:not([src]),
+    .co-img[src=""] {
+      visibility: hidden;
+    }
+
     /* ══ Албан ёсны маягт (НХМаягт БМ-3 / ТМ-1) ══ */
     .of-sheet {
       width: 210mm;
@@ -1103,6 +1125,11 @@
       margin-top: 10px;
     }
 
+    /* Grid нүд агшиж чаддаг байх ёстой — эс тэгвэл урт хаяг нөгөө баганыг хуудаснаас түлхэнэ */
+    .of-parties > div {
+      min-width: 0;
+    }
+
     .of-party-h {
       font-weight: 700;
       margin-bottom: 3px;
@@ -1122,6 +1149,9 @@
       min-width: 0;
       text-align: left;
       font-size: 11px;
+      /* Шошго нь нэг мөрөнд үлдэнэ, харин утга нь урт бол доош мөр шилжинэ */
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     /* Маягтын хүснэгт */
@@ -1369,7 +1399,7 @@
   <!-- ══ Нэвтрэх ══ -->
   <div id="lockScreen">
     <div class="lock-card">
-      <img src="images/1000014080.png" alt="Лого" />
+      <img id="logo_lock" src="images/1000014080.png" alt="Лого" />
       <h2>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</h2>
       <p>Нэвтрэхийн тулд кодоо оруулна уу</p>
       <div class="lock-inp-wrap">
@@ -1384,9 +1414,9 @@
   <!-- ══ Топ бар ══ -->
   <div class="topbar">
     <div class="topbar-brand">
-      <img src="images/1000014080.png" alt="лого" />
+      <img id="logo_topbar" src="images/1000014080.png" alt="лого" />
       <div>
-        <span>ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</span><br />
+        <span id="brand_name">ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</span><br />
         <small>Инвойс систем</small>
       </div>
     </div>
@@ -1424,6 +1454,13 @@
         </div>
       </div>
       <div class="card-body">
+        <div class="field">
+          <label>Байгууллага (баримт гаргагч)</label>
+          <div style="display:flex; gap:6px;">
+            <select id="companySel" onchange="onCompanyChange()" style="flex:1;"></select>
+            <button class="btn btn-icon" onclick="toggleCompanyCard()" title="Байгууллагын бүртгэл засах">⚙</button>
+          </div>
+        </div>
         <div class="grid-2">
           <div class="field">
             <label>Баримтын төрөл</label>
@@ -1472,6 +1509,99 @@
             <label>Тамга хэмжээ</label>
             <input type="range" id="stamp_scale" min="70" max="140" value="100" />
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Байгууллагын бүртгэл -->
+    <div class="card" style="margin-bottom:14px; display:none;" id="companyCard">
+      <div class="card-head">
+        <span class="icon">🏢</span>
+        <h3>Байгууллагын бүртгэл</h3>
+        <div style="margin-left:auto; display:flex; gap:6px;">
+          <button class="btn btn-sm" onclick="addCompany()">＋ Шинэ</button>
+          <button class="btn btn-sm btn-red" onclick="deleteCompany()">🗑</button>
+          <button class="btn btn-sm" onclick="toggleCompanyCard()">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Байгууллагын нэр</label>
+          <input id="co_name" placeholder="ЖИШЭЭ ХХК" />
+        </div>
+        <div class="field">
+          <label>Хаяг <span style="color:var(--muted);font-weight:400;">(мөр таслах боломжтой)</span></label>
+          <textarea id="co_address" style="min-height:64px;" placeholder="Улаанбаатар хот, ... дүүрэг&#10;9-р хороо, ..."></textarea>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Регистрийн №</label>
+            <input id="co_rd" placeholder="6622755" />
+          </div>
+          <div class="field">
+            <label>Утас</label>
+            <input id="co_phone" placeholder="+976 8888-8888" />
+          </div>
+          <div class="field">
+            <label>Э-шуудан</label>
+            <input id="co_email" placeholder="info@example.com" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Банкны нэр</label>
+            <input id="co_bank" placeholder="Хаан банк" />
+          </div>
+          <div class="field">
+            <label>Дансны дугаар</label>
+            <input id="co_account" placeholder="5166766796" />
+          </div>
+          <div class="field">
+            <label>Захирлын нэр</label>
+            <input id="co_director" placeholder="Ю.Амгалан" />
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:2px;">
+          <div class="field">
+            <label>Лого</label>
+            <div class="co-img-row">
+              <img id="co_logo_prev" class="co-img" alt="" />
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <button class="btn btn-sm" onclick="document.getElementById('co_logo_file').click()">📁 Сонгох</button>
+                <button class="btn btn-sm btn-red" onclick="clearCompanyImage('logo')">Арилгах</button>
+              </div>
+            </div>
+            <input type="file" id="co_logo_file" accept="image/*" style="display:none"
+              onchange="pickCompanyImage(event,'logo')" />
+          </div>
+          <div class="field">
+            <label>Тамга</label>
+            <div class="co-img-row">
+              <img id="co_stamp_prev" class="co-img" alt="" />
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <button class="btn btn-sm" onclick="document.getElementById('co_stamp_file').click()">📁 Сонгох</button>
+                <button class="btn btn-sm btn-red" onclick="clearCompanyImage('stamp')">Арилгах</button>
+              </div>
+            </div>
+            <input type="file" id="co_stamp_file" accept="image/*" style="display:none"
+              onchange="pickCompanyImage(event,'stamp')" />
+          </div>
+          <div class="field">
+            <label>Гарын үсэг</label>
+            <div class="co-img-row">
+              <img id="co_sig_prev" class="co-img" alt="" />
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <button class="btn btn-sm" onclick="document.getElementById('co_sig_file').click()">📁 Сонгох</button>
+                <button class="btn btn-sm btn-red" onclick="clearCompanyImage('signature')">Арилгах</button>
+              </div>
+            </div>
+            <input type="file" id="co_sig_file" accept="image/*" style="display:none"
+              onchange="pickCompanyImage(event,'signature')" />
+          </div>
+        </div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:6px;">
+          Өөрчлөлт шууд хадгалагдаж, бүх баримтад хэрэглэгдэнэ.
         </div>
       </div>
     </div>
@@ -1701,12 +1831,8 @@
         <div class="sh-logo-wrap">
           <img id="logo_preview" style="height:58px;" alt="Лого" src="images/1000014080.png" />
           <div>
-            <div class="sh-co-name">ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</div>
-            <div class="sh-co-info">
-              Улаанбаатар хот, Сонгинохайрхан дүүрэг<br />
-              9-р хороо, Баруун баян уул 6-30<br />
-              РД: 6622755
-            </div>
+            <div class="sh-co-name" id="p_co_name"></div>
+            <div class="sh-co-info" id="p_co_info" style="white-space:pre-line;"></div>
           </div>
         </div>
         <div class="sh-right">
@@ -1752,7 +1878,7 @@
           </div>
           <div class="sh-stamp-wrap">
             <img class="sh-stamp" id="stamp_preview_letter" alt="Тамга" src="images/1000014081.jpg" />
-            <img class="sh-sig" src="images/signature-transparent.png" alt="" />
+            <img class="sh-sig" id="sig_letter" src="images/signature-transparent.png" alt="" />
             <div class="sh-sign-label">
               <strong>Тамга тэмдэг</strong><br/>
               <span style="color:#94a3b8;">/Гарын үсэг/</span>
@@ -1785,18 +1911,13 @@
 
       <div class="sh-footer" id="p_invoice_footer">
         <div>
-          <div class="sh-bank-name">ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК</div>
-          <div class="sh-bank-row">
-            Хаан банк: <strong>51 66 766 796</strong><br />
-            IBAN: 70000500<br />
-            Email: umgmtrade@gmail.com<br />
-            Утас: +976 8520-5258
-          </div>
+          <div class="sh-bank-name" id="p_bank_name"></div>
+          <div class="sh-bank-row" id="p_bank_row"></div>
           <div class="sh-words" id="p_sumWords"></div>
         </div>
         <div class="sh-stamp-wrap">
           <img class="sh-stamp" id="stamp_preview" alt="Тамга" src="images/1000014081.jpg" />
-          <img class="sh-sig" src="images/signature-transparent.png" alt="" />
+          <img class="sh-sig" id="sig_preview" src="images/signature-transparent.png" alt="" />
           <div class="sh-sign-label">
             <strong>Тамга тэмдэг</strong><br />
             <span style="color:#94a3b8;">/Гарын үсэг/</span>
@@ -1964,17 +2085,56 @@
     const LS_CUST = "umgm_customers_v1";
     const LS_CNT = "umgm_inv_counter_v1";
     const LS_DARK = "umgm_dark_v1";
+    const LS_CO = "umgm_companies_v1";
+    const LS_CO_SEL = "umgm_company_sel_v1";
 
-    /* ── Манай байгууллагын мэдээлэл (албан маягтад бөглөгдөнө) ── */
-    const CO = {
-      name:    "ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК",
-      rd:      "6622755",
-      address: "Улаанбаатар хот, Сонгинохайрхан дүүрэг, 9-р хороо, Баруун баян уул 6-30",
-      phone:   "+976 8520-5258",
-      email:   "umgmtrade@gmail.com",
-      bank:    "Хаан банк",
-      account: "5166766796",
-    };
+    /* ── Баримт гаргагч байгууллагууд ──
+       Анх удаа доорхоос эхэлж, дараа нь localStorage дээр засварлагдана. */
+    function defaultCompanies() {
+      return [
+        {
+          id: "umgm",
+          name: "ЮУ ЭМ ЖИ ЭМ ТРЕЙД ХХК",
+          address: "Улаанбаатар хот, Сонгинохайрхан дүүрэг\n9-р хороо, Баруун баян уул 6-30",
+          rd: "6622755",
+          phone: "+976 8520-5258",
+          email: "umgmtrade@gmail.com",
+          bank: "Хаан банк",
+          account: "5166766796",
+          director: "Ю.Амгалан",
+          logo: "images/1000014080.png",
+          stamp: "images/1000014081.jpg",
+          signature: "images/signature-transparent.png",
+        },
+        {
+          id: "eche",
+          name: "ЭХ ЧАНДМАНЬ ЭРДЭНЭ ХХК",
+          address: "Монгол Улс, Улаанбаатар хот\nСонгино Хайрхан дүүрэг, 9-р хороо\nбаруун баян уулын 6-30 тоот",
+          rd: "",
+          phone: "88019166",
+          email: "echehhk@gmail.com",
+          bank: "",
+          account: "",
+          director: "",
+          logo: "",
+          stamp: "",
+          signature: "",
+        },
+      ];
+    }
+
+    function getCompanies() {
+      try {
+        const a = JSON.parse(localStorage.getItem(LS_CO));
+        if (Array.isArray(a) && a.length) return a;
+      } catch { /* эвдэрсэн бол үндсэн жагсаалт руу шилжинэ */ }
+      return defaultCompanies();
+    }
+    function setCompanies(list) { localStorage.setItem(LS_CO, JSON.stringify(list)); }
+    function currentCompany() {
+      const list = getCompanies();
+      return list.find(c => c.id === localStorage.getItem(LS_CO_SEL)) || list[0];
+    }
 
     /* Албан маягтын хоосон мөрийн доод хэмжээ (хэвлэмэл маягттай адил харагдуулна) */
     const BM3_MIN_ROWS = 20;
@@ -1986,7 +2146,11 @@
       "invDirector", "invReceiver", "invAccountant",
       "buyerRD", "carrierInfo", "issuerName", "receiverName", "accountantName",
     ];
-    const OFFICIAL_DEFAULTS = { vatMode: "none", invDirector: "Ю.Амгалан", issuerName: "Ю.Амгалан" };
+    /* Гарын үсэг зурах хүний нэр сонгосон байгууллагаас автоматаар ирнэ */
+    function officialDefaults() {
+      const d = currentCompany().director || "";
+      return { vatMode: "none", invDirector: d, issuerName: d };
+    }
 
     /* ── DOM refs ── */
     const itemsEl = document.getElementById("items");
@@ -1995,6 +2159,169 @@
     const stampScale = document.getElementById("stamp_scale");
 
     const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    /* ── Байгууллага сонгох / засах ── */
+    const CO_FIELDS = ["name", "address", "rd", "phone", "email", "bank", "account", "director"];
+
+    function refreshCompanySel() {
+      const sel = document.getElementById("companySel");
+      const cur = currentCompany();
+      sel.innerHTML = "";
+      getCompanies().forEach(c => {
+        const o = document.createElement("option");
+        o.value = c.id;
+        o.textContent = c.name || "(нэргүй)";
+        sel.appendChild(o);
+      });
+      sel.value = cur.id;
+    }
+
+    function onCompanyChange() {
+      const prev = currentCompany().director || "";
+      localStorage.setItem(LS_CO_SEL, document.getElementById("companySel").value);
+      const next = currentCompany().director || "";
+      // Гарын үсэг зурагчийн нэрийг дагуулж солино — гараар бичсэн нэрэнд хүрэхгүй
+      ["invDirector", "issuerName", "letterSignName"].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value || el.value === prev) el.value = next;
+      });
+      fillCompanyForm();
+      applyCompany();
+      sync();
+    }
+
+    function toggleCompanyCard() {
+      const el = document.getElementById("companyCard");
+      const show = el.style.display === "none";
+      el.style.display = show ? "" : "none";
+      if (show) fillCompanyForm();
+    }
+
+    function fillCompanyForm() {
+      const c = currentCompany();
+      CO_FIELDS.forEach(f => document.getElementById("co_" + f).value = c[f] || "");
+      setImgSrc(document.getElementById("co_logo_prev"), c.logo);
+      setImgSrc(document.getElementById("co_stamp_prev"), c.stamp);
+      setImgSrc(document.getElementById("co_sig_prev"), c.signature);
+    }
+
+    /* Зураг байхгүй бол <img>-г нууна — өөр байгууллагад тамга/лого байхгүй байж болно */
+    function setImgSrc(img, src) {
+      if (src) { img.src = src; img.style.display = ""; }
+      else { img.removeAttribute("src"); img.style.display = "none"; }
+    }
+
+    function saveCompanyForm() {
+      const list = getCompanies();
+      const c = list.find(x => x.id === currentCompany().id);
+      if (!c) return;
+      const prevDirector = c.director || "";
+      CO_FIELDS.forEach(f => c[f] = document.getElementById("co_" + f).value);
+      setCompanies(list);
+      // Захирлын нэрийг гарын үсгийн талбаруудад дамжуулна — гараар бичсэнд хүрэхгүй
+      if ((c.director || "") !== prevDirector) {
+        ["invDirector", "issuerName", "letterSignName"].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el.value || el.value === prevDirector) el.value = c.director || "";
+        });
+      }
+      refreshCompanySel();
+      applyCompany();
+      sync();
+    }
+
+    function addCompany() {
+      const name = (prompt("Шинэ байгууллагын нэр:") || "").trim();
+      if (!name) return;
+      const list = getCompanies();
+      const c = {
+        id: "co" + Date.now(), name, address: "", rd: "", phone: "", email: "",
+        bank: "", account: "", director: "", logo: "", stamp: "", signature: "",
+      };
+      list.push(c);
+      setCompanies(list);
+      localStorage.setItem(LS_CO_SEL, c.id);
+      refreshCompanySel();
+      fillCompanyForm();
+      applyCompany();
+      sync();
+      showToast("✅ Байгууллага нэмэгдлээ");
+    }
+
+    function deleteCompany() {
+      const list = getCompanies();
+      if (list.length < 2) { showToast("⚠️ Сүүлчийн байгууллагыг устгах боломжгүй"); return; }
+      const c = currentCompany();
+      if (!confirm(`"${c.name}" устгах уу?`)) return;
+      const rest = list.filter(x => x.id !== c.id);
+      setCompanies(rest);
+      localStorage.setItem(LS_CO_SEL, rest[0].id);
+      refreshCompanySel();
+      fillCompanyForm();
+      applyCompany();
+      sync();
+      showToast("🗑 Устгагдлаа");
+    }
+
+    /* Лого/тамга/гарын үсгийг data URL болгож хадгална — файл зөөх шаардлагагүй */
+    function pickCompanyImage(e, key) {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      if (file.size > 1.5 * 1024 * 1024) { showToast("⚠️ Зураг 1.5MB-аас бага байх ёстой"); return; }
+      const fr = new FileReader();
+      fr.onload = () => {
+        const list = getCompanies();
+        const c = list.find(x => x.id === currentCompany().id);
+        if (!c) return;
+        c[key] = fr.result;
+        try { setCompanies(list); }
+        catch { showToast("⚠️ Багтаамж хүрэлцэхгүй байна"); return; }
+        fillCompanyForm();
+        applyCompany();
+        sync();
+        showToast("✅ Зураг хадгалагдлаа");
+      };
+      fr.onerror = () => showToast("⚠️ Зураг уншиж чадсангүй");
+      fr.readAsDataURL(file);
+    }
+
+    function clearCompanyImage(key) {
+      const list = getCompanies();
+      const c = list.find(x => x.id === currentCompany().id);
+      if (!c || !c[key]) return;
+      c[key] = "";
+      setCompanies(list);
+      fillCompanyForm();
+      applyCompany();
+      sync();
+    }
+
+    /* Сонгосон байгууллагыг бүх баримт, толгой, тамганд тавина */
+    function applyCompany() {
+      const c = currentCompany();
+      const info = [c.address || "", c.rd ? "РД: " + c.rd : ""].filter(Boolean).join("\n");
+
+      document.getElementById("brand_name").textContent = c.name || "";
+      document.getElementById("p_co_name").textContent  = c.name || "";
+      document.getElementById("p_co_info").textContent  = info;
+
+      document.getElementById("p_bank_name").textContent = c.name || "";
+      document.getElementById("p_bank_row").innerHTML = [
+        c.bank || c.account ? `${esc(c.bank || "Банк")}: <strong>${esc(c.account)}</strong>` : "",
+        c.email ? "Email: " + esc(c.email) : "",
+        c.phone ? "Утас: " + esc(c.phone) : "",
+      ].filter(Boolean).join("<br />");
+
+      ["logo_topbar", "logo_lock", "logo_editor", "logo_preview"]
+        .forEach(id => setImgSrc(document.getElementById(id), c.logo));
+      ["stamp_preview", "stamp_preview_letter", "stamp_of1", "stamp_of3"]
+        .forEach(id => setImgSrc(document.getElementById(id), c.stamp));
+      ["sig_preview", "sig_letter", "sig_of1"]
+        .forEach(id => setImgSrc(document.getElementById(id), c.signature));
+
+      applyScales();
+    }
 
     /* ── Нэвтрэх ── */
     document.getElementById("lockInput").addEventListener("keydown", e => { if (e.key === "Enter") checkLock(); });
@@ -2072,8 +2399,9 @@
       document.getElementById("customer").value = "";
       document.getElementById("note").value = "Дээрх үнэд нэмэгдсэн өртгийн албан татвар (НӨАТ) багтсан болно. Бараа нийлүүлэх хугацаа 14 хоног.";
       document.getElementById("date").value = today();
+      const defs = officialDefaults();
       OFFICIAL_FIELDS.forEach(id => {
-        document.getElementById(id).value = OFFICIAL_DEFAULTS[id] || "";
+        document.getElementById(id).value = defs[id] || "";
       });
       autoInvNo();
       addRow();
@@ -2186,8 +2514,9 @@
     function renderBm3(rows, total) {
       const d = (document.getElementById("date").value || "").split("-");
       document.getElementById("of3_num").textContent     = document.getElementById("inv").value || "";
-      document.getElementById("of3_org").textContent     = CO.name;
-      document.getElementById("of3_orgRD").textContent   = CO.rd;
+      const co = currentCompany();
+      document.getElementById("of3_org").textContent     = co.name || "";
+      document.getElementById("of3_orgRD").textContent   = co.rd || "";
       document.getElementById("of3_buyer").textContent   = document.getElementById("customer").value || "";
       document.getElementById("of3_buyerRD").textContent = document.getElementById("buyerRD").value || "";
       document.getElementById("of3_yy").textContent      = d[0] ? d[0].slice(2) : "";
@@ -2209,13 +2538,15 @@
     /* НХМаягт ТМ-1 — Нэхэмжлэх */
     function renderTm1(rows, total, words) {
       document.getElementById("of1_num").textContent    = document.getElementById("inv").value || "";
-      document.getElementById("of1_sName").textContent  = CO.name;
-      document.getElementById("of1_sAddr").textContent  = CO.address;
-      document.getElementById("of1_sPhone").textContent = CO.phone;
-      document.getElementById("of1_sEmail").textContent = CO.email;
-      document.getElementById("of1_sBank").textContent  = CO.bank;
-      document.getElementById("of1_sAcc").textContent   = CO.account;
-      document.getElementById("of1_sRD").textContent    = CO.rd;
+      const co = currentCompany();
+      document.getElementById("of1_sName").textContent  = co.name || "";
+      // Маягт дээр нэг мөрөнд багтах тул хаягийн мөр таслалыг зайгаар солино
+      document.getElementById("of1_sAddr").textContent  = (co.address || "").replace(/\s*\n\s*/g, ", ");
+      document.getElementById("of1_sPhone").textContent = co.phone || "";
+      document.getElementById("of1_sEmail").textContent = co.email || "";
+      document.getElementById("of1_sBank").textContent  = co.bank || "";
+      document.getElementById("of1_sAcc").textContent   = co.account || "";
+      document.getElementById("of1_sRD").textContent    = co.rd || "";
 
       document.getElementById("of1_bName").textContent  = document.getElementById("customer").value || "";
       document.getElementById("of1_bAddr").textContent  = document.getElementById("custAddress").value || "";
@@ -2322,6 +2653,9 @@
     ["letterNum","letterToReal","letterOrgReal","letterSubjectReal","letterBodyReal","letterPosition","letterSignName"].forEach(id => {
       document.getElementById(id).addEventListener("input", sync);
     });
+    CO_FIELDS.forEach(f => {
+      document.getElementById("co_" + f).addEventListener("input", saveCompanyForm);
+    });
     OFFICIAL_FIELDS.forEach(id => {
       const el = document.getElementById(id);
       el.addEventListener("input", sync);
@@ -2424,9 +2758,17 @@
         letterSignName: document.getElementById("letterSignName").value || "",
       };
       OFFICIAL_FIELDS.forEach(id => st[id] = document.getElementById(id).value || "");
+      st.companyId = currentCompany().id;
       return st;
     }
     function applyState(s) {
+      // Баримтыг гаргасан байгууллагаар нь сэргээнэ (устгагдсан бол одоогийнхоор үлдэнэ)
+      if (s.companyId && getCompanies().some(c => c.id === s.companyId)) {
+        localStorage.setItem(LS_CO_SEL, s.companyId);
+        refreshCompanySel();
+        fillCompanyForm();
+      }
+      const defs = officialDefaults();
       document.getElementById("inv").value      = s.inv || "";
       document.getElementById("date").value     = s.date || "";
       document.getElementById("customer").value = s.customer || "";
@@ -2440,12 +2782,13 @@
       document.getElementById("letterSubjectReal").value  = s.letterSubject || "";
       document.getElementById("letterBodyReal").value     = s.letterBody || "";
       document.getElementById("letterPosition").value     = s.letterPosition || "Захирал";
-      document.getElementById("letterSignName").value     = s.letterSignName || "Ю.Амгалан";
+      document.getElementById("letterSignName").value     = s.letterSignName || currentCompany().director || "";
       OFFICIAL_FIELDS.forEach(id => {
-        document.getElementById(id).value = s[id] || OFFICIAL_DEFAULTS[id] || "";
+        document.getElementById(id).value = s[id] || defs[id] || "";
       });
       clearRows();
       (s.rows || []).forEach(r => addRow(r));
+      applyCompany();
       onDocTypeChange();
       applyScales();
     }
@@ -2512,6 +2855,13 @@
 
     /* ── Init ── */
     if (localStorage.getItem(LS_DARK) === "1") applyDark(true);
+    refreshCompanySel();
+    fillCompanyForm();
+    applyCompany();
+    (() => {
+      const d = currentCompany().director || "";
+      ["invDirector", "issuerName", "letterSignName"].forEach(id => document.getElementById(id).value = d);
+    })();
     if (sessionStorage.getItem("umgm_unlocked") === "1") unlock();
     addRow({ name: "", unit: "ш", price: "", qty: 1 });
     applyScales();
