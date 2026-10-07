@@ -82,19 +82,22 @@ export function DocumentEditor({
     setResult(null);
   };
 
-  // Өмнөх баримтаас бараа, харилцагчийг татна — хоосон талбаруудыг бөглөж, барааны жагсаалтыг солино
+  // Өмнөх баримтаас бараа, харилцагчийг татна — зөвхөн «Татах» дарахад. Буруу бол «Буцаах».
   const [importing, startImport] = useTransition();
+  const [pickId, setPickId] = useState("");
+  const [beforeImport, setBeforeImport] = useState<DocState | null>(null);
   const importFrom = (id: string) =>
     startImport(async () => {
       const src = await loadDocForImport(tenantId, id);
       if (!src) return;
       const d = src.data;
       const rows = (d.rows ?? []).filter(r => r.name || r.price);
+      setBeforeImport(s);
       setS(prev => {
-        const keepRows = prev.rows.some(r => r.name.trim() || r.price);
+        const own = prev.rows.filter(r => r.name.trim() || r.price);
         return {
           ...prev,
-          rows: rows.length ? (keepRows ? [...prev.rows.filter(r => r.name.trim() || r.price), ...rows] : rows) : prev.rows,
+          rows: rows.length ? [...own, ...rows] : prev.rows,
           customerName: prev.customerName || src.customerName,
           custRD: prev.custRD || d.custRD || "",
           custAddress: prev.custAddress || d.custAddress || "",
@@ -105,9 +108,14 @@ export function DocumentEditor({
           note: prev.note || d.note || "",
         };
       });
+      setPickId("");
       setDirty(true);
       setResult(null);
     });
+  const undoImport = () => {
+    if (beforeImport) setS(beforeImport);
+    setBeforeImport(null);
+  };
 
   const save = () =>
     startTransition(async () => {
@@ -205,19 +213,27 @@ export function DocumentEditor({
         {canEdit && !isLetter && !s.id && recentDocs.length > 0 && (
           <Card className="space-y-2 p-4">
             <p className="text-sm font-semibold">📥 Өмнөх баримтаас бараа татах</p>
-            <Select
-              value=""
-              disabled={importing}
-              onChange={e => e.target.value && importFrom(e.target.value)}
-              aria-label="Өмнөх баримт сонгох"
-            >
-              <option value="">{importing ? "Татаж байна…" : "Баримт сонгох — бараа, харилцагч хуулагдана"}</option>
-              {recentDocs.map(d => (
-                <option key={d.id} value={d.id}>
-                  {DOC_TYPE_LABEL[d.doc_type]} №{d.number} · {d.customer_name || "—"} · {fmtMoney(d.total)}₮
-                </option>
-              ))}
-            </Select>
+            <div className="flex gap-2">
+              <Select value={pickId} disabled={importing} onChange={e => setPickId(e.target.value)} aria-label="Өмнөх баримт сонгох" className="min-w-0 flex-1">
+                <option value="">Баримт сонгох…</option>
+                {recentDocs.map(d => (
+                  <option key={d.id} value={d.id}>
+                    {DOC_TYPE_LABEL[d.doc_type]} №{d.number} · {d.customer_name || "—"} · {fmtMoney(d.total)}₮
+                  </option>
+                ))}
+              </Select>
+              <button type="button" disabled={!pickId || importing} onClick={() => importFrom(pickId)} className={buttonClass("primary", "shrink-0 px-4")}>
+                {importing ? "…" : "Татах"}
+              </button>
+            </div>
+            {beforeImport ? (
+              <p className="flex items-center justify-between gap-2 text-xs text-emerald-700">
+                ✓ Бараа, харилцагч татагдлаа.
+                <button type="button" onClick={undoImport} className="font-semibold text-slate-600 underline">Буцаах</button>
+              </p>
+            ) : (
+              <p className="text-xs text-slate-500">Сонгоод «Татах» дарахад бараа, харилцагчийн мэдээлэл хуулагдана.</p>
+            )}
           </Card>
         )}
 
