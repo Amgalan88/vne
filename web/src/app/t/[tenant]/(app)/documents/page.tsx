@@ -107,7 +107,7 @@ export default async function DocumentsPage({ params }: PageProps<"/t/[tenant]/d
       )}
 
       {docs?.length ? (
-        <DocList docs={docs} />
+        <DocList docs={docs} editable={editable} />
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-300 px-6 py-12 text-center">
           <p className="font-semibold">Одоогоор баримт алга</p>

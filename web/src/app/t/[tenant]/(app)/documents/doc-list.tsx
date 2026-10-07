@@ -24,7 +24,7 @@ const STATUS_STYLE: Record<DocStatus, string> = {
 };
 
 /** Дугаар, харилцагчаар хайх; төрөл, төлвөөр шүүх */
-export function DocList({ docs }: { docs: DocListRow[] }) {
+export function DocList({ docs, editable }: { docs: DocListRow[]; editable: boolean }) {
   const [q, setQ] = useState("");
   const [type, setType] = useState("");
   const [status, setStatus] = useState("");
@@ -53,7 +53,36 @@ export function DocList({ docs }: { docs: DocListRow[] }) {
       {shown.length === 0 ? (
         <p className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">Хайлтад тохирох баримт олдсонгүй.</p>
       ) : (
-        <Card className="overflow-x-auto">
+        <>
+        {/* Утас: карт хэлбэр — бүх мэдээлэл, үйлдэл нэг дор */}
+        <ul className="space-y-2 sm:hidden">
+          {shown.map(d => {
+            const draft = d.status === "draft";
+            return (
+              <li key={d.id}>
+                <Link href={`/documents/${d.id}`} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 active:bg-slate-50">
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-2 text-sm">
+                      <span className="font-mono font-semibold text-indigo-600">{d.number}</span>
+                      <span className="text-slate-500">{DOC_TYPE_LABEL[d.doc_type]}</span>
+                    </p>
+                    <p className="truncate font-semibold">{d.customer_name || "—"}</p>
+                    <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
+                      {fmtDate(d.doc_date)}
+                      {d.doc_type !== "letter" && <b className="text-slate-700">{fmtMoney(d.total)} ₮</b>}
+                      <span className={`rounded-full px-2 py-0.5 font-semibold ${STATUS_STYLE[d.status]}`}>{DOC_STATUS_LABEL[d.status]}</span>
+                    </p>
+                  </div>
+                  <span className={`shrink-0 rounded-lg px-3 py-2 text-sm font-semibold ${draft && editable ? "bg-indigo-600 text-white" : "border border-slate-200 text-slate-700"}`}>
+                    {draft && editable ? "✎ Засах" : "Нээх"}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <Card className="hidden overflow-x-auto sm:block">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
@@ -63,6 +92,7 @@ export function DocList({ docs }: { docs: DocListRow[] }) {
                 <th className="px-4 py-3">Харилцагч</th>
                 <th className="px-4 py-3 text-right">Дүн</th>
                 <th className="px-4 py-3">Төлөв</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -76,11 +106,20 @@ export function DocList({ docs }: { docs: DocListRow[] }) {
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[d.status]}`}>{DOC_STATUS_LABEL[d.status]}</span>
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/documents/${d.id}`}
+                      className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold ${d.status === "draft" && editable ? "bg-indigo-600 text-white hover:bg-indigo-500" : "border border-slate-200 hover:bg-slate-50"}`}
+                    >
+                      {d.status === "draft" && editable ? "✎ Засах" : "Нээх"}
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </Card>
+        </>
       )}
     </div>
   );
