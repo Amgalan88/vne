@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Field, Input, Notice } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { SlugField } from "@/components/slug-field";
+import { rootUrl } from "@/lib/hosts";
 import { forgotPassword, login, signup, updatePassword, type FormState } from "./actions";
 
 const initial: FormState = {};
@@ -65,6 +66,11 @@ export function SignupForm({ next, company }: { next: string; company: { slug: s
       <SubmitButton variant="primary" className="w-full py-2.5">
         {company ? "Үнэгүй эхлэх" : "Бүртгүүлэх"}
       </SubmitButton>
+      <p className="text-center text-xs text-slate-500">
+        Бүртгүүлснээр{" "}
+        <a href={rootUrl("/terms")} target="_blank" className="underline">үйлчилгээний нөхцөл</a>,{" "}
+        <a href={rootUrl("/privacy")} target="_blank" className="underline">нууцлалын бодлого</a>-ыг зөвшөөрсөнд тооцно.
+      </p>
     </form>
   );
 }

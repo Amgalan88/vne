@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { logClientError } from "@/lib/log-error";
 
 /** Хуудас ачаалах үед гэнэтийн алдаа гарвал — цагаан дэлгэцийн оронд ойлгомжтой мессеж, дахин оролдох товч */
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error(error);
+    logClientError(`${error.name}: ${error.message}`, error.digest, location.href, navigator.userAgent);
   }, [error]);
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-24 text-center">

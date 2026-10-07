@@ -518,6 +518,8 @@ function Footer() {
           <Link href="/guide" className="hover:text-slate-800">Гарын авлага</Link>
           <a href="#pricing" className="hover:text-slate-800">Үнэ</a>
           <a href="#faq" className="hover:text-slate-800">Асуулт</a>
+          <Link href="/terms" className="hover:text-slate-800">Нөхцөл</Link>
+          <Link href="/privacy" className="hover:text-slate-800">Нууцлал</Link>
         </nav>
         <p>© {new Date().getFullYear()} hhk.mn · Улаанбаатар</p>
       </div>

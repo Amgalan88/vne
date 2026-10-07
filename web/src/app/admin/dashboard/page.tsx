@@ -34,6 +34,7 @@ const TABS = [
   { key: "payments", label: "Төлбөр" },
   { key: "companies", label: "Компаниуд" },
   { key: "landing", label: "Нүүр хуудас" },
+  { key: "errors", label: "Алдаа" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
@@ -51,11 +52,15 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
   const sp = await searchParams;
   const tab: Tab = TABS.some(t => t.key === sp.tab) ? (sp.tab as Tab) : "overview";
 
-  const [{ data }, { data: tdata }, banner] = await Promise.all([
+  const [{ data }, { data: tdata }, banner, { data: edata }] = await Promise.all([
     supabase.rpc("admin_payments"),
     supabase.rpc("admin_tenants"),
     getBanner(),
+    tab === "errors" || tab === "overview" ? supabase.rpc("admin_errors") : Promise.resolve({ data: [] }),
   ]);
+  const errors = (edata ?? []) as { id: number; created_at: string; message: string; digest: string | null; url: string | null; user_agent: string | null }[];
+  const dayAgo = Date.parse(new Date().toISOString()) - 86_400_000;
+  const errors24h = errors.filter(e => Date.parse(e.created_at) > dayAgo).length;
   const rows = (data ?? []) as Row[];
   const tenants = (tdata ?? []) as TenantRow[]; // 005_admin_overview.sql ажиллаагүй бол хоосон
   const pending = rows.filter(r => r.status === "pending");
@@ -72,6 +77,7 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
     { label: "Энэ сарын орлого", value: `${fmtMoney(monthIncome)}₮`, href: "?tab=payments" },
     { label: "Төлбөртэй компани", value: `${proTenants.length} / ${tenants.length}`, href: "?tab=companies" },
     { label: "7 хоногт дуусах", value: String(expiring.length), href: "?tab=companies", alert: expiring.length > 0 },
+    { label: "24 цагийн алдаа", value: String(errors24h), href: "?tab=errors", alert: errors24h > 0 },
   ];
 
   return (
@@ -108,7 +114,7 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
 
       {tab === "overview" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             {stats.map(s => (
               <Link key={s.label} href={s.href} className={`rounded-xl border bg-white p-4 hover:shadow-sm ${s.alert ? "border-amber-300" : "border-slate-200"}`}>
                 <p className="text-xs font-semibold text-slate-500">{s.label}</p>
@@ -207,6 +213,30 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
                   </div>
                 );
               })}
+            </Card>
+          )}
+        </section>
+      )}
+
+      {tab === "errors" && (
+        <section className="space-y-3">
+          <div>
+            <h2 className="font-bold">Апп-ын алдаанууд</h2>
+            <p className="text-sm text-slate-500">Хэрэглэгчдэд гарсан алдаа энд автоматаар бүртгэгдэнэ (сүүлийн 60 хоног). Код (digest)-оор Vercel-ийн log-оос дэлгэрэнгүйг хайна.</p>
+          </div>
+          {errors.length === 0 ? (
+            <EmptyState title="Алдаа алга ✓">010_v2.sql ажиллаагүй бол энд бүртгэгдэхгүй.</EmptyState>
+          ) : (
+            <Card className="divide-y divide-slate-100">
+              {errors.map(e => (
+                <div key={e.id} className="space-y-1 px-4 py-3 text-sm">
+                  <p className="break-words font-mono text-xs font-semibold text-red-700">{e.message}</p>
+                  <p className="text-xs text-slate-500">
+                    {fmtDateTime(e.created_at)} · {e.url}
+                    {e.digest && <> · код <span className="font-mono">{e.digest}</span></>}
+                  </p>
+                </div>
+              ))}
             </Card>
           )}
         </section>

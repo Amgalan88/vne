@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ROOT_DOMAIN } from "@/lib/env";
+import { redirect } from "next/navigation";
+import { getAdminClient } from "@/lib/admin";
 
 export const metadata: Metadata = { title: "Системийн шалгалт", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -20,6 +22,8 @@ async function hasAuthFn(loggedIn: boolean, fn: string, args: Record<string, unk
 }
 
 export default async function SetupPage() {
+  // Тохиргооны байдлыг зөвхөн платформын админ харна
+  if (!(await getAdminClient())) redirect("/admin/login");
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
   const loggedIn = !!auth?.claims;
@@ -59,6 +63,11 @@ export default async function SetupPage() {
       ok: !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && !!process.env.VAPID_PRIVATE_KEY,
       fix: "SETUP.md-ийн «Push мэдэгдэл» хэсгийн хоёр түлхүүрийг Vercel-д нэмээд Redeploy.",
       optional: true,
+    },
+    {
+      name: "Алдааны бүртгэл, хуваалцах холбоос, импорт: 010_v2.sql",
+      ok: await hasFn("public_document", { p_token: "00000000-0000-0000-0000-000000000000" }),
+      fix: "Supabase → SQL Editor дээр supabase/010_v2.sql-ийг Run.",
     },
     {
       name: "Нүүр хуудасны баннер: 007_platform.sql",
