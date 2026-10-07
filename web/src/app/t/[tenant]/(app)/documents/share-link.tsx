@@ -35,12 +35,17 @@ export function ShareLink({ tenantId, docId, initialUrl }: { tenantId: string; d
             <a href={`https://wa.me/?text=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer" className={buttonClass("light", "px-3 py-1.5 text-xs")}>WhatsApp</a>
             <button type="button" disabled={pending} onClick={() => run(false)} className="px-2 text-xs font-semibold text-red-600 hover:underline">Холбоосыг хаах</button>
           </div>
-          <p className="text-xs text-slate-500">Холбоостой хүн нэвтрэлгүйгээр харж, PDF татна. PIN-тэй тамга холбоосонд гарахгүй.</p>
+          <p className="text-xs text-slate-500">Холбоостой хүн нэвтрэлгүйгээр харж, PDF татна. «Холбоосыг хаах» дарвал ажиллахаа болино.</p>
         </>
       ) : (
-        <button type="button" disabled={pending} onClick={() => run(true)} className={buttonClass("light", "w-full py-2")}>
-          {pending ? "…" : "Холбоос үүсгэх"}
-        </button>
+        <>
+          <p className="text-xs text-slate-500">
+            Ихэнхдээ PDF хангалттай. Харилцагч утсан дээрээ файл татахгүйгээр шууд нээж харах бол холбоос үүсгэнэ.
+          </p>
+          <button type="button" disabled={pending} onClick={() => run(true)} className={buttonClass("light", "w-full py-2")}>
+            {pending ? "…" : "Холбоос үүсгэх"}
+          </button>
+        </>
       )}
     </div>
   );

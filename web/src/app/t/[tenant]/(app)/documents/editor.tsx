@@ -54,6 +54,8 @@ export function DocumentEditor({
   const locked = !!s.id && savedStatus !== "draft";
   // Утсан дээр засах, харах хоёрыг шилжүүлж харуулна (том дэлгэц дээр зэрэг харагдана)
   const [view, setView] = useState<"edit" | "preview">("edit");
+  // Холбоосоор илгээх хэсэг — «🔗» дарахад л нээгдэнэ
+  const [shareOpen, setShareOpen] = useState(false);
 
   const issuer = issuers.find(i => i.id === s.issuerId) ?? issuers[0];
   const issuerAssets = issuer ? assets[issuer.id] : undefined;
@@ -513,6 +515,18 @@ export function DocumentEditor({
           <button type="button" onClick={() => window.print()} className={buttonClass("light", "px-3")} title="Хэвлэх" aria-label="Хэвлэх">
             🖨
           </button>
+          {canEdit && s.id && (locked || shareUrl) && (
+            <button
+              type="button"
+              onClick={() => setShareOpen(o => !o)}
+              className={buttonClass(shareOpen ? "dark" : "light", "px-3")}
+              title="Харилцагчид холбоосоор илгээх"
+              aria-label="Холбоосоор илгээх"
+              aria-expanded={shareOpen}
+            >
+              🔗
+            </button>
+          )}
           {canEdit && s.id && (
             <button type="button" onClick={() => router.push(`/documents/new?from=${s.id}`)} className={buttonClass("light", "px-3")} title="Хуулбарлаж шинэ баримт үүсгэх">
               ⧉ Хуулах
@@ -524,9 +538,9 @@ export function DocumentEditor({
             </button>
           )}
         </div>
-        {s.id && canEdit && <ShareLink tenantId={tenantId} docId={s.id} initialUrl={shareUrl} />}
+        {shareOpen && s.id && canEdit && <ShareLink tenantId={tenantId} docId={s.id} initialUrl={shareUrl ?? null} />}
         <p className="text-xs text-slate-500">
-          «Хадгалах» дармагц баримт «Баримтууд» жагсаалтад хадгалагдана. «⬇ PDF татах» дарахад PDF файл төхөөрөмжийн «Татаж авсан»
+          «Ноорог хадгалах» эсвэл «✅ Гаргах» дармагц баримт «Баримтууд» жагсаалтад хадгалагдана. «⬇ PDF татах» дарахад PDF файл төхөөрөмжийн «Татаж авсан»
           (Downloads) хавтсанд шууд орно.
         </p>
       </div>
