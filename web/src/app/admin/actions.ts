@@ -114,3 +114,13 @@ export async function removeBanner() {
   revalidatePath("/");
   revalidatePath("/admin/dashboard");
 }
+
+/** Компанийн багцыг гараар сунгах (бэлэн мөнгө, бусад сувгаар төлсөн үед) */
+export async function adminExtend(slug: string, fd: FormData) {
+  const supabase = await getAdminClient();
+  if (!supabase) redirect("/admin/login");
+  const months = Number(fd.get("months"));
+  if (![1, 3, 6, 12].includes(months)) return;
+  await supabase.rpc("admin_extend", { p_slug: slug, p_months: months });
+  revalidatePath("/admin/dashboard");
+}

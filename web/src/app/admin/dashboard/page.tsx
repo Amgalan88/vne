@@ -8,7 +8,7 @@ import { getBanner } from "@/lib/platform";
 import { PushToggle } from "@/components/push-toggle";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { Card, EmptyState } from "@/components/ui";
-import { adminLogout, decidePayment, removeBanner } from "../actions";
+import { adminExtend, adminLogout, decidePayment, removeBanner } from "../actions";
 import { BannerForm } from "./banner-form";
 
 type Row = {
@@ -50,6 +50,7 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
   if (!supabase) redirect("/admin/login");
 
   const sp = await searchParams;
+  const q = typeof sp.q === "string" ? sp.q.trim().toLowerCase() : "";
   const tab: Tab = TABS.some(t => t.key === sp.tab) ? (sp.tab as Tab) : "overview";
 
   const [{ data }, { data: tdata }, banner, { data: edata }] = await Promise.all([
@@ -174,7 +175,12 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
 
           {done.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold">Түүх</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold">Түүх</h2>
+                {/* Файл татах — клиент навигаци биш */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a download href="/admin/export/payments" className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-100">⬇ Excel (CSV)</a>
+              </div>
               <Card className="divide-y divide-slate-100">
                 {done.map(r => (
                   <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
@@ -193,26 +199,56 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
 
       {tab === "companies" && (
         <section className="space-y-3">
-          <h2 className="font-bold">Компаниуд ({tenants.length}) · төлбөртэй {proTenants.length}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-bold">Компаниуд ({tenants.length}) · төлбөртэй {proTenants.length}</h2>
+            {/* Файл татах — клиент навигаци биш */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a download href="/admin/export/companies" className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-100">⬇ Excel (CSV)</a>
+          </div>
+          <form className="flex gap-2">
+            <input type="hidden" name="tab" value="companies" />
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Нэр, хаяг, имэйлээр хайх"
+              className="w-full rounded-lg border-[1.5px] border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-500"
+            />
+            <button className="rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white">Хайх</button>
+          </form>
           {tenants.length === 0 ? (
             <EmptyState title="Компани алга">005_admin_overview.sql ажиллаагүй бол энэ жагсаалт хоосон байна.</EmptyState>
           ) : (
             <Card className="divide-y divide-slate-100">
-              {tenants.map(t => {
-                const days = daysLeft(t.paid_until);
-                const active = t.plan === "pro" && days !== null && days > 0;
-                return (
-                  <div key={t.slug} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-                    <div className="min-w-0">
-                      <p className="font-semibold">{t.name} <span className="font-mono font-normal text-slate-400">{t.slug}.hhk.mn</span></p>
-                      <p className="text-slate-500">{t.owner_email} · {t.members} гишүүн · {t.documents} баримт · {fmtDate(t.created_at)}-нд нээсэн</p>
+              {tenants
+                .filter(t => !q || [t.name, t.slug, t.owner_email ?? ""].some(v => v.toLowerCase().includes(q)))
+                .map(t => {
+                  const days = daysLeft(t.paid_until);
+                  const active = t.plan === "pro" && days !== null && days > 0;
+                  return (
+                    <div key={t.slug} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+                      <div className="min-w-0">
+                        <p className="font-semibold">
+                          {t.name} <a href={`https://${t.slug}.hhk.mn`} target="_blank" className="font-mono font-normal text-slate-400 hover:underline">{t.slug}.hhk.mn</a>
+                        </p>
+                        <p className="text-slate-500">{t.owner_email} · {t.members} гишүүн · {t.documents} баримт · {fmtDate(t.created_at)}-нд нээсэн</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${active ? (days! <= 7 ? "bg-amber-100 text-amber-800" : "bg-indigo-100 text-indigo-700") : "bg-slate-100 text-slate-500"}`}>
+                          {active ? `Төлбөртэй · ${days} хоног (${fmtDate(t.paid_until!)})` : t.plan === "pro" ? "Хугацаа дууссан" : "Үнэгүй"}
+                        </span>
+                        <form action={adminExtend.bind(null, t.slug)} className="flex items-center gap-1">
+                          <select name="months" defaultValue="1" className="rounded-md border border-slate-200 bg-white px-1.5 py-1 text-xs">
+                            <option value="1">+1 сар</option>
+                            <option value="3">+3 сар</option>
+                            <option value="6">+6 сар</option>
+                            <option value="12">+1 жил</option>
+                          </select>
+                          <button className="rounded-md bg-slate-900 px-2 py-1 text-xs font-semibold text-white" title="Төлбөргүйгээр гараар сунгах">Сунгах</button>
+                        </form>
+                      </div>
                     </div>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${active ? (days! <= 7 ? "bg-amber-100 text-amber-800" : "bg-indigo-100 text-indigo-700") : "bg-slate-100 text-slate-500"}`}>
-                      {active ? `Төлбөртэй · ${days} хоног (${fmtDate(t.paid_until!)})` : t.plan === "pro" ? "Хугацаа дууссан" : "Үнэгүй"}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </Card>
           )}
         </section>
