@@ -37,6 +37,18 @@ export default async function SetupPage() {
       fix: "Supabase → SQL Editor дээр supabase/005_admin_overview.sql-ийг Run.",
     },
     {
+      name: "Push мэдэгдлийн хүснэгт: 006_push.sql",
+      ok: await hasFn("save_push_subscription", { p_endpoint: "", p_p256dh: "", p_auth: "" }),
+      fix: "Supabase → SQL Editor дээр supabase/006_push.sql-ийг Run.",
+      optional: true,
+    },
+    {
+      name: "Push мэдэгдлийн түлхүүр (NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)",
+      ok: !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && !!process.env.VAPID_PRIVATE_KEY,
+      fix: "SETUP.md-ийн «Push мэдэгдэл» хэсгийн хоёр түлхүүрийг Vercel-д нэмээд Redeploy.",
+      optional: true,
+    },
+    {
       name: "Ажилтанд түр нууц үг өгөх (SUPABASE_SERVICE_ROLE_KEY)",
       ok: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       fix: "Supabase → Project Settings → API Keys → Secret key-г хуулж Vercel-д SUPABASE_SERVICE_ROLE_KEY нэрээр нэмээд Redeploy.",

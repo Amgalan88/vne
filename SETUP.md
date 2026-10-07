@@ -42,9 +42,17 @@ Vercel → төсөл → **Settings → Environment Variables**:
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase → API Keys → Publishable key | Тийм |
 | `NEXT_PUBLIC_ROOT_DOMAIN` | `hhk.mn` | Тийм |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API Keys → **Secret key** | Ажилтанд түр нууц үг өгөхөд |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Push мэдэгдлийн түлхүүр (доорх хэсгийг үз) | Push мэдэгдэлд (заавал биш) |
 | `RESEND_API_KEY`, `MAIL_FROM` | resend.com түлхүүр | Имэйл мэдэгдэлд (заавал биш) |
 
 Хувьсагч нэмсэн бүрдээ **Deployments → Redeploy** хийнэ. Secret key-г хэнд ч бүү өг.
+
+### 3.1. Push мэдэгдэл (заавал биш)
+Утас, компьютерт мэдэгдэл ирэх: төлбөрийн хүсэлт ирэхэд админд, баталгаажихад хэрэглэгчид.
+1. Supabase SQL Editor дээр `supabase/006_push.sql`-ийг Run.
+2. Vercel-д `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` нэмнэ (түлхүүрийг Claude-ээс авсан эсвэл `npx web-push generate-vapid-keys`-ээр үүсгэсэн). `SUPABASE_SERVICE_ROLE_KEY` мөн хэрэгтэй. Redeploy.
+3. Хэрэглэгч бүр өөрийн төхөөрөмж дээр **🔔 Мэдэгдэл асаах** дарж зөвшөөрнө. Android/Chrome дээр **📲 Апп болгон суулгах**, iPhone дээр Хуваалцах → «Нүүр дэлгэцэнд нэмэх» хийж суулгана (iPhone дээр суулгасан апп-аас л мэдэгдэл ирнэ).
+4. Админ `hhk.mn/admin/dashboard` дээр өөрөө мэдэгдлээ асаана.
 
 ### 4. Vercel: домэйн
 **Settings → Domains** дээр `hhk.mn` болон `*.hhk.mn` нэмнэ. `*.hhk.mn` ажиллахын тулд домэйны nameserver-ийг Vercel-ийнх (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`) болгоно.

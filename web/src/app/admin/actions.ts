@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ADMIN_EMAIL, getAdminClient } from "@/lib/admin";
 import { sendMail } from "@/lib/mail";
+import { sendPush } from "@/lib/push";
+import { tenantUrl } from "@/lib/hosts";
 import { createClient } from "@/lib/supabase/server";
 
 export type CodeState = { step?: "code"; email?: string; error?: string };
@@ -46,6 +48,11 @@ export async function decidePayment(id: string, approve: boolean) {
   const { error } = await supabase.rpc("admin_decide_payment", { p_id: id, p_approve: approve });
   revalidatePath("/admin/dashboard");
   if (error || !row?.requester_email) return;
+  await sendPush(row.requester_email, {
+    title: approve ? "Төлбөр баталгаажлаа ✓" : "Төлбөрийн хүсэлт татгалзагдлаа",
+    body: approve ? `${row.tenant_name} — төлбөртэй багц идэвхжлээ` : `${row.tenant_name} — гүйлгээг шалгаад дахин илгээнэ үү`,
+    url: tenantUrl(row.tenant_slug, "/billing"),
+  });
   await sendMail(
     row.requester_email,
     approve ? "hhk.mn — төлбөр баталгаажлаа" : "hhk.mn — төлбөрийн хүсэлт татгалзагдлаа",

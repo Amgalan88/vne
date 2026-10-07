@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { tenantHost, tenantUrl } from "@/lib/hosts";
 import { ROLE_LABEL, type Role } from "@/lib/types";
 import { buttonClass, Card } from "@/components/ui";
+import { PushToggle } from "@/components/push-toggle";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/logo";
 
@@ -53,6 +54,7 @@ export default async function Home({ searchParams }: PageProps<"/dashboard">) {
         </div>
       </header>
 
+      <div className="mb-4"><PushToggle /></div>
       <h1 className="text-2xl font-extrabold tracking-tight">Сайн байна уу{name ? `, ${name}` : ""}!</h1>
 
       {rows?.length ? (

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ADMIN_EMAIL } from "@/lib/admin";
 import { fmtMoney } from "@/lib/format";
 import { sendMail } from "@/lib/mail";
+import { sendPush } from "@/lib/push";
 import { rootUrl } from "@/lib/hosts";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,5 +26,10 @@ export async function requestPayment(tenantId: string, _: PayState, fd: FormData
      <p>Дүн: ${fmtMoney(Number(fd.get("months")) === 12 ? 400000 : 49900)}₮</p>
      <p><a href="${rootUrl("/admin/dashboard")}">Админ хуудас руу орж баталгаажуулах</a></p>`,
   );
+  await sendPush(ADMIN_EMAIL, {
+    title: "Төлбөрийн шинэ хүсэлт",
+    body: `${t?.name ?? ""} — ${fmtMoney(Number(fd.get("months")) === 12 ? 400000 : 49900)}₮`,
+    url: rootUrl("/admin/dashboard"),
+  });
   return { sent: true };
 }

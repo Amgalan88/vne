@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
 import { daysLeft } from "@/lib/billing";
 import { fmtDate, fmtDateTime, fmtMoney } from "@/lib/format";
+import { PushToggle } from "@/components/push-toggle";
 import { Card, EmptyState } from "@/components/ui";
 import { adminLogout, decidePayment } from "../actions";
 
@@ -55,6 +56,8 @@ export default async function AdminDashboard() {
           <button className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-100">Гарах</button>
         </form>
       </div>
+
+      <PushToggle />
 
       <section className="space-y-3">
         <h2 className="font-bold">Хүлээгдэж буй ({pending.length})</h2>

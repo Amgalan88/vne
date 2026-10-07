@@ -70,5 +70,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Статик файлууд болон /umgm/ (хуучин апп) proxy-гоор дамжихгүй
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|umgm/|sw\\.js$|.*\\.(?:png|jpg|jpeg|svg|webp|ico|txt|xml|json|html)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|umgm/|sw\\.js$|push-sw\\.js$|manifest\\.webmanifest$|icons/|.*\\.(?:png|jpg|jpeg|svg|webp|ico|txt|xml|json|html)$).*)"],
 };

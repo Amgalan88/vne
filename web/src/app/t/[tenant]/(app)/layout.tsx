@@ -6,6 +6,7 @@ import { appUrl } from "@/lib/hosts";
 import { canManage, ROLE_LABEL } from "@/lib/types";
 import { daysLeft as daysUntil, isPro } from "@/lib/billing";
 import { Card } from "@/components/ui";
+import { PushToggle } from "@/components/push-toggle";
 import { SignOutButton } from "@/components/sign-out-button";
 import { TenantNav } from "./nav";
 
@@ -93,6 +94,9 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
         </div>
       )}
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:max-w-none print:p-0">{children}</main>
+      <footer className="mx-auto w-full max-w-6xl px-4 pb-6 print:hidden">
+        <PushToggle />
+      </footer>
     </div>
   );
 }

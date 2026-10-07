@@ -48,10 +48,30 @@ export default async function NewDocumentPage({ params, searchParams }: PageProp
     }
   }
   const first = issuers[0];
+  // Өмнөх ижил төрлийн баримтаас давтагддаг талбаруудыг (гарын үсэг зурагч нар, НӨАТ, төлөх хугацаа…) санаж бөглөнө
+  const docType = TYPES.includes(type as DocType) ? (type as DocType) : "invoice";
+  let remembered: Partial<DocFields> = {};
+  if (!copy) {
+    const supabase = await createClient();
+    const { data: last } = await supabase
+      .from("documents")
+      .select("data")
+      .eq("tenant_id", tenant.id)
+      .eq("doc_type", docType)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<{ data: Partial<DocFields> }>();
+    const d = last?.data ?? {};
+    const keep = ["director", "receiver", "accountant", "carrier", "issuerName", "receiverName", "accountantName", "position", "signName", "vatMode", "payDue", "note"] as const;
+    remembered = Object.fromEntries(keep.filter(k => d[k]).map(k => [k, d[k]]));
+  }
+
   const initial: DocState = copy ?? {
     ...emptyFields(first?.director ?? ""),
+    ...remembered,
     id: null,
-    docType: TYPES.includes(type as DocType) ? (type as DocType) : "invoice",
+    docType,
     issuerId: first?.id ?? "",
     number: "",
     docDate: today,

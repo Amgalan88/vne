@@ -5,6 +5,7 @@ import { fmtDate, fmtDateTime, fmtMoney } from "@/lib/format";
 import { FREE_FEATURES, isPro, PLANS, PRO_FEATURES, PRO_PRICE } from "@/lib/billing";
 import { Card } from "@/components/ui";
 import { PayForm } from "./pay-form";
+import { AutoRefresh } from "@/components/auto-refresh";
 
 export const metadata: Metadata = { title: "Багц, төлбөр" };
 
@@ -32,6 +33,7 @@ export default async function BillingPage({ params }: PageProps<"/t/[tenant]/bil
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <AutoRefresh active={!!payments?.some(p => p.status === "pending")} />
       <div>
         <h1 className="text-lg font-bold">Багц, төлбөр</h1>
         <p className="mt-1 text-sm text-slate-500">
