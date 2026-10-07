@@ -58,6 +58,15 @@ export function describe(e: AuditEntry): AuditLine {
     }
     case "customers":
       return { text: `Харилцагч «${row.name}» ${verb}`, changes };
+    case "tenant_sites":
+      return {
+        text: e.action === "insert" ? "Компанийн нийтийн хуудас үүсгэсэн" : "Компанийн нийтийн хуудас зассан",
+        changes: changes.filter(c => !c.startsWith("services") && !c.startsWith("published")).concat(
+          e.before && e.after && e.before.published !== e.after.published
+            ? [e.after.published ? "нийтэлсэн" : "нийтлэхээ больсон"]
+            : [],
+        ),
+      };
     case "templates":
       return { text: `Загвар «${row.name}» ${verb}`, changes };
     case "tenants":

@@ -9,9 +9,9 @@ export function TenantNav({ links, slug }: { links: { href: string; label: strin
   const path = raw.startsWith(`/t/${slug}`) ? raw.slice(`/t/${slug}`.length) || "/" : raw;
 
   return (
-    <nav className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4">
+    <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4">
       {links.map(l => {
-        const active = l.href === "/" ? path === "/" || path.startsWith("/documents") : path.startsWith(l.href);
+        const active = path.startsWith(l.href);
         return (
           <Link
             key={l.href}

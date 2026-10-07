@@ -35,17 +35,23 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
 
   const { tenant, role, email } = ctx;
   const links = [
-    { href: "/", label: "Баримтууд" },
+    { href: "/documents", label: "Баримтууд" },
     { href: "/members", label: "Гишүүд" },
-    ...(canManage(role) ? [{ href: "/audit", label: "Аудит лог" }] : []),
+    ...(canManage(role)
+      ? [
+          { href: "/settings", label: "Тохиргоо" },
+          { href: "/site", label: "Нийтийн хуудас" },
+          { href: "/audit", label: "Аудит лог" },
+        ]
+      : []),
     { href: "/billing", label: "Багц" },
   ];
   const pro = isPro(tenant);
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+      <header className="border-b border-slate-200 bg-white print:hidden">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <p className="flex items-center gap-2 font-bold">
               <span className="truncate">{tenant.name}</span>
@@ -70,7 +76,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
         </div>
         <TenantNav links={links} slug={slug} />
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:max-w-none print:p-0">{children}</main>
     </div>
   );
 }
