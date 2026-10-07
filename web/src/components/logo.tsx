@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { rootUrl } from "@/lib/hosts";
 
 /** HHK.MN тэмдэг: сүлжээ бүхий «H» + баримтын дүрс, цэнхэр→ногоон градиент */
 export function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
@@ -37,7 +38,8 @@ export function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
   );
 }
 
-export function Logo({ href = "/", light = false }: { href?: string; light?: boolean }) {
+/** Лого дээр дарахад үргэлж hhk.mn нүүр хуудас руу (компанийн дэд домэйн, app.hhk.mn дээрээс ч) */
+export function Logo({ href = rootUrl(), light = false }: { href?: string; light?: boolean }) {
   return (
     <Link href={href} className="inline-flex items-center gap-2 font-black tracking-tight" aria-label="HHK.MN нүүр хуудас">
       <LogoMark />

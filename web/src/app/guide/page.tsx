@@ -53,7 +53,7 @@ const SECTIONS: Section[] = [
       "Харилцагчийн нэрийг бичнэ — өмнө нь бичсэн бол жагсаалтаас сонгоход РД, хаяг автоматаар бөглөгдөнө.",
       "Бараа, тоо, үнээ нэмнэ. Нийт дүн, үсгээр бичсэн дүн автоматаар гарна.",
       "«Хадгалах» (эсвэл Ctrl+S) дарна. Дугаар автоматаар олгогдоно.",
-      "«🖨 Хэвлэх / PDF» дарж хэвлэнэ эсвэл PDF болгоно.",
+      "«⬇ PDF татах» дарж PDF файл авна, эсвэл «🖨» дарж хэвлэнэ.",
     ],
     tip: "Утсан дээр дээд талын «✎ Засах / 👁 Урьдчилж харах» товчоор шилжинэ. Сар бүр давтагддаг нэхэмжлэхийг хуучныг нь нээгээд «⧉ Хуулах» дарж хурдан гаргана. Гарын үсэг зурагч, нягтлангийн нэр зэргийг дараагийн баримтад автоматаар санана.",
   },
@@ -62,8 +62,7 @@ const SECTIONS: Section[] = [
     title: "PDF хадгалах, хаана хадгалагддаг вэ",
     steps: [
       "«Хадгалах» дарсан баримт системд хадгалагдаж, «Баримтууд» жагсаалтад үргэлж харагдана. Ямар ч төхөөрөмжөөс нээж болно.",
-      "PDF файл авах бол «Хэвлэх / PDF» → хэвлэгчийн оронд «PDF хэлбэрээр хадгалах» (Save as PDF) сонгоно.",
-      "Файл «Татаж авсан» (Downloads) хавтсанд орно: Android — Files → Downloads, компьютер — Downloads хавтас.",
+      "«⬇ PDF татах» дарахад PDF файл шууд «Татаж авсан» (Downloads) хавтсанд орно: Android — Files → Downloads, компьютер — Downloads хавтас.",
     ],
   },
   {
@@ -166,7 +165,7 @@ export default async function GuidePage() {
     <div className="flex-1 bg-white text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <Link href="/"><Logo /></Link>
+          <Logo />
           {signedIn ? (
             <a href={appUrl()} className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-slate-700">Ажлын хэсэг рүү →</a>
           ) : (
