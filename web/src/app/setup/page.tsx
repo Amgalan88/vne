@@ -82,6 +82,12 @@ export default async function SetupPage() {
       optional: true,
     },
     {
+      name: "Өдөр бүрийн автомат ажил (CRON_SECRET)",
+      ok: !!process.env.CRON_SECRET,
+      fix: "Vercel → Environment Variables → CRON_SECRET (санамсаргүй урт текст) нэмээд Redeploy. Багц дуусах сануулга, зураг цэвэрлэлт ажиллана.",
+      optional: true,
+    },
+    {
       name: "Имэйл мэдэгдэл (RESEND_API_KEY)",
       ok: !!process.env.RESEND_API_KEY,
       fix: "resend.com дээр түлхүүр авч Vercel-д RESEND_API_KEY, MAIL_FROM нэмээд Redeploy. Заавал биш.",
