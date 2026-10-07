@@ -10,7 +10,7 @@ export type InviteState = {
   error?: string;
   message?: string;
   /** Түр нууц үгтэй урилга: эзэмшигч ажилтанд өгөх мэдээлэл */
-  credentials?: { email: string; password: string; url: string };
+  credentials?: { email: string; password: string; url: string; companyName: string; emailed: boolean };
 };
 
 const esc = (v: string) => v.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -66,14 +66,14 @@ export async function inviteMember(tenantId: string, _: InviteState, fd: FormDat
           : `${email} урилга бүртгэгдсэн ч хэрэглэгч үүсгэж чадсангүй: ${createErr.message}`,
       };
     }
-    await sendMail(
+    const emailed = await sendMail(
       lower,
       `${t?.name ?? "hhk.mn"} — таныг урилаа`,
       `<p>Таныг <b>${esc(t?.name ?? "")}</b> компанид урилаа.</p><p>Нэвтрэх: <a href="${url}">${url}</a><br>Имэйл: ${esc(lower)}<br>Түр нууц үг: <b>${esc(tempPassword)}</b></p><p>Анх нэвтрэхэд өөрийн шинэ нууц үгээ тохируулна.</p>`,
     );
     return {
       message: `${email} хэрэглэгч үүсч, компанид нэмэгдлээ. Доорх мэдээллийг ажилтанд өгнө үү — анх нэвтрэхдээ шинэ нууц үгээ өөрөө тохируулна.`,
-      credentials: { email: lower, password: tempPassword, url },
+      credentials: { email: lower, password: tempPassword, url, companyName: t?.name ?? "", emailed },
     };
   }
 

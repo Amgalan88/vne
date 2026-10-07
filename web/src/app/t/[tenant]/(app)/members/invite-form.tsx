@@ -36,6 +36,23 @@ export function InviteForm({ tenantId, canInviteAdmin }: { tenantId: string; can
           ))}
         </dl>
       )}
+      {state.credentials && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {state.credentials.emailed ? (
+            <span className="font-semibold text-emerald-700">✓ {state.credentials.email} хаяг руу имэйлээр илгээгдлээ</span>
+          ) : (
+            <a
+              className="rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white hover:bg-slate-700"
+              href={`mailto:${state.credentials.email}?subject=${encodeURIComponent(`${state.credentials.companyName} — таныг урилаа`)}&body=${encodeURIComponent(
+                `Таныг ${state.credentials.companyName} компанид урилаа.\n\nНэвтрэх: ${state.credentials.url}\nИмэйл: ${state.credentials.email}\nТүр нууц үг: ${state.credentials.password}\n\nАнх нэвтрэхэд өөрийн шинэ нууц үгээ тохируулна.`,
+              )}`}
+            >
+              ✉ Имэйлээр илгээх
+            </a>
+          )}
+          {!state.credentials.emailed && <span className="text-xs text-slate-500">Таны имэйл програм нээгдэж, бэлэн текстээр гарна.</span>}
+        </div>
+      )}
       <div className="flex flex-col gap-2 sm:flex-row">
         <Input name="email" type="email" required placeholder="ajiltan@gmail.com" className="flex-1" />
         <Select name="role" defaultValue="staff" className="sm:w-40">
