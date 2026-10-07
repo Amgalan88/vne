@@ -15,9 +15,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="grid flex-1 bg-white text-slate-900 lg:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-indigo-600/30 blur-3xl" />
-        <Logo light />
+      <aside className="relative hidden overflow-hidden bg-brand-dark p-12 text-white lg:flex lg:flex-col lg:justify-between">
+                <Logo light />
         <div className="relative">
           <p className="text-3xl font-extrabold leading-tight tracking-tight">
             Нэхэмжлэх, албан баримтаа
@@ -30,7 +29,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
             <li>📜 Хэн юу хийсэн бүгд бүртгэгдэнэ</li>
           </ul>
         </div>
-        <p className="relative text-sm text-slate-500">© hhk.mn</p>
+        <p className="relative text-sm text-slate-400">© HHK.MN · Бизнесээ өргөжүүлээрэй</p>
       </aside>
 
       <main className="flex items-center justify-center px-4 py-12 sm:px-8">

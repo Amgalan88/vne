@@ -7,6 +7,54 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
+/*
+ * HHK.MN брэнд: далайн цэнхэр → ногоон (teal) градиент, гүн хөх дэвсгэр.
+ * Апп даяар ашиглагддаг "indigo" өнгийг брэндийн цэнхэрээр сольж бүх товч, холбоос нэг дор шинэчлэгдэнэ.
+ */
+@theme {
+  --color-indigo-50: #eef6ff;
+  --color-indigo-100: #d9eaff;
+  --color-indigo-200: #b9d7ff;
+  --color-indigo-300: #89bbff;
+  --color-indigo-400: #4f95f5;
+  --color-indigo-500: #2a74e6;
+  --color-indigo-600: #1a5bcc;
+  --color-indigo-700: #1648a6;
+  --color-indigo-800: #173d85;
+  --color-indigo-900: #18356b;
+  --color-indigo-950: #0f2147;
+
+  --color-brand-navy: #0a1f4a;
+  --color-brand-blue: #1a5bcc;
+  --color-brand-teal: #14b3a0;
+  --color-brand-green: #22c58b;
+}
+
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+@utility bg-brand {
+  background-image: linear-gradient(100deg, var(--color-brand-blue) 0%, #1689c4 50%, var(--color-brand-teal) 100%);
+}
+@utility text-brand {
+  background-image: linear-gradient(100deg, var(--color-brand-blue) 0%, #1689c4 45%, var(--color-brand-teal) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility text-brand-light {
+  background-image: linear-gradient(100deg, #5fb7ff 0%, #3fd6c2 55%, #6ee7a7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Гүн хөхөөс ногоон руу шилжих дэвсгэр + сүлжээний (цэг, шугам) хээ */
+@utility bg-brand-dark {
+  background-color: var(--color-brand-navy);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.10' stroke-width='1'%3E%3Cpath d='M20 30L90 70L60 140L140 120L200 40M90 70L140 120L210 170L150 220L60 140M200 40L210 170M20 200L60 140'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='.35'%3E%3Ccircle cx='20' cy='30' r='2'/%3E%3Ccircle cx='90' cy='70' r='2.5'/%3E%3Ccircle cx='60' cy='140' r='2'/%3E%3Ccircle cx='140' cy='120' r='3'/%3E%3Ccircle cx='200' cy='40' r='2'/%3E%3Ccircle cx='210' cy='170' r='2.5'/%3E%3Ccircle cx='150' cy='220' r='2'/%3E%3Ccircle cx='20' cy='200' r='2'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 85% 110%, rgba(20, 179, 160, 0.55), transparent 55%),
+    radial-gradient(ellipse at 10% -10%, rgba(42, 116, 230, 0.55), transparent 50%),
+    linear-gradient(160deg, #0a1f4a 0%, #0b3a6e 55%, #0b5b6e 100%);
 }

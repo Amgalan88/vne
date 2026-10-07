@@ -36,7 +36,7 @@ export function SlugClaim({ rootDomain, onDark = false }: { rootDomain: string; 
         <button
           type="submit"
           disabled={blocked}
-          className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold whitespace-nowrap text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-xl bg-brand px-5 py-3 text-sm font-semibold whitespace-nowrap text-white shadow-lg shadow-indigo-600/25 transition hover:brightness-110 disabled:opacity-50"
         >
           Хаягаа авах →
         </button>

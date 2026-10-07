@@ -38,7 +38,7 @@ export function Select({ className = "", ...props }: ComponentProps<"select">) {
 }
 
 const BUTTON = {
-  primary: "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500",
+  primary: "bg-brand text-white shadow-md shadow-indigo-600/20 hover:brightness-110",
   dark: "bg-slate-900 text-white hover:bg-slate-700 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200",
   light: "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200",
   red: "bg-red-600 text-white hover:bg-red-700",

@@ -58,6 +58,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
   return (
     <div className="flex flex-1 flex-col">
       <header className="border-b border-slate-200 bg-white print:hidden">
+        <div className="h-1 bg-brand" />
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <p className="flex items-center gap-2 font-bold">

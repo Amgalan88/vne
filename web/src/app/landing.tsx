@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { FREE_FEATURES, PRO_FEATURES, PRO_PRICE } from "@/lib/billing";
+import { FREE_FEATURES, PLANS, PRO_FEATURES, PRO_PRICE } from "@/lib/billing";
 import { fmtMoney } from "@/lib/format";
 import { ROOT_DOMAIN } from "@/lib/env";
 import { appUrl } from "@/lib/hosts";
@@ -43,7 +43,7 @@ function Nav({ signedIn }: { signedIn: boolean }) {
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
-            <a href={appUrl()} className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+            <a href={appUrl()} className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
               Ажлын хэсэг рүү →
             </a>
           ) : (
@@ -51,7 +51,7 @@ function Nav({ signedIn }: { signedIn: boolean }) {
               <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                 Нэвтрэх
               </Link>
-              <Link href="/signup" className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+              <Link href="/signup" className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110">
                 Үнэгүй эхлэх
               </Link>
             </>
@@ -65,63 +65,209 @@ function Nav({ signedIn }: { signedIn: boolean }) {
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_at_top_right,var(--color-indigo-100),transparent_55%)]" />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pt-14 pb-20 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-20">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-            Жижиг бизнес, хувь хүнд зориулсан
-          </span>
-          <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.5rem]">
-            Нэхэмжлэх, албан баримтаа{" "}
-            <span className="relative whitespace-nowrap text-indigo-600">
-              тамгатай нь
-              <svg viewBox="0 0 220 12" className="absolute -bottom-1 left-0 h-2.5 w-full" preserveAspectRatio="none" aria-hidden>
-                <path d="M2 9c50-6 120-8 216-3" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity=".35" />
-              </svg>
-            </span>{" "}
-            1 минутад.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
-            Үнийн санал, НЭХЭМЖЛЭХ (ТМ-1), ЗАРЛАГЫН БАРИМТ (БМ-3), албан бичгийг албан ёсны маягтаар нь гарга.
-            Тамга, гарын үсэг PIN-ээр хамгаалагдана. Хэн юу хийсэн бүгд бүртгэгдэнэ.
-          </p>
-          <div className="mt-8">
-            <SlugClaim rootDomain={ROOT_DOMAIN} />
-          </div>
-          <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
-            {["Карт шаардлагагүй", "Утсан дээр ажиллана", "PDF болон хэвлэх"].map(t => (
-              <li key={t} className="flex items-center gap-1.5">
-                <Check /> {t}
-              </li>
-            ))}
-          </ul>
+      {/* Дээд хэсэг — цагаан дэвсгэр дээр уриа (постерын дээд хэсэгтэй адил) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,var(--color-indigo-50),transparent_70%)]" />
+      <div className="relative mx-auto max-w-6xl px-4 pt-14 text-center sm:px-6 lg:pt-20">
+        <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1 text-xs font-semibold text-indigo-700 shadow-sm">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-teal" />
+          Жижиг, дунд бизнест зориулсан
+        </span>
+        <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-black leading-[1.05] tracking-tight text-brand-navy sm:text-6xl lg:text-7xl">
+          Бизнесээ өргөжүүлээрэй. <span className="text-brand">Үнэгүй!</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+          Компанийн өөрийн хаяг, вэб хуудас, албан бичиг, нэхэмжлэх — дижитал тамга, гарын үсэгтэй.
+          Багаа нэг дор удирдаж, бүх үйлдэл аюулгүй бүртгэгдэнэ.
+        </p>
+        <div className="mt-8 flex justify-center text-left">
+          <SlugClaim rootDomain={ROOT_DOMAIN} />
         </div>
-        <HeroMock />
+        <ul className="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
+          {["Карт шаардлагагүй", "Утас, таблет, компьютер", "PDF болон хэвлэх"].map(t => (
+            <li key={t} className="flex items-center gap-1.5">
+              <Check /> {t}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Доод хэсэг — гүн хөх сүлжээн дэвсгэр дээр 3 төхөөрөмж, дараа нь 3 багана */}
+      <div className="relative mt-14 bg-brand-dark text-white">
+        <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+          <Devices />
+        </div>
+        <Pillars />
       </div>
     </section>
   );
 }
 
-/** Нэхэмжлэхийн жишээ — жинхэнэ ТМ-1 загвараар (апп дотор гарах баримттай яг ижил) */
-function HeroMock() {
+/** Зөөврийн компьютер, таблет, утас — апп-ын гурван гол боломжийг харуулна */
+function Devices() {
   return (
-    <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-      <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-br from-indigo-200/60 via-white to-amber-100/60 blur-2xl" />
-      <div className="mx-auto w-fit rotate-[1.2deg] rounded-xl bg-white shadow-2xl shadow-slate-900/15 ring-1 ring-slate-200">
-        <SampleSheet type="invoice" zoom="[zoom:0.4] sm:[zoom:0.52] lg:[zoom:0.6]" className="max-h-[480px] sm:max-h-[600px] lg:max-h-[680px] rounded-xl" />
+    <div className="flex justify-center overflow-hidden pb-10" aria-hidden>
+      <div className="relative flex w-[1000px] shrink-0 items-end justify-center gap-6 [zoom:0.36] sm:[zoom:0.62] lg:[zoom:1]">
+        <Laptop />
+        <Tablet />
+        <Phone />
       </div>
+    </div>
+  );
+}
 
-      <div className="absolute -top-5 -left-3 flex items-center gap-2 rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs font-semibold shadow-lg sm:-left-8">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">🔓</span>
-        Тамга PIN-ээр нээгдлээ
+function Laptop() {
+  return (
+    <div className="w-[520px]">
+      <div className="rounded-t-2xl border-[10px] border-b-[14px] border-slate-800 bg-slate-800 shadow-2xl shadow-black/40">
+        <div className="h-[300px] overflow-hidden rounded-md bg-white text-slate-900">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+            <span className="flex items-center gap-1.5 text-[13px] font-black text-brand-navy">
+              <span className="flex h-5 w-5 items-center justify-center rounded bg-brand text-[10px] text-white">Т</span>
+              Таны Компани
+            </span>
+            <span className="flex gap-4 text-[11px] text-slate-500">
+              <span>Бидний тухай</span>
+              <span>Үйлчилгээ</span>
+              <span>Холбоо барих</span>
+            </span>
+          </div>
+          <div className="bg-brand-dark px-6 py-7 text-white">
+            <p className="font-mono text-[11px] text-teal-200">🔒 tanykompani.hhk.mn</p>
+            <p className="mt-2 text-[26px] font-black leading-tight">Таны компанийн вэб хуудас</p>
+            <p className="mt-2 max-w-xs text-[12px] text-slate-200">Компанийн танилцуулга, үйлчилгээ, холбоо барих мэдээлэл — үнэгүй, өөрийн хаягтай.</p>
+            <div className="mt-4 flex gap-2">
+              <span className="rounded-md bg-brand px-3 py-1.5 text-[11px] font-semibold">Холбогдох</span>
+              <span className="rounded-md border border-white/40 px-3 py-1.5 text-[11px] font-semibold">Үйлчилгээ</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 p-4">
+            {["Бараа нийлүүлэлт", "Хүргэлт", "Засвар үйлчилгээ"].map(t => (
+              <div key={t} className="rounded-lg border border-slate-100 p-2.5">
+                <div className="h-6 w-6 rounded bg-indigo-50" />
+                <p className="mt-1.5 text-[11px] font-semibold">{t}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="absolute -bottom-8 -right-2 w-60 rounded-xl border border-slate-200 bg-white p-3 text-xs shadow-lg sm:-right-6">
-        <p className="font-semibold text-slate-400">Аудит лог · 2 мин өмнө</p>
-        <p className="mt-1 text-slate-700">
-          <b>Д.Сараа</b> — №043 нэхэмжлэхийн дүн <span className="whitespace-nowrap">1,740,000₮ → 1,800,000₮</span>
-        </p>
+      <div className="mx-auto h-4 w-[590px] -translate-x-[35px] rounded-b-2xl bg-gradient-to-b from-slate-300 to-slate-400" />
+    </div>
+  );
+}
+
+function DocIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M6 3h8l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+      <path d="M14 3v4h4M8 11h8M8 14h8M8 17h5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Tablet() {
+  const tiles = ["Албан бичиг", "Үнийн санал", "Нэхэмжлэх", "Зарлагын баримт"];
+  return (
+    <div className="relative z-10 w-[300px] rounded-[28px] border-[10px] border-slate-900 bg-slate-900 shadow-2xl shadow-black/50">
+      <div className="h-[400px] overflow-hidden rounded-[18px] bg-gradient-to-b from-[#0d2a5c] to-[#0a1f4a] p-4">
+        <p className="text-center text-[14px] font-bold">Баримт бичиг үүсгэх</p>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {tiles.map(t => (
+            <div key={t} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-4">
+              <DocIcon className="h-9 w-9 text-sky-300" />
+              <span className="text-[11px] font-semibold">{t}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 flex justify-center">
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-teal-300/80 shadow-[0_0_30px_rgba(45,212,191,0.55)]">
+            <div className="absolute inset-2 rounded-full border border-teal-300/50" />
+            <svg viewBox="0 0 120 50" className="h-8 w-16 text-teal-200">
+              <path d="M5 35c10-25 18-25 14 0s12-30 20-10 6 18 16-2 10 8 18 4 14-14 22-6 10 10 20 2" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+        <p className="mt-2 text-center text-[11px] text-teal-200">Дижитал тамга, гарын үсэг</p>
       </div>
+    </div>
+  );
+}
+
+function Phone() {
+  const team = [
+    ["Б.Болд", "Эзэмшигч", "bg-indigo-100 text-indigo-700"],
+    ["Д.Сараа", "Админ", "bg-teal-100 text-teal-700"],
+    ["Г.Тэмүүлэн", "Ажилтан", "bg-slate-100 text-slate-600"],
+  ];
+  return (
+    <div className="w-[170px] rounded-[30px] border-[7px] border-slate-900 bg-slate-900 shadow-2xl shadow-black/50">
+      <div className="h-[340px] overflow-hidden rounded-[22px] bg-slate-50 text-slate-900">
+        <div className="bg-brand px-3 pt-5 pb-3 text-white">
+          <p className="text-[12px] font-bold">Ажилтны удирдлага</p>
+        </div>
+        <div className="space-y-1.5 p-2.5">
+          <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Баг</p>
+          {team.map(([n, r, c]) => (
+            <div key={n} className="flex items-center justify-between rounded-lg bg-white p-1.5 shadow-sm">
+              <span className="flex items-center gap-1.5">
+                <span className="h-5 w-5 rounded-full bg-gradient-to-br from-sky-300 to-teal-300" />
+                <span className="text-[9.5px] font-semibold">{n}</span>
+              </span>
+              <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-semibold ${c}`}>{r}</span>
+            </div>
+          ))}
+          <p className="pt-1 text-[9px] font-semibold uppercase tracking-wide text-slate-400">Аюулгүй нэвтрэлт</p>
+          <div className="rounded-lg bg-white p-2 shadow-sm">
+            <div className="flex justify-center gap-1.5">
+              {[1, 1, 1, 0].map((on, i) => (
+                <span key={i} className={`h-2 w-2 rounded-full ${on ? "bg-indigo-600" : "border border-slate-300"}`} />
+              ))}
+            </div>
+            <div className="mt-2 rounded-md bg-brand py-1.5 text-center text-[9px] font-semibold text-white">Нэвтрэх</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PILLARS = [
+  {
+    title: ["Үнэгүй ландинг", "& домэйн"],
+    items: ["tanykompani.hhk.mn хаяг", "Компанийн танилцуулга хуудас", "Утсанд тохирсон"],
+    tone: "from-[#0b2a63] to-[#0d3b7a]",
+  },
+  {
+    title: ["Албан бичиг", "& дижитал тамга"],
+    items: ["Нэхэмжлэх ТМ-1, БМ-3, үнийн санал", "Тамга, гарын үсэг PIN-ээр", "PDF, хэвлэх нэг товчоор"],
+    tone: "from-[#0d3b7a] to-[#0b5f86]",
+  },
+  {
+    title: ["Багийн удирдлага", "& аюулгүй байдал"],
+    items: ["Эзэмшигч, админ, ажилтан, харагч", "Хэн юу хийснийг бүртгэнэ", "Өгөгдөл компани бүрт тусдаа"],
+    tone: "from-[#0b5f86] to-[#0c8a7c]",
+  },
+];
+
+function Pillars() {
+  return (
+    <div className="grid md:grid-cols-3">
+      {PILLARS.map(p => (
+        <div key={p.title[0]} className={`bg-gradient-to-b ${p.tone} px-6 py-12 text-center`}>
+          <h2 className="text-2xl font-black uppercase leading-tight tracking-tight lg:text-3xl">
+            {p.title[0]}
+            <br />
+            {p.title[1]}
+          </h2>
+          <ul className="mx-auto mt-5 max-w-xs space-y-2 text-sm text-slate-200">
+            {p.items.map(i => (
+              <li key={i} className="flex items-center justify-center gap-2">
+                <span className="text-teal-300"><Check /></span>
+                {i}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
@@ -223,7 +369,7 @@ function Steps() {
 
 function StampSecurity() {
   return (
-    <section id="security" className="scroll-mt-20 bg-slate-950 py-24 text-white">
+    <section id="security" className="scroll-mt-20 bg-brand-dark py-24 text-white">
       <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-2">
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-indigo-300">Тамганы хамгаалалт</p>
@@ -277,7 +423,7 @@ function StampSecurity() {
 function Pricing() {
   const plans = [
     { name: "Үнэгүй", price: "0₮", note: "үргэлж", items: FREE_FEATURES, cta: "Үнэгүй эхлэх" },
-    { name: "Төлбөртэй", price: `${fmtMoney(PRO_PRICE)}₮`, note: "сард", items: ["Үнэгүй багцын бүх боломж", ...PRO_FEATURES], cta: "Эхлэх", featured: true },
+    { name: "Төлбөртэй", price: `${fmtMoney(PRO_PRICE)}₮`, note: "сард", items: [`эсвэл 1 жил — ${fmtMoney(PLANS[1].price)}₮ (${fmtMoney(PRO_PRICE * 12 - PLANS[1].price)}₮ хэмнэнэ)`, "Үнэгүй багцын бүх боломж", ...PRO_FEATURES], cta: "Эхлэх", featured: true },
   ];
   return (
     <section id="pricing" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-24 sm:px-6">
@@ -286,10 +432,10 @@ function Pricing() {
         {plans.map(p => (
           <div
             key={p.name}
-            className={`relative flex flex-col rounded-2xl p-7 ${p.featured ? "bg-slate-900 text-white shadow-2xl shadow-slate-900/20 ring-1 ring-slate-900" : "border border-slate-200 bg-white"}`}
+            className={`relative flex flex-col rounded-2xl p-7 ${p.featured ? "bg-brand-dark text-white shadow-2xl shadow-indigo-900/30" : "border border-slate-200 bg-white"}`}
           >
             {p.featured && (
-              <span className="absolute -top-3 left-7 rounded-full bg-indigo-500 px-3 py-1 text-xs font-semibold text-white">Түгээмэл</span>
+              <span className="absolute -top-3 left-7 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">Түгээмэл</span>
             )}
             <p className={`font-semibold ${p.featured ? "text-slate-300" : "text-slate-500"}`}>{p.name}</p>
             <p className="mt-3 flex items-baseline gap-1.5">
@@ -352,10 +498,8 @@ function Faq() {
 function FinalCta() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-      <div className="relative overflow-hidden rounded-3xl bg-indigo-600 px-6 py-14 text-center text-white sm:px-12">
-        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10" />
-        <div className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-indigo-400/30" />
-        <h2 className="relative text-3xl font-extrabold tracking-tight sm:text-4xl">Анхны баримтаа өнөөдөр гарга</h2>
+      <div className="relative overflow-hidden rounded-3xl bg-brand-dark px-6 py-14 text-center text-white sm:px-12">
+        <h2 className="relative text-3xl font-black tracking-tight sm:text-4xl">Бизнесээ өнөөдөр <span className="text-brand-light">өргөжүүл</span></h2>
         <p className="relative mx-auto mt-4 max-w-xl text-indigo-100">Компанийнхаа хаягийг аваад 1 минутад эхэл. Карт шаардлагагүй.</p>
         <div className="relative mx-auto mt-8 flex justify-center text-left">
           <SlugClaim rootDomain={ROOT_DOMAIN} onDark />
