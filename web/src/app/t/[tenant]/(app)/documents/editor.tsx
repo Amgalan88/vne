@@ -52,6 +52,8 @@ export function DocumentEditor({
   // Аль үйлдэл ажиллаж байгаа, дууссаны дараа юу хийхийг доод мөрөнд харуулна
   const [busy, setBusy] = useState<"draft" | "issue" | "status" | "unlock" | "delete" | "nav" | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  // PDF татсаны дараа «дууслаа» гэж мэдэгдээд дараагийн алхмыг санал болгоно
+  const [pdfDone, setPdfDone] = useState(false);
   // Хадгалагдсан төлөв: ноорог биш бол тамга дарагдсан → агуулга түгжээтэй (DB-ийн trigger мөн хамгаална)
   const [savedStatus, setSavedStatus] = useState<DocStatus>(initial.id ? initial.status : "draft");
   const locked = !!s.id && savedStatus !== "draft";
@@ -70,6 +72,7 @@ export function DocumentEditor({
     setDirty(true);
     setResult(null);
     setDone(null);
+    setPdfDone(false);
   };
   const setRow = (i: number, patch: Partial<Row>) =>
     set("rows", s.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
@@ -130,6 +133,7 @@ export function DocumentEditor({
     if (locked) return;
     setBusy(status === "draft" ? "draft" : "issue");
     setDone(null);
+    setPdfDone(false);
     startTransition(async () => {
       const r = await saveDocument(tenantId, { ...s, status });
       setResult(r);
@@ -185,6 +189,7 @@ export function DocumentEditor({
     if (!s.id) return;
     setBusy("status");
     setDone(null);
+    setPdfDone(false);
     startTransition(async () => {
       const r = await setDocStatus(tenantId, s.id!, status);
       setResult(r.error ? r : null);
@@ -206,6 +211,7 @@ export function DocumentEditor({
     if (!reason || reason.trim().length < 3) return;
     setBusy("unlock");
     setDone(null);
+    setPdfDone(false);
     startTransition(async () => {
       const r = await unlockDocument(tenantId, s.id!, reason.trim());
       if (r.error) setResult(r);
@@ -531,6 +537,22 @@ export function DocumentEditor({
                   </Link>
                 )}
               </p>
+            ) : pdfDone && !dirty ? (
+              <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
+                <p className="font-medium">
+                  {locked
+                    ? "✓ PDF татагдлаа (Downloads хавтас). Баримт бэлэн — харилцагчдаа илгээнэ үү."
+                    : "✓ PDF татагдлаа — гэхдээ НООРОГ бичигтэй, тамгагүй. Албан ёсоор илгээх бол «✅ Гаргах» дарж дахин татна."}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/documents" className={buttonClass("dark", "px-3 py-1.5 text-xs")}>
+                    ✓ Дуусгах — Баримтууд руу
+                  </Link>
+                  <Link href="/documents/new" className={buttonClass("light", "px-3 py-1.5 text-xs")}>
+                    ＋ Шинэ баримт
+                  </Link>
+                </div>
+              </div>
             ) : done && !dirty ? (
               <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 font-medium text-emerald-800">{done}</p>
             ) : !canEdit ? null : locked ? (
@@ -554,7 +576,7 @@ export function DocumentEditor({
                 </button>
               </>
             )}
-            <PdfButton targetId="doc-sheet" filename={`${DOC_TYPE_LABEL[s.docType]} ${s.number || "ноорог"}`} variant="dark" className="flex-1 py-2.5" />
+            <PdfButton targetId="doc-sheet" filename={`${DOC_TYPE_LABEL[s.docType]} ${s.number || "ноорог"}`} variant="dark" className="flex-1 py-2.5" onDone={() => { setDone(null); setPdfDone(true); }} />
             <button type="button" onClick={() => window.print()} className={buttonClass("light", "px-3")} title="Хэвлэх" aria-label="Хэвлэх">
               🖨
             </button>
@@ -585,7 +607,7 @@ export function DocumentEditor({
         {shareOpen && s.id && canEdit && <ShareLink tenantId={tenantId} docId={s.id} initialUrl={shareUrl ?? null} />}
         <p className="text-xs text-slate-500">
           «Ноорог хадгалах» эсвэл «✅ Гаргах» дармагц баримт «Баримтууд» жагсаалтад хадгалагдана. «⬇ PDF татах» дарахад PDF файл төхөөрөмжийн «Татаж авсан»
-          (Downloads) хавтсанд шууд орно.
+          (Downloads) хавтсанд орно. Дууссан бол «✓ Дуусгах» дарж жагсаалт руу буцна.
         </p>
       </div>
 

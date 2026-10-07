@@ -5,7 +5,20 @@ import { buttonClass, Spinner, type ButtonVariant } from "@/components/ui";
 import { downloadSheetPdf } from "@/lib/pdf";
 
 /** «⬇ PDF татах» — targetId бүхий элемент доторх баримтыг PDF болгоно */
-export function PdfButton({ targetId, filename, variant = "primary", className = "" }: { targetId: string; filename: string; variant?: ButtonVariant; className?: string }) {
+export function PdfButton({
+  targetId,
+  filename,
+  variant = "primary",
+  className = "",
+  onDone,
+}: {
+  targetId: string;
+  filename: string;
+  variant?: ButtonVariant;
+  className?: string;
+  /** PDF амжилттай татагдсаны дараа */
+  onDone?: () => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   return (
@@ -20,6 +33,7 @@ export function PdfButton({ targetId, filename, variant = "primary", className =
           setErr("");
           try {
             await downloadSheetPdf(el, filename);
+            onDone?.();
           } catch (e) {
             setErr(e instanceof Error ? e.message : "PDF үүсгэж чадсангүй");
           } finally {
