@@ -18,6 +18,7 @@ type DocRow = {
   customer_name: string;
   total: number;
   status: DocStatus;
+  pay_due: string | null;
 };
 
 export default async function DocumentsPage({ params }: PageProps<"/t/[tenant]/documents">) {
@@ -28,7 +29,7 @@ export default async function DocumentsPage({ params }: PageProps<"/t/[tenant]/d
   const [{ data: docs }, { data: issuer }, { data: site }] = await Promise.all([
     supabase
       .from("documents")
-      .select("id, doc_type, number, doc_date, customer_name, total, status")
+      .select("id, doc_type, number, doc_date, customer_name, total, status, pay_due:data->>payDue")
       .eq("tenant_id", tenant.id)
       .is("deleted_at", null)
       .order("doc_date", { ascending: false })

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Card, Input, Select } from "@/components/ui";
 import { fmtDate, fmtMoney } from "@/lib/format";
+import { overdueDays } from "@/lib/due";
 import { DOC_STATUS_LABEL, DOC_TYPE_LABEL, type DocStatus, type DocType } from "@/lib/types";
 
 export type DocListRow = {
@@ -14,6 +15,7 @@ export type DocListRow = {
   customer_name: string;
   total: number;
   status: DocStatus;
+  pay_due?: string | null;
 };
 
 const STATUS_STYLE: Record<DocStatus, string> = {
@@ -22,6 +24,15 @@ const STATUS_STYLE: Record<DocStatus, string> = {
   paid: "bg-emerald-100 text-emerald-700",
   cancelled: "bg-red-50 text-red-600",
 };
+
+function Status({ d }: { d: DocListRow }) {
+  const late = overdueDays(d);
+  return late ? (
+    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">{late} хоног хэтэрсэн</span>
+  ) : (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[d.status]}`}>{DOC_STATUS_LABEL[d.status]}</span>
+  );
+}
 
 /** Дугаар, харилцагчаар хайх; төрөл, төлвөөр шүүх */
 export function DocList({ docs, editable }: { docs: DocListRow[]; editable: boolean }) {
@@ -32,7 +43,7 @@ export function DocList({ docs, editable }: { docs: DocListRow[]; editable: bool
   const shown = docs.filter(
     d =>
       (!type || d.doc_type === type) &&
-      (!status || d.status === status) &&
+      (!status || (status === "overdue" ? overdueDays(d) > 0 : d.status === status)) &&
       (!needle || d.number.toLowerCase().includes(needle) || d.customer_name.toLowerCase().includes(needle)),
   );
 
@@ -46,6 +57,7 @@ export function DocList({ docs, editable }: { docs: DocListRow[]; editable: bool
         </Select>
         <Select value={status} onChange={e => setStatus(e.target.value)} className="sm:w-40" aria-label="Төлөв">
           <option value="">Бүх төлөв</option>
+          <option value="overdue">Хугацаа хэтэрсэн</option>
           {(Object.keys(DOC_STATUS_LABEL) as DocStatus[]).map(k => <option key={k} value={k}>{DOC_STATUS_LABEL[k]}</option>)}
         </Select>
       </div>
@@ -70,7 +82,7 @@ export function DocList({ docs, editable }: { docs: DocListRow[]; editable: bool
                     <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
                       {fmtDate(d.doc_date)}
                       {d.doc_type !== "letter" && <b className="text-slate-700">{fmtMoney(d.total)} ₮</b>}
-                      <span className={`rounded-full px-2 py-0.5 font-semibold ${STATUS_STYLE[d.status]}`}>{DOC_STATUS_LABEL[d.status]}</span>
+                      <Status d={d} />
                     </p>
                   </div>
                   <span className={`shrink-0 rounded-lg px-3 py-2 text-sm font-semibold ${draft && editable ? "bg-indigo-600 text-white" : "border border-slate-200 text-slate-700"}`}>
@@ -104,7 +116,7 @@ export function DocList({ docs, editable }: { docs: DocListRow[]; editable: bool
                   <td className="px-4 py-3">{d.customer_name}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-right font-semibold">{d.doc_type === "letter" ? "—" : `${fmtMoney(d.total)} ₮`}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLE[d.status]}`}>{DOC_STATUS_LABEL[d.status]}</span>
+                    <Status d={d} />
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link

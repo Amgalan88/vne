@@ -41,6 +41,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
   const links = [
     { href: "/documents", label: "Баримтууд" },
     { href: "/customers", label: "Харилцагчид" },
+    { href: "/reports", label: "Тайлан" },
     { href: "/members", label: "Гишүүд" },
     ...(canManage(role)
       ? [
