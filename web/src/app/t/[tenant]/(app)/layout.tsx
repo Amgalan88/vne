@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/tenant";
 import { fmtDate } from "@/lib/format";
-import { appUrl } from "@/lib/hosts";
+import { appUrl, rootUrl } from "@/lib/hosts";
 import { canManage, ROLE_LABEL } from "@/lib/types";
 import { daysLeft as daysUntil, isPro } from "@/lib/billing";
 import { Card } from "@/components/ui";
@@ -69,9 +69,10 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
                 {pro ? "Төлбөртэй" : "Үнэгүй"}
               </Link>
             </p>
-            <a href={appUrl("/?companies")} className="text-xs text-slate-400 hover:underline">
-              Миний компаниуд
-            </a>
+            <span className="flex gap-3 text-xs text-slate-400">
+              <a href={appUrl("/?companies")} className="hover:underline">Миний компаниуд</a>
+              <a href={rootUrl("/guide")} className="hover:underline">Гарын авлага</a>
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right text-xs sm:block">

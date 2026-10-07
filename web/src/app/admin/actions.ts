@@ -67,3 +67,50 @@ export async function adminLogout() {
   await supabase.auth.signOut();
   redirect("/admin/login");
 }
+
+// ── Нүүр хуудасны баннер ──
+const BANNER_EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+
+export type BannerState = { error?: string; message?: string };
+
+export async function saveBanner(_: BannerState, fd: FormData): Promise<BannerState> {
+  const supabase = await getAdminClient();
+  if (!supabase) redirect("/admin/login");
+
+  const { data: cur } = await supabase.from("platform_settings").select("value").eq("key", "banner").maybeSingle();
+  const prev = (cur?.value ?? {}) as { path?: string };
+  let path = prev.path ?? "";
+
+  const file = fd.get("file");
+  if (file instanceof File && file.size) {
+    const ext = BANNER_EXT[file.type];
+    if (!ext) return { error: "PNG, JPG эсвэл WEBP зураг оруулна уу." };
+    if (file.size > 5 * 1024 * 1024) return { error: "Зураг 5MB-аас бага байх ёстой." };
+    const next = `banner/banner-${Date.now()}.${ext}`;
+    const up = await supabase.storage.from("platform").upload(next, file, { contentType: file.type });
+    if (up.error) return { error: `Зураг хадгалж чадсангүй: ${up.error.message}. 007_platform.sql ажилласан эсэхийг шалгана уу.` };
+    if (path) await supabase.storage.from("platform").remove([path]);
+    path = next;
+  }
+  if (!path) return { error: "Баннерын зургаа сонгоно уу." };
+
+  const link = String(fd.get("link") ?? "").trim();
+  if (link && !/^(https?:\/\/|\/)/.test(link)) return { error: "Холбоос https:// эсвэл / -ээр эхэлнэ." };
+  const value = { path, link, alt: String(fd.get("alt") ?? "").trim().slice(0, 200), enabled: fd.get("enabled") === "on" };
+  const { error } = await supabase.from("platform_settings").upsert({ key: "banner", value, updated_at: new Date().toISOString() });
+  if (error) return { error: `Хадгалж чадсангүй: ${error.message}` };
+  revalidatePath("/");
+  revalidatePath("/admin/dashboard");
+  return { message: "✓ Хадгалагдлаа. Нүүр хуудсанд шууд харагдана." };
+}
+
+export async function removeBanner() {
+  const supabase = await getAdminClient();
+  if (!supabase) redirect("/admin/login");
+  const { data: cur } = await supabase.from("platform_settings").select("value").eq("key", "banner").maybeSingle();
+  const path = (cur?.value as { path?: string } | undefined)?.path;
+  if (path) await supabase.storage.from("platform").remove([path]);
+  await supabase.from("platform_settings").delete().eq("key", "banner");
+  revalidatePath("/");
+  revalidatePath("/admin/dashboard");
+}

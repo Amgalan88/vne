@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { mustChangePassword } from "@/lib/password";
 import { finishOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
-import { tenantHost, tenantUrl } from "@/lib/hosts";
+import { rootUrl, tenantHost, tenantUrl } from "@/lib/hosts";
 import { ROLE_LABEL, type Role } from "@/lib/types";
 import { buttonClass, Card } from "@/components/ui";
 import { PushToggle } from "@/components/push-toggle";
@@ -50,6 +50,7 @@ export default async function Home({ searchParams }: PageProps<"/dashboard">) {
         <Logo />
         <div className="flex items-center gap-3 text-sm text-slate-500">
           <span className="hidden sm:inline">{String(claims.email ?? "")}</span>
+          <a href={rootUrl("/guide")} className="hover:underline">Гарын авлага</a>
           <SignOutButton />
         </div>
       </header>

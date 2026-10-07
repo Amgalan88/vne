@@ -61,6 +61,12 @@ export default async function SetupPage() {
       optional: true,
     },
     {
+      name: "Нүүр хуудасны баннер: 007_platform.sql",
+      ok: !(await (await createClient()).from("platform_settings").select("key").limit(1)).error,
+      fix: "Supabase → SQL Editor дээр supabase/007_platform.sql-ийг Run.",
+      optional: true,
+    },
+    {
       name: "Ажилтанд түр нууц үг өгөх (SUPABASE_SERVICE_ROLE_KEY)",
       ok: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       fix: "Supabase → Project Settings → API Keys → Secret key-г хуулж Vercel-д SUPABASE_SERVICE_ROLE_KEY нэрээр нэмээд Redeploy.",

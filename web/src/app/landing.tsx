@@ -5,13 +5,17 @@ import { fmtMoney } from "@/lib/format";
 import { ROOT_DOMAIN } from "@/lib/env";
 import { appUrl } from "@/lib/hosts";
 import { SlugClaim } from "@/components/slug-claim";
+import { SampleSheet } from "@/components/sample-sheet";
+import type { Banner } from "@/lib/platform";
+import type { DocType } from "@/lib/types";
 
 /* hhk.mn нүүр хуудас (нэвтрээгүй хэрэглэгчид). Харанхуй горимоос үл хамааран цайвар өнгөтэй. */
 
-export function Landing({ signedIn = false }: { signedIn?: boolean }) {
+export function Landing({ signedIn = false, banner = null }: { signedIn?: boolean; banner?: Banner | null }) {
   return (
     <div className="flex-1 bg-white text-slate-900">
       <Nav signedIn={signedIn} />
+      {banner?.enabled && <PromoBanner banner={banner} />}
       <Hero />
       <DocTypes />
       <Features />
@@ -35,6 +39,7 @@ function Nav({ signedIn }: { signedIn: boolean }) {
           <a href="#security" className="hover:text-slate-900">Тамганы хамгаалалт</a>
           <a href="#pricing" className="hover:text-slate-900">Үнэ</a>
           <a href="#faq" className="hover:text-slate-900">Асуулт</a>
+          <Link href="/guide" className="hover:text-slate-900">Гарын авлага</Link>
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
@@ -98,107 +103,69 @@ function Hero() {
   );
 }
 
-/** Нэхэмжлэхийн жишээ — тамга, гарын үсэг, аудит логийн мэдэгдэлтэй */
+/** Нэхэмжлэхийн жишээ — жинхэнэ ТМ-1 загвараар (апп дотор гарах баримттай яг ижил) */
 function HeroMock() {
-  const rows = [
-    ["Хэвлэлийн цаас A4", "20 хайрцаг", "1,100,000"],
-    ["Хар бэх HP 85A", "4 ш", "640,000"],
-    ["Хүргэлт", "1", "60,000"],
-  ];
   return (
     <div className="relative mx-auto w-full max-w-md lg:max-w-none">
       <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-br from-indigo-200/60 via-white to-amber-100/60 blur-2xl" />
-      <div className="rotate-[1.5deg] rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10 sm:p-8">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <p className="text-sm font-bold">ЖИШЭЭ ТРЕЙД ХХК</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-slate-400">
-              Улаанбаатар, СХД, 9-р хороо
-              <br />
-              РД: 6622755
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs font-extrabold tracking-[0.2em] text-slate-700">НЭХЭМЖЛЭХ</p>
-            <p className="mt-1 inline-block rounded bg-slate-900 px-2 py-0.5 font-mono text-[11px] text-white">НХ-0043</p>
-          </div>
-        </div>
-        <table className="mt-4 w-full text-[12px]">
-          <thead>
-            <tr className="text-left text-[10px] uppercase tracking-wide text-slate-400">
-              <th className="pb-2 font-semibold">Бараа</th>
-              <th className="pb-2 font-semibold">Тоо</th>
-              <th className="pb-2 text-right font-semibold">Дүн</th>
-            </tr>
-          </thead>
-          <tbody className="text-slate-700">
-            {rows.map(([n, q, s]) => (
-              <tr key={n} className="border-t border-slate-100">
-                <td className="py-2">{n}</td>
-                <td className="py-2 text-slate-500">{q}</td>
-                <td className="py-2 text-right font-medium">{s}₮</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Нийт дүн</span>
-          <span className="text-base font-extrabold">1,800,000₮</span>
-        </div>
-        <div className="relative mt-6 flex h-28 items-end justify-between">
-          <div className="text-[11px] text-slate-400">
-            <p>Захирал ............ /Ю.Амгалан/</p>
-            <p className="mt-3">Нягтлан ............ /Б.Сараа/</p>
-          </div>
-          <svg viewBox="0 0 120 50" className="absolute bottom-9 left-16 h-10 w-28 text-slate-700/80" aria-hidden>
-            <path d="M5 35c10-25 18-25 14 0s12-30 20-10 6 18 16-2 10 8 18 4 14-14 22-6 10 10 20 2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          <Stamp className="h-28 w-28 -rotate-12" />
-        </div>
+      <div className="mx-auto w-fit rotate-[1.2deg] rounded-xl bg-white shadow-2xl shadow-slate-900/15 ring-1 ring-slate-200">
+        <SampleSheet type="invoice" zoom="[zoom:0.4] sm:[zoom:0.52] lg:[zoom:0.6]" className="max-h-[480px] sm:max-h-[600px] lg:max-h-[680px] rounded-xl" />
       </div>
 
       <div className="absolute -top-5 -left-3 flex items-center gap-2 rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs font-semibold shadow-lg sm:-left-8">
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">🔓</span>
         Тамга PIN-ээр нээгдлээ
       </div>
-      <div className="absolute -bottom-12 -right-2 w-60 rounded-xl border border-slate-200 bg-white p-3 text-xs shadow-lg sm:-right-6">
+      <div className="absolute -bottom-8 -right-2 w-60 rounded-xl border border-slate-200 bg-white p-3 text-xs shadow-lg sm:-right-6">
         <p className="font-semibold text-slate-400">Аудит лог · 2 мин өмнө</p>
         <p className="mt-1 text-slate-700">
-          <b>Б.Сараа</b> — НХ-0043-ийн дүн <span className="whitespace-nowrap">1,740,000₮ → 1,800,000₮</span>
+          <b>Д.Сараа</b> — №043 нэхэмжлэхийн дүн <span className="whitespace-nowrap">1,740,000₮ → 1,800,000₮</span>
         </p>
       </div>
     </div>
   );
 }
 
-function Stamp({ className = "" }: { className?: string }) {
+function PromoBanner({ banner }: { banner: Banner }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  const img = <img src={banner.url} alt={banner.alt} className="mx-auto block max-h-[320px] w-full max-w-6xl object-cover sm:rounded-2xl" />;
   return (
-    <svg viewBox="0 0 120 120" className={`text-indigo-600/80 ${className}`} aria-hidden>
-      <defs>
-        <path id="stamp-ring" d="M60 60m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0" />
-      </defs>
-      <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" strokeWidth="3" />
-      <circle cx="60" cy="60" r="33" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <text fill="currentColor" fontSize="8.6" fontWeight="700" letterSpacing="0.8">
-        <textPath href="#stamp-ring">ЖИШЭЭ ТРЕЙД ХХК • УЛААНБААТАР ХОТ •</textPath>
-      </text>
-      <text x="60" y="57" textAnchor="middle" fill="currentColor" fontSize="9" fontWeight="700">РД</text>
-      <text x="60" y="70" textAnchor="middle" fill="currentColor" fontSize="10" fontWeight="800">6622755</text>
-    </svg>
+    <div className="px-0 pt-4 sm:px-6">
+      {banner.link ? (
+        <a href={banner.link} className="block transition hover:opacity-95">
+          {img}
+        </a>
+      ) : (
+        img
+      )}
+    </div>
   );
 }
 
+const GALLERY: { type: DocType; title: string; text: string }[] = [
+  { type: "invoice", title: "Нэхэмжлэх · ТМ-1", text: "Сангийн сайдын батласан маягт. НӨАТ задлах, дүнг үсгээр." },
+  { type: "dispatch", title: "Зарлагын баримт · БМ-3", text: "Бараа хүлээлцэх баримт, хүлээлгэн өгсөн, хүлээн авсан." },
+  { type: "quote", title: "Үнийн санал", text: "Лого, өнгө бүхий брэнд загвар. Хүчинтэй хугацаа, нөхцөл." },
+  { type: "letter", title: "Албан бичиг", text: "Дугаар, огноо, хаяглалттай албан бичиг тамга, гарын үсэгтэй." },
+];
+
 function DocTypes() {
   return (
-    <section className="border-y border-slate-100 bg-slate-50/60">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-6 text-sm font-semibold text-slate-500 sm:px-6">
-        <span className="text-xs uppercase tracking-widest text-slate-400">Баримтын төрлүүд</span>
-        {["Үнийн санал", "Нэхэмжлэх · ТМ-1", "Зарлагын баримт · БМ-3", "Албан бичиг"].map(t => (
-          <span key={t} className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-            {t}
-          </span>
-        ))}
+    <section id="documents" className="scroll-mt-20 border-y border-slate-100 bg-slate-50/60 py-20">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <SectionHead eyebrow="Баримтын төрлүүд" title="Апп дотор яг ийм баримт гарна" text="Доорх нь жишээ мэдээлэлтэй жинхэнэ загварууд. Өөрийн тамга, гарын үсэг, логотой гарна." />
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {GALLERY.map(g => (
+            <figure key={g.type} className="rounded-2xl border border-slate-200 bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-900/5">
+              <SampleSheet type={g.type} zoom="[zoom:0.36] sm:[zoom:0.33] lg:[zoom:0.3]" className="flex h-[330px] justify-center rounded-lg bg-slate-100 pt-2 sm:h-[300px] lg:h-[270px]" />
+              <figcaption className="px-1 pt-3">
+                <p className="font-bold">{g.title}</p>
+                <p className="mt-1 text-sm text-slate-600">{g.text}</p>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+        <p className="mt-6 text-center text-xs text-slate-400">Зураг дээрх компани, хүмүүсийн нэр, дүн бүгд зохиомол.</p>
       </div>
     </section>
   );
@@ -403,6 +370,11 @@ function Footer() {
     <footer className="border-t border-slate-100">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:px-6">
         <Logo />
+        <nav className="flex gap-5">
+          <Link href="/guide" className="hover:text-slate-800">Гарын авлага</Link>
+          <a href="#pricing" className="hover:text-slate-800">Үнэ</a>
+          <a href="#faq" className="hover:text-slate-800">Асуулт</a>
+        </nav>
         <p>© {new Date().getFullYear()} hhk.mn · Улаанбаатар</p>
       </div>
     </footer>
