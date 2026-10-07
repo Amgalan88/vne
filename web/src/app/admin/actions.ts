@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export type CodeState = { step?: "code"; email?: string; error?: string };
 
 /**
- * 1-р алхам: имэйлд нэг удаагийн код илгээнэ. Админы имэйл биш бол код илгээхгүй ч
+ * 1-р алхам: имэйлд нэг удаагийн код илгээнэ (админы имэйл бүртгэлгүй бол кодоор баталгаажихад өөрөө үүснэ). Админы имэйл биш бол код илгээхгүй ч
  * хариу ижил байна — хэн админ болохыг задруулахгүй.
  * 2-р алхам: кодыг шалгаж нэвтрүүлнэ.
  */
@@ -20,12 +20,12 @@ export async function adminLogin(_: CodeState, fd: FormData): Promise<CodeState>
 
   if (!token) {
     if (email === ADMIN_EMAIL) {
-      const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+      const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
       // Админы имэйл дээр л бодит алдааг харуулна (өөр имэйлд хариу ижил хэвээр)
       if (error) {
         if (error.code?.startsWith("over_")) return { error: "Хэт олон оролдлого хийлээ. Хэдэн минутын дараа дахин оролдоно уу." };
         if (error.code === "otp_disabled" || error.message.toLowerCase().includes("signups not allowed"))
-          return { error: "Энэ имэйлээр бүртгэл олдсонгүй. Эхлээд hhk.mn/signup дээр бүртгүүлж, имэйлээ баталгаажуулаад дахин оролдоно уу." };
+          return { error: "Supabase дээр шинэ бүртгэл хаалттай байна. Authentication → Sign In / Providers дээр \"Allow new users to sign up\"-ийг түр асаагаад дахин оролдоно уу." };
         return { error: `Код илгээж чадсангүй: ${error.message}. Supabase-ийн SMTP тохиргоог шалгана уу.` };
       }
     }
