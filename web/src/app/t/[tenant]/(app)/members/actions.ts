@@ -9,8 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 export type InviteState = {
   error?: string;
   message?: string;
-  /** Түр нууц үгтэй урилга: эзэмшигч ажилтанд өгөх мэдээлэл */
-  credentials?: { email: string; password: string; url: string; companyName: string; emailed: boolean };
+  /** Ажилтанд явуулах холбоос (урилга эсвэл нэвтрэх хаяг) */
+  credentials?: { email: string; url: string; companyName: string; emailed: boolean; isLink: boolean };
 };
 
 const esc = (v: string) => v.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -29,9 +29,6 @@ const refresh = () => revalidatePath("/t/[tenant]/members", "page");
 
 export async function inviteMember(tenantId: string, _: InviteState, fd: FormData): Promise<InviteState> {
   const email = String(fd.get("email") ?? "").trim();
-  const tempPassword = String(fd.get("password") ?? "");
-  if (tempPassword && tempPassword.length < 8) return { error: "Түр нууц үг дор хаяж 8 тэмдэгт байна." };
-
   const supabase = await createClient();
   // Эрх (owner/admin), төлбөртэй багц, давхардлыг Postgres шалгана — доорх үйлдлүүд зөвхөн амжилттай бол ажиллана
   const { error } = await supabase.rpc("invite_member", {
@@ -43,48 +40,42 @@ export async function inviteMember(tenantId: string, _: InviteState, fd: FormDat
   refresh();
 
   const { data: t } = await supabase.from("tenants").select("name, slug").eq("id", tenantId).maybeSingle();
-  const url = t ? tenantUrl(t.slug, "/login") : "";
+  const companyName = t?.name ?? "";
   const lower = email.toLowerCase();
 
-  // Түр нууц үгтэй бол хэрэглэгчийг шууд үүсгэнэ; анх нэвтрэхэд өөрөө шинэ нууц үг тохируулна
-  if (tempPassword) {
-    const admin = createAdminClient();
-    if (!admin) {
-      return { message: `${email} урилга бүртгэгдлээ, гэхдээ түр нууц үг үүсгэж чадсангүй: SUPABASE_SERVICE_ROLE_KEY тохируулаагүй байна. Ажилтан өөрөө бүртгүүлж нэгдэнэ.` };
-    }
-    const { error: createErr } = await admin.auth.admin.createUser({
+  // Шинэ хүнд нэг удаагийн урилгын холбоос: дармагц имэйл нь баталгаажиж, өөрөө нууц үгээ тохируулна.
+  // Эзэмшигч нууц үгийг хэзээ ч мэдэхгүй, бусдын имэйлээр аккаунт үүсгэх боломжгүй.
+  const admin = createAdminClient();
+  let link = "";
+  if (admin && t) {
+    const { data, error: linkErr } = await admin.auth.admin.generateLink({
+      type: "invite",
       email: lower,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { must_change_password: true },
+      options: { data: { must_change_password: true } },
     });
-    if (createErr) {
-      const exists = createErr.code === "email_exists" || createErr.message.toLowerCase().includes("already");
-      return {
-        message: exists
-          ? `${email} аль хэдийн бүртгэлтэй тул урилга бүртгэгдлээ. Тэр өөрийн нууц үгээрээ нэвтэрмэгц гишүүн болно.`
-          : `${email} урилга бүртгэгдсэн ч хэрэглэгч үүсгэж чадсангүй: ${createErr.message}`,
-      };
+    const hashed = data?.properties?.hashed_token;
+    if (!linkErr && hashed) {
+      link = tenantUrl(t.slug, `/auth/confirm?token_hash=${hashed}&type=invite&next=/change-password`);
+    } else if (linkErr && !(linkErr.code === "email_exists" || linkErr.message.toLowerCase().includes("already"))) {
+      return { message: `${email} урилга бүртгэгдсэн ч холбоос үүсгэж чадсангүй: ${linkErr.message}` };
     }
-    const emailed = await sendMail(
-      lower,
-      `${t?.name ?? "hhk.mn"} — таныг урилаа`,
-      `<p>Таныг <b>${esc(t?.name ?? "")}</b> компанид урилаа.</p><p>Нэвтрэх: <a href="${url}">${url}</a><br>Имэйл: ${esc(lower)}<br>Түр нууц үг: <b>${esc(tempPassword)}</b></p><p>Анх нэвтрэхэд өөрийн шинэ нууц үгээ тохируулна.</p>`,
-    );
-    return {
-      message: `${email} хэрэглэгч үүсч, компанид нэмэгдлээ. Доорх мэдээллийг ажилтанд өгнө үү — анх нэвтрэхдээ шинэ нууц үгээ өөрөө тохируулна.`,
-      credentials: { email: lower, password: tempPassword, url, companyName: t?.name ?? "", emailed },
-    };
   }
 
-  // Нууц үггүй: ажилтан өөрөө бүртгүүлнэ. Холбоосыг имэйлээр явуулна (RESEND_API_KEY тохируулсан бол).
-  const signup = t ? tenantUrl(t.slug, "/signup") : "";
-  await sendMail(
+  // Бүртгэлтэй хүн эсвэл service key байхгүй үед — нэвтрэх / бүртгүүлэх хаяг
+  const url = link || (t ? tenantUrl(t.slug, "/signup") : "");
+  const emailed = await sendMail(
     lower,
-    `${t?.name ?? "hhk.mn"} — таныг урилаа`,
-    `<p>Таныг <b>${esc(t?.name ?? "")}</b> компанид урилаа.</p><p>Энэ имэйлээрээ (${esc(lower)}) бүртгүүлнэ үү: <a href="${signup}">${signup}</a></p>`,
+    `${companyName || "HHK.MN"} — таныг урилаа`,
+    link
+      ? `<p>Таныг <b>${esc(companyName)}</b> компанид урилаа.</p><p><a href="${link}">Урилгыг хүлээн авч нууц үгээ тохируулах</a></p><p>Холбоос 24 цагийн дотор хүчинтэй.</p>`
+      : `<p>Таныг <b>${esc(companyName)}</b> компанид урилаа.</p><p>Энэ имэйлээрээ (${esc(lower)}) нэвтэрч эсвэл бүртгүүлж орно уу: <a href="${url}">${url}</a></p>`,
   );
-  return { message: `${email} урилга бүртгэгдлээ. Тэр энэ имэйлээр ${signup} дээр бүртгүүлж нэвтэрмэгц гишүүн болно.` };
+  return {
+    message: link
+      ? `${email} урилга бэлэн. Доорх холбоосыг ажилтанд явуулна уу — дармагц имэйл нь баталгаажиж, өөрийн нууц үгээ тохируулна.`
+      : `${email} урилга бүртгэгдлээ. Тэр энэ имэйлээрээ нэвтэрмэгц (бүртгэлгүй бол бүртгүүлмэгц) гишүүн болно.`,
+    credentials: { email: lower, url, companyName, emailed, isLink: !!link },
+  };
 }
 
 export async function changeRole(tenantId: string, userId: string, fd: FormData) {

@@ -9,6 +9,7 @@ import { UpgradeNotice } from "@/components/upgrade-notice";
 import { loadIssuerAssets } from "@/lib/assets";
 import { IssuerForm } from "./issuer-form";
 import { StampPanel, type StampInfo } from "./stamp-panel";
+import { LegacyImport } from "./legacy-import";
 
 export const metadata: Metadata = { title: "Тохиргоо" };
 
@@ -78,6 +79,8 @@ export default async function SettingsPage({ params }: PageProps<"/t/[tenant]/se
           </UpgradeNotice>
         )}
       </div>
+
+      {!!issuers?.length && <LegacyImport tenantId={tenant.id} issuers={issuers.map(i => ({ id: i.id, name: i.name }))} />}
 
     </div>
   );

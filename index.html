@@ -1280,6 +1280,7 @@
 
     /* ══ Print ══ */
     @media print {
+      #moveBanner { display: none !important; }
       body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -1441,6 +1442,11 @@
 </head>
 
 <body>
+  <div id="moveBanner" style="background:linear-gradient(100deg,#1a5bcc,#14b3a0);color:#fff;padding:10px 14px;font:600 13px/1.4 system-ui,sans-serif;text-align:center">
+    Энэ бол хуучин хувилбар. Шинэ <a href="https://hhk.mn" style="color:#fff;text-decoration:underline">hhk.mn</a> апп руу шилжээрэй —
+    дээрх «⬆ Шинэ апп руу» товчоор баримтуудаа татаж, шинэ апп-ын Тохиргоо хэсэгт оруулна.
+    <button onclick="this.parentElement.remove()" style="margin-left:8px;background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer">✕</button>
+  </div>
 
   <!-- ══ Нэвтрэх ══ -->
   <div id="lockScreen">
@@ -1468,6 +1474,7 @@
     </div>
     <div class="topbar-right">
       <button class="tb-btn" onclick="openHistory()">🗂 Түүх</button>
+      <button class="tb-btn" onclick="exportForNewApp()" title="Бүх баримт, харилцагчаа шинэ hhk.mn апп руу шилжүүлэх файл татах">⬆ Шинэ апп руу</button>
       <button class="tb-btn" onclick="toggleDark()" id="darkBtn">🌙</button>
       <button class="tb-btn" id="installBtn" style="display:none">📲 Суулгах</button>
     </div>
@@ -3074,6 +3081,20 @@
         sel.appendChild(o);
       });
       if (cur && saved[cur]) sel.value = cur;
+    }
+    /* Шинэ hhk.mn апп руу шилжүүлэх: түүх, харилцагч, байгууллагын мэдээллийг нэг JSON файл болгон татна.
+       Шинэ апп → Тохиргоо → «Хуучин аппаас импортлох» хэсэгт энэ файлыг оруулна. */
+    function exportForNewApp() {
+      const read = k => { try { return JSON.parse(localStorage.getItem(k)) ?? null; } catch { return null; } };
+      const companies = (getCompanies() || []).map(c => ({ id: c.id, name: c.name, address: c.address, rd: c.rd, phone: c.phone, email: c.email, bank: c.bank, account: c.account, director: c.director }));
+      const data = { app: "umgm", version: 1, exportedAt: new Date().toISOString(), history: read(LS_HIST) || [], customers: getCusts() || [], templates: read(LS_TMPL) || {}, companies };
+      const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "hhk-huuchin-app-" + today() + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      showToast("✅ Файл татагдлаа. hhk.mn → Тохиргоо → «Хуучин аппаас импортлох» хэсэгт оруулна уу.");
     }
     function collectState() {
       const st = {
