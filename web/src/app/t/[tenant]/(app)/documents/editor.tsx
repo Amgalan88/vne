@@ -159,6 +159,10 @@ export function DocumentEditor({
 
   // «Гаргах»: тамга дарагдаж, баримт түгжигдэнэ
   const issue = () => {
+    if (issuerAssets?.locked) {
+      alert("Тамга PIN-ээр хамгаалагдсан байна.\n\nДээрх шар хэсэгт PIN-ээ оруулж нээгээд дараа нь «✅ Гаргах»-ыг дарна уу.\nPIN-гүй бол «Ноорог хадгалах»-аар хадгалаад эзэмшигчид хэлнэ үү.");
+      return;
+    }
     if (!confirm("Баримтыг гаргах уу?\n\n• Тамга, гарын үсэг дарагдана.\n• Баримт түгжигдэж, дахин засах боломжгүй болно.\n• Засах шаардлагатай бол «⧉ Хуулах»-аар шинэ баримт үүсгэнэ.")) return;
     save("issued");
   };
@@ -236,7 +240,7 @@ export function DocumentEditor({
           ))}
         </div>
 
-        {issuer && issuerAssets?.locked && <StampUnlock issuerId={issuer.id} />}
+        {issuer && issuerAssets?.locked && !locked && <StampUnlock issuerId={issuer.id} />}
 
         {issuer && !isLetter && !(issuer.rd && (issuer.bank || issuer.account)) && (
           <Notice tone="info">

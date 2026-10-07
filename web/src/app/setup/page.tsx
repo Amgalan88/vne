@@ -77,6 +77,11 @@ export default async function SetupPage() {
       fix: "Supabase → SQL Editor дээр supabase/011_document_lock.sql-ийг Run.",
     },
     {
+      name: "Гаргахад тамга дарах (холбоос дээр PIN тамга): 012_stamp_on_issue.sql",
+      ok: !(await (await createClient()).from("documents").select("stamped_at").limit(1)).error,
+      fix: "Supabase → SQL Editor дээр supabase/012_stamp_on_issue.sql-ийг Run.",
+    },
+    {
       name: "Нүүр хуудасны баннер: 007_platform.sql",
       ok: !(await (await createClient()).from("platform_settings").select("key").limit(1)).error,
       fix: "Supabase → SQL Editor дээр supabase/007_platform.sql-ийг Run.",
