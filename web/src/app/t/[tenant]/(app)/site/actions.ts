@@ -49,11 +49,18 @@ export async function saveSite(tenantId: string, _: SiteState, fd: FormData): Pr
   } catch {
     return { error: "Үйлчилгээний жагсаалт буруу байна." };
   }
+  let gallery: string[] = [];
+  try {
+    const raw = JSON.parse(String(fd.get("gallery") ?? "[]"));
+    if (Array.isArray(raw)) gallery = raw.filter((p): p is string => typeof p === "string" && p.startsWith(`${tenantId}/`)).slice(0, 24);
+  } catch {
+    gallery = [];
+  }
   const color = String(fd.get("color")) as SiteColor;
   const template = String(fd.get("template")) as SiteTemplate;
 
   const supabase = await createClient();
-  const { data: before } = await supabase.from("tenant_sites").select("services").eq("tenant_id", tenantId).maybeSingle();
+  const { data: before } = await supabase.from("tenant_sites").select("*").eq("tenant_id", tenantId).maybeSingle();
 
   const row = {
     tenant_id: tenantId,
@@ -67,25 +74,34 @@ export async function saveSite(tenantId: string, _: SiteState, fd: FormData): Pr
     facebook: text(fd, "facebook", 300),
     color: SITE_COLORS.includes(color) ? color : "indigo",
   };
-  let { error } = await supabase
-    .from("tenant_sites")
-    .upsert({ ...row, template: SITE_TEMPLATES.some(x => x.key === template) ? template : "modern" });
-  // 008_site_templates.sql ажиллаагүй бол загваргүйгээр хадгална
+  const tpl = { template: SITE_TEMPLATES.some(x => x.key === template) ? template : "modern" };
+  const extras = { hours: text(fd, "hours", 300), gallery, show_map: fd.get("show_map") === "on" };
+  const missingColumn = (e: { code?: string } | null) => !!e && (e.code === "PGRST204" || e.code === "42703");
+  // Шинэ баганууд (008, 010 SQL) ажиллаагүй бол аль боломжтойгоор нь хадгална
+  let { error } = await supabase.from("tenant_sites").upsert({ ...row, ...tpl, ...extras });
+  let noExtras = false;
   let noTemplates = false;
-  if (error && (error.code === "PGRST204" || error.code === "42703")) {
-    ({ error } = await supabase.from("tenant_sites").upsert(row));
+  if (missingColumn(error)) {
+    noExtras = true;
+    ({ error } = await supabase.from("tenant_sites").upsert({ ...row, ...tpl }));
+  }
+  if (missingColumn(error)) {
     noTemplates = true;
+    ({ error } = await supabase.from("tenant_sites").upsert(row));
   }
   if (error) return { error: error.code === "42501" ? "Засах эрх хүрэлцэхгүй байна." : error.message };
 
   // Хассан, сольсон үйлчилгээний зургийг storage-оос цэвэрлэнэ
-  const kept = new Set(services.map(s => s.image).filter(Boolean));
-  const stale = ((before?.services ?? []) as Service[]).map(s => s.image).filter((p): p is string => !!p && !kept.has(p));
+  const kept = new Set([...services.map(s => s.image), ...(noExtras ? [] : gallery)].filter(Boolean));
+  const prevGallery = (noExtras ? [] : ((before as { gallery?: string[] } | null)?.gallery ?? [])) as string[];
+  const stale = [...((before?.services ?? []) as Service[]).map(s => s.image), ...prevGallery].filter((p): p is string => !!p && !kept.has(p));
   if (stale.length) await supabase.storage.from("sites").remove(stale);
 
   refresh();
   const msg = fd.get("published") === "on" ? "✓ Хадгалагдаж, нийтлэгдлээ" : "✓ Хадгалагдлаа (нийтлээгүй)";
-  return { message: noTemplates ? `${msg}. Загвар сонголт ажиллахын тулд 008_site_templates.sql-ийг Run хийнэ үү.` : msg };
+  if (noTemplates) return { message: `${msg}. Загвар сонголт ажиллахын тулд 008_site_templates.sql-ийг Run хийнэ үү.` };
+  if (noExtras) return { message: `${msg}. Ажлын цаг, зургийн цомог хадгалагдахын тулд 010_v2.sql-ийг Run хийнэ үү.` };
+  return { message: msg };
 }
 
 /** Нүүр зураг, лого, «Бидний тухай» зураг — нийтийн "sites" bucket-д. Эрхийг storage policy (owner/admin) шалгана. */
@@ -123,13 +139,25 @@ export async function removeSiteImage(tenantId: string, kind: ImageKind): Promis
   return { message: "✓ Устгагдлаа" };
 }
 
-/** Үйлчилгээний зураг — замыг буцаана, «Хадгалах» дарахад services-д орно */
-export async function uploadServiceImage(tenantId: string, fd: FormData): Promise<{ path?: string; url?: string; error?: string }> {
+/** Үйлчилгээ / цомгийн зураг — замыг буцаана, «Хадгалах» дарахад хуудсанд орно */
+export async function uploadServiceImage(tenantId: string, fd: FormData, prefix: "svc" | "gal" = "svc"): Promise<{ path?: string; url?: string; error?: string }> {
   const { file, ext, error: bad } = checkImage(fd.get("file"));
   if (bad) return { error: bad };
   const supabase = await createClient();
-  const path = `${tenantId}/svc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+  const path = `${tenantId}/${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
   const up = await supabase.storage.from("sites").upload(path, file!, { contentType: file!.type });
   if (up.error) return { error: `Зураг хадгалж чадсангүй: ${up.error.message}. 008_site_templates.sql ажилласан эсэхийг шалгана уу.` };
   return { path, url: siteImageUrl(path)! };
+}
+
+/** Ирсэн хүсэлтийг шийдвэрлэсэн / устгах */
+export async function setInquiryHandled(id: string, handled: boolean) {
+  const supabase = await createClient();
+  await supabase.from("site_inquiries").update({ handled }).eq("id", id);
+  revalidatePath("/t/[tenant]/site", "page");
+}
+export async function deleteInquiry(id: string) {
+  const supabase = await createClient();
+  await supabase.from("site_inquiries").delete().eq("id", id);
+  revalidatePath("/t/[tenant]/site", "page");
 }

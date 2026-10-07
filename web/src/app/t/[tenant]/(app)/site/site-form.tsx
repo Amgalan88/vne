@@ -20,6 +20,9 @@ export type SiteValues = {
   cover: string | null;
   logo: string | null;
   aboutImage: string | null;
+  hours: string;
+  gallery: string[];
+  showMap: boolean;
 };
 
 const textarea =
@@ -163,6 +166,9 @@ export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteV
   const [services, setServices] = useState<Service[]>(values.services.length ? values.services : [{ title: "", text: "" }]);
   const [color, setColor] = useState<SiteColor>(values.color);
   const [template, setTemplate] = useState<SiteTemplate>(values.template);
+  const [gallery, setGallery] = useState<string[]>(values.gallery);
+  const [galPending, startGal] = useTransition();
+  const [galErr, setGalErr] = useState("");
   const setService = (i: number, patch: Partial<Service>) =>
     setServices(services.map((s, j) => (j === i ? { ...s, ...patch } : s)));
 
@@ -171,6 +177,7 @@ export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteV
       <input type="hidden" name="services" value={JSON.stringify(services)} />
       <input type="hidden" name="color" value={color} />
       <input type="hidden" name="template" value={template} />
+      <input type="hidden" name="gallery" value={JSON.stringify(gallery)} />
       {state.error && <Notice tone="error">{state.error}</Notice>}
       {state.message && <Notice tone="success">{state.message}</Notice>}
 
@@ -269,6 +276,56 @@ export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteV
         <Field label="Имэйл"><Input name="email" type="email" defaultValue={values.email} /></Field>
         <Field label="Хаяг"><Input name="address" defaultValue={values.address} placeholder="Улаанбаатар, ..." /></Field>
         <Field label="Facebook хуудас"><Input name="facebook" defaultValue={values.facebook} placeholder="facebook.com/tumen" /></Field>
+        <Field label="Ажлын цаг"><Input name="hours" defaultValue={values.hours} placeholder="Даваа–Баасан 09:00–18:00, Бямба 10:00–15:00" /></Field>
+        <label className="flex items-center gap-2 self-end pb-2 text-sm font-semibold">
+          <input type="checkbox" name="show_map" defaultChecked={values.showMap} className="h-4 w-4 accent-indigo-600" />
+          Хаягийг газрын зураг дээр харуулах
+        </label>
+        <p className="text-xs text-slate-500 sm:col-span-2">Хуудасны доод хэсэгт «Захиалга, асуулт» маягт автоматаар гарна. Ирсэн хүсэлт энэ хуудасны дээд хэсэгт харагдаж, танд мэдэгдэл очно.</p>
+      </Card>
+
+      <Card className="p-5">
+        <p className="mb-1 text-sm font-bold">6. Зургийн цомог</p>
+        <p className="mb-3 text-xs text-slate-500">Бүтээгдэхүүн, ажлын явц, оффисын зураг — 24 хүртэл.</p>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {gallery.map((p, i) => (
+            <div key={p} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-slate-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={siteImageUrl(p)!} alt="" className="h-full w-full object-cover" />
+              <button type="button" onClick={() => setGallery(gallery.filter((_, j) => j !== i))} className="absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-xs text-white" aria-label="Хасах">✕</button>
+            </div>
+          ))}
+          {gallery.length < 24 && (
+            <label className="flex aspect-square cursor-pointer items-center justify-center rounded-lg bg-slate-100 text-center text-xs text-slate-500 ring-1 ring-slate-200 hover:ring-slate-400">
+              {galPending ? "…" : "＋ Зураг"}
+              <input
+                type="file"
+                multiple
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                disabled={galPending}
+                onChange={e => {
+                  const files = [...(e.target.files ?? [])].slice(0, 24 - gallery.length);
+                  e.target.value = "";
+                  startGal(async () => {
+                    const added: string[] = [];
+                    for (const f of files) {
+                      const fd = new FormData();
+                      fd.set("file", f);
+                      const r = await uploadServiceImage(tenantId, fd, "gal");
+                      if (r.error) setGalErr(r.error);
+                      else added.push(r.path!);
+                    }
+                    if (added.length) setGalErr("");
+                    setGallery(g => [...g, ...added]);
+                  });
+                }}
+              />
+            </label>
+          )}
+        </div>
+        {galErr && <p className="mt-2 text-xs text-red-600">{galErr}</p>}
+        <p className="mt-2 text-xs text-slate-400">Нэмсэн, хассан зураг «Хадгалах» дармагц хуудсанд орно.</p>
       </Card>
 
       <Card className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 p-4">

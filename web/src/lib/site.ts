@@ -21,6 +21,9 @@ export type PublicSiteData = {
   cover_path?: string | null;
   logo_path?: string | null;
   about_image_path?: string | null;
+  hours?: string;
+  gallery?: string[];
+  show_map?: boolean;
 };
 
 export const SITE_COLORS: SiteColor[] = ["indigo", "emerald", "rose", "amber", "sky", "slate"];

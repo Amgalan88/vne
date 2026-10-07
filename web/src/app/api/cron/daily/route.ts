@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ── 2. Ашиглагдаагүй үйлчилгээний зураг (1 хоногоос хуучин) ──
-  const { data: sites } = await admin.from("tenant_sites").select("tenant_id, services");
+  // ── 2. Ашиглагдаагүй үйлчилгээ / цомгийн зураг (1 хоногоос хуучин) ──
+  const { data: sites } = await admin.from("tenant_sites").select("*");
   for (const s of sites ?? []) {
-    const used = new Set(((s.services ?? []) as Service[]).map(x => x.image).filter(Boolean));
+    const used = new Set([...((s.services ?? []) as Service[]).map(x => x.image), ...((s.gallery ?? []) as string[])].filter(Boolean));
     const { data: files } = await admin.storage.from("sites").list(s.tenant_id, { limit: 1000 });
     const stale = (files ?? [])
-      .filter(f => f.name.startsWith("svc-") && !used.has(`${s.tenant_id}/${f.name}`))
+      .filter(f => (f.name.startsWith("svc-") || f.name.startsWith("gal-")) && !used.has(`${s.tenant_id}/${f.name}`))
       .filter(f => (f.created_at ? Date.now() - Date.parse(f.created_at) > DAY : false))
       .map(f => `${s.tenant_id}/${f.name}`);
     if (stale.length) {

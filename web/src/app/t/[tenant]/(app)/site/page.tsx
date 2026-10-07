@@ -6,6 +6,7 @@ import { canManage } from "@/lib/types";
 import { tenantHost, tenantUrl } from "@/lib/hosts";
 import { coverUrl } from "@/lib/site";
 import { SiteForm, type SiteValues } from "./site-form";
+import { Inquiries } from "./inquiries";
 
 export const metadata: Metadata = { title: "Нийтийн хуудас" };
 
@@ -31,6 +32,9 @@ export default async function SitePage({ params }: PageProps<"/t/[tenant]/site">
     cover: coverUrl(data?.cover_path),
     logo: coverUrl(data?.logo_path),
     aboutImage: coverUrl(data?.about_image_path),
+    hours: (data as { hours?: string } | null)?.hours ?? "",
+    gallery: (data as { gallery?: string[] } | null)?.gallery ?? [],
+    showMap: (data as { show_map?: boolean } | null)?.show_map ?? true,
   };
 
   return (
@@ -46,6 +50,7 @@ export default async function SitePage({ params }: PageProps<"/t/[tenant]/site">
           Хуудсаа харах ↗
         </a>
       </div>
+      <Inquiries tenantId={tenant.id} />
       <SiteForm tenantId={tenant.id} values={values} />
     </div>
   );

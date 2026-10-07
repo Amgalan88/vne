@@ -2,6 +2,7 @@ import Link from "next/link";
 import { rootUrl } from "@/lib/hosts";
 import { coverUrl, initials, siteImageUrl, THEME, type PublicSiteData, type Service, type SiteTemplate } from "@/lib/site";
 import { LogoMark } from "@/components/logo";
+import { InquiryForm } from "@/components/inquiry-form";
 
 /* slug.hhk.mn — компанийн нийтийн хуудас. 4 загвар: Орчин үе, Цэвэр, Тод, Харанхуй */
 
@@ -30,7 +31,8 @@ export function PublicSite({ site, member }: { site: PublicSiteData; member: boo
   const contacts = [
     site.phone && { icon: "📞", label: "Утас", value: site.phone, href: `tel:${site.phone.replace(/\s/g, "")}` },
     site.email && { icon: "✉️", label: "Имэйл", value: site.email, href: `mailto:${site.email}` },
-    site.address && { icon: "📍", label: "Хаяг", value: site.address },
+    site.address && { icon: "📍", label: "Хаяг", value: site.address, href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address)}` },
+    site.hours && { icon: "🕒", label: "Ажлын цаг", value: site.hours },
     site.facebook && { icon: "💬", label: "Facebook", value: "Facebook хуудас", href: site.facebook.startsWith("http") ? site.facebook : `https://${site.facebook}` },
   ].filter(Boolean) as Contact[];
   const cover = coverUrl(site.cover_path);
@@ -44,6 +46,7 @@ export function PublicSite({ site, member }: { site: PublicSiteData; member: boo
       {tpl === "clean" && <Clean {...props} />}
       {tpl === "bold" && <Bold {...props} />}
       {tpl === "dark" && <Dark {...props} />}
+      <Extras site={site} t={t} tone={tpl === "dark" ? "dark" : "light"} />
       <Footer tone={tpl === "dark" ? "dark" : "light"} />
     </div>
   );
@@ -129,7 +132,7 @@ function ContactCards({ contacts, t, tone }: { contacts: Contact[]; t: T; tone: 
         );
         const cls = `flex items-center gap-4 rounded-2xl p-5 transition ${tone === "dark" ? "border border-white/10 bg-white/5 hover:bg-white/10" : "border border-slate-200 bg-white hover:shadow-md"}`;
         return c.href ? (
-          <a key={c.label} href={c.href} target={c.label === "Facebook" ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>{body}</a>
+          <a key={c.label} href={c.href} target={c.label === "Facebook" || c.label === "Хаяг" ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>{body}</a>
         ) : (
           <div key={c.label} className={cls}>{body}</div>
         );
@@ -161,6 +164,52 @@ function AboutImg({ url, className = "" }: { url: string | null; className?: str
   if (!url) return null;
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={url} alt="" className={`w-full object-cover ${className}`} />;
+}
+
+/** Бүх загварт: зургийн цомог, захиалгын маягт, газрын зураг */
+function Extras({ site, t, tone }: { site: PublicSiteData; t: T; tone: "light" | "dark" }) {
+  const gallery = (site.gallery ?? []).map(p => siteImageUrl(p)).filter((u): u is string => !!u);
+  const dark = tone === "dark";
+  const map = site.show_map !== false && site.address;
+  return (
+    <>
+      {gallery.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <Eyebrow className={dark ? t.light : t.text}>Зургийн цомог</Eyebrow>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {gallery.map((u, i) => (
+              <a key={u} href={u} target="_blank" className={`group block overflow-hidden rounded-2xl ${i === 0 && gallery.length > 4 ? "col-span-2 row-span-2" : ""}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={u} alt="" loading="lazy" className="aspect-square h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section id="order" className={`scroll-mt-20 ${dark ? "" : "bg-slate-50"} py-16`}>
+        <div className={`mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 ${map ? "lg:grid-cols-2" : "max-w-2xl"}`}>
+          <div>
+            <Eyebrow className={dark ? t.light : t.text}>Захиалга, асуулт</Eyebrow>
+            <h2 className={`mt-3 text-2xl font-black tracking-tight ${dark ? "text-white" : ""}`}>Бидэнд мессеж үлдээгээрэй</h2>
+            <p className={`mt-2 mb-6 ${dark ? "text-slate-400" : "text-slate-600"}`}>Нэр, утсаа үлдээвэл бид эргэж холбогдоно.</p>
+            <InquiryForm slug={site.slug} tone={tone} accent={t.solid} />
+          </div>
+          {map && (
+            <div className={`min-h-72 overflow-hidden rounded-2xl ${dark ? "ring-1 ring-white/10" : "ring-1 ring-slate-200"}`}>
+              <iframe
+                title="Байршил"
+                src={`https://www.google.com/maps?q=${encodeURIComponent(site.address!)}&output=embed`}
+                className="h-full min-h-72 w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  );
 }
 
 function Footer({ tone }: { tone: "light" | "dark" }) {
