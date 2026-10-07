@@ -10,7 +10,7 @@ self.addEventListener("push", event => {
     data = { title: "hhk.mn", body: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "hhk.mn", {
+    self.registration.showNotification(data.title || "HHK.MN", {
       body: data.body || "",
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
