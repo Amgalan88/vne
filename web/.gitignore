@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# хуучин апп — scripts/copy-legacy.mjs үүсгэнэ
+/public/umgm/
