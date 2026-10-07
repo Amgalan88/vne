@@ -15,7 +15,7 @@ export default async function NewDocumentPage({ params, searchParams }: PageProp
   const { tenant, role } = await requireTenant(slug);
   if (!canEdit(role)) redirect("/documents");
 
-  const { issuers, customers } = await loadEditorData(tenant.id);
+  const { issuers, customers, assets } = await loadEditorData(tenant.id);
   const type = (await searchParams).type;
   const first = issuers[0];
   const initial: DocState = {
@@ -34,6 +34,7 @@ export default async function NewDocumentPage({ params, searchParams }: PageProp
       tenantId={tenant.id}
       issuers={issuers}
       customers={customers}
+      assets={assets}
       initial={initial}
       canEdit
       canDelete={canManage(role)}

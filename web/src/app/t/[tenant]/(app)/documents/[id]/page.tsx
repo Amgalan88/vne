@@ -35,7 +35,7 @@ export default async function DocumentPage({ params }: PageProps<"/t/[tenant]/do
     .maybeSingle<DocRow>();
   if (!doc) notFound();
 
-  const { issuers, customers } = await loadEditorData(tenant.id);
+  const { issuers, customers, assets } = await loadEditorData(tenant.id);
   const initial: DocState = {
     ...emptyFields(),
     ...doc.data,
@@ -54,6 +54,7 @@ export default async function DocumentPage({ params }: PageProps<"/t/[tenant]/do
       tenantId={tenant.id}
       issuers={issuers}
       customers={customers}
+      assets={assets}
       initial={initial}
       canEdit={canEdit(role)}
       canDelete={canManage(role)}

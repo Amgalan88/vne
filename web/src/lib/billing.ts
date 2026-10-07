@@ -25,3 +25,8 @@ export const PRO_FEATURES = [
 export function isPro(t: Pick<Tenant, "plan" | "paid_until">): boolean {
   return t.plan === "pro" && !!t.paid_until && new Date(t.paid_until) > new Date();
 }
+
+/** Хугацаа дуусахад үлдсэн өдөр (дууссан бол ≤ 0). paid_until байхгүй бол null */
+export function daysLeft(paidUntil: string | null): number | null {
+  return paidUntil ? Math.ceil((new Date(paidUntil).getTime() - Date.now()) / 86_400_000) : null;
+}

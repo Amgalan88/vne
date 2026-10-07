@@ -1,12 +1,13 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { Issuer } from "@/lib/documents";
+import { loadIssuerAssets } from "@/lib/assets";
 import type { CustomerOption } from "./editor";
 
 /** Засварлагчид хэрэгтэй байгууллага, харилцагчдын жагсаалт */
 export async function loadEditorData(tenantId: string) {
   const supabase = await createClient();
-  const [{ data: issuers }, { data: customers }] = await Promise.all([
+  const [{ data: issuers }, { data: customers }, assets] = await Promise.all([
     supabase
       .from("issuers")
       .select("id, name, address, rd, phone, email, bank, account, director")
@@ -22,6 +23,7 @@ export async function loadEditorData(tenantId: string) {
       .order("name")
       .limit(500)
       .returns<CustomerOption[]>(),
+    loadIssuerAssets(supabase, tenantId),
   ]);
-  return { issuers: issuers ?? [], customers: customers ?? [] };
+  return { issuers: issuers ?? [], customers: customers ?? [], assets };
 }
