@@ -1,0 +1,45 @@
+# Өгөгдлийн сангийн долоо хоног бүрийн нөөц (Ням гараг 03:00 УБ).
+# Тохируулах: GitHub → Settings → Secrets and variables → Actions:
+#   SUPABASE_DB_URL     — Supabase → Connect → Session pooler connection string (нууц үгтэй)
+#   BACKUP_PASSPHRASE   — нөөцийг шифрлэх урт нууц үг (сэргээхэд хэрэгтэй, сайн хадгална)
+# Нөөц GitHub Actions → Backup → artifact хэлбэрээр 30 хоног хадгалагдана (шифрлэгдсэн).
+# Сэргээх: gpg -d backup.sql.gz.gpg | gunzip | psql "$DB_URL"
+name: Backup
+
+on:
+  schedule:
+    - cron: "0 19 * * 6"
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    env:
+      DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Тохиргоо шалгах
+        id: cfg
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASS" ]; then
+            echo "SUPABASE_DB_URL / BACKUP_PASSPHRASE тохируулаагүй — алгаслаа."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Нөөц авах (pg_dump)
+        if: steps.cfg.outputs.skip != '1'
+        run: |
+          docker run --rm -e DB_URL postgres:17 sh -c 'pg_dump "$DB_URL" --no-owner --no-privileges --schema=public --schema=auth --schema=storage' \
+            | gzip -9 > backup.sql.gz
+          ls -lh backup.sql.gz
+          test -s backup.sql.gz
+      - name: Шифрлэх
+        if: steps.cfg.outputs.skip != '1'
+        run: |
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" --symmetric --cipher-algo AES256 -o "hhk-backup-$(date +%F).sql.gz.gpg" backup.sql.gz
+          rm backup.sql.gz
+      - uses: actions/upload-artifact@v4
+        if: steps.cfg.outputs.skip != '1'
+        with:
+          name: hhk-backup
+          path: hhk-backup-*.sql.gz.gpg
+          retention-days: 30

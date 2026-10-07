@@ -1,0 +1,41 @@
+# Push болон Pull request бүрт: lint, unit тест, build, smoke тест.
+# Алдаа гарвал GitHub дээр улаан ✗ гарч, Vercel руу эвдэрсэн код орохоос өмнө мэдэгдэнэ.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      # Тестэд жинхэнэ Supabase шаардлагагүй — зөвхөн build, хуудаснууд нээгдэж байгааг шалгана
+      NEXT_PUBLIC_SUPABASE_URL: https://ci.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3999
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit тест
+        run: npm test
+      - name: Build (төрлийн шалгалттай)
+        run: npm run build
+      - name: Smoke тест
+        run: npm run smoke

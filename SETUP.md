@@ -23,6 +23,7 @@ Supabase → **SQL Editor** → New query. Дараах файлуудыг GitHu
 7. `supabase/007_platform.sql`
 8. `supabase/008_site_templates.sql`
 9. `supabase/009_site_media.sql`
+10. `supabase/010_v2.sql`
 
 (Нэг файлыг хоёр удаа Run хийвэл "already exists" алдаа гарна. Тэр тохиолдолд дараагийнх руу шилж.)
 
@@ -47,6 +48,7 @@ Vercel → төсөл → **Settings → Environment Variables**:
 | `NEXT_PUBLIC_ROOT_DOMAIN` | `hhk.mn` | Тийм |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API Keys → **Secret key** | Ажилтанд түр нууц үг өгөхөд |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Push мэдэгдлийн түлхүүр (доорх хэсгийг үз) | Push мэдэгдэлд (заавал биш) |
+| `CRON_SECRET` | Санамсаргүй урт текст (жишээ нь 40 тэмдэгт) | Багц дуусах автомат сануулга, зураг цэвэрлэлт |
 | `RESEND_API_KEY`, `MAIL_FROM` | resend.com түлхүүр | Имэйл мэдэгдэлд (заавал биш) |
 
 Хувьсагч нэмсэн бүрдээ **Deployments → Redeploy** хийнэ. Secret key-г хэнд ч бүү өг.
@@ -61,9 +63,14 @@ Vercel → төсөл → **Settings → Environment Variables**:
 ### 4. Vercel: домэйн
 **Settings → Domains** дээр `hhk.mn` болон `*.hhk.mn` нэмнэ. `*.hhk.mn` ажиллахын тулд домэйны nameserver-ийг Vercel-ийнх (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`) болгоно.
 
+## Автомат шалгалт ба нөөцлөлт (GitHub)
+
+- **CI:** `main` руу push хийх бүрт GitHub Actions автоматаар lint, тест, build, smoke тест ажиллуулна. GitHub дээр commit-ийн хажууд ✓ эсвэл ✗ гарна. ✗ бол «Details»-ээс алдааг харна.
+- **Нөөцлөлт:** GitHub → Settings → Secrets and variables → Actions дээр `SUPABASE_DB_URL` (Supabase → Connect → Session pooler холбоосын мөр) болон `BACKUP_PASSPHRASE` (урт нууц үг) нэмбэл долоо хоног бүр шифрлэгдсэн нөөц үүснэ (Actions → Backup → artifact, 30 хоног). Сэргээх: `gpg -d файл.sql.gz.gpg | gunzip | psql "<DB холбоос>"`.
+
 ## Зөв ажиллаж байгааг шалгах
 
-**`https://hhk.mn/setup`** хуудсыг нээнэ. Тохиргоо бүрийн хажууд ✓ эсвэл ✗ гарна, ✗ бол яг юу хийхийг бичсэн байна. Бүгд ✓ болтол засна.
+Админаар нэвтэрсний дараа **`https://hhk.mn/setup`** хуудсыг нээнэ. Тохиргоо бүрийн хажууд ✓ эсвэл ✗ гарна, ✗ бол яг юу хийхийг бичсэн байна. Бүгд ✓ болтол засна.
 
 ## Өдөр тутмын ажил
 

@@ -47,8 +47,11 @@ export const THEME: Record<
   slate: { solid: "bg-slate-800", text: "text-slate-800", soft: "bg-slate-100", swatch: "bg-slate-800", label: "Хар", grad: "from-slate-950 via-slate-800 to-slate-600", light: "text-slate-300", ring: "ring-slate-800", glow: "bg-slate-400/20" },
 };
 
+// Хуулийн этгээдийн хэлбэрийг үсэгт оруулахгүй. (JS-ийн \b кирилл дээр ажилладаггүй тул үгээр нь шүүнэ)
+const LEGAL_FORMS = new Set(["ХХК", "ХК", "ТӨХК", "ТББ", "ХЗХ", "LLC", "LTD", "INC"]);
+
 export function initials(name: string): string {
-  const words = name.replace(/\b(ХХК|ХК|LLC)\b/gi, "").trim().split(/\s+/).filter(Boolean);
+  const words = name.trim().split(/\s+/).filter(w => w && !LEGAL_FORMS.has(w.replace(/[.,]/g, "").toUpperCase()));
   return (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
 }
 
