@@ -36,7 +36,7 @@ export default async function DocumentPage({ params }: PageProps<"/t/[tenant]/do
     .maybeSingle<DocRow>();
   if (!doc) notFound();
 
-  const { issuers, customers, assets } = await loadEditorData(tenant.id);
+  const { issuers, customers, assets, recentDocs } = await loadEditorData(tenant.id);
   // 010_v2.sql ажиллаагүй бол багана байхгүй — алдааг үл тоож холбоосгүй гэж үзнэ
   const { data: share } = await supabase.from("documents").select("share_token").eq("id", id).maybeSingle<{ share_token: string | null }>();
   const shareUrl = share?.share_token ? rootUrl(`/d/${share.share_token}`) : null;
@@ -59,6 +59,7 @@ export default async function DocumentPage({ params }: PageProps<"/t/[tenant]/do
       issuers={issuers}
       customers={customers}
       assets={assets}
+      recentDocs={recentDocs}
       initial={initial}
       canEdit={canEdit(role)}
       canDelete={canManage(role)}

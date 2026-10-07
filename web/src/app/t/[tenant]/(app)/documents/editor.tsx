@@ -10,12 +10,13 @@ import { toWordsMn } from "@/lib/money";
 import { docTotal, emptyRow, rowAmount, type DocState, type Issuer, type Row } from "@/lib/documents";
 import { DOC_STATUS_LABEL, DOC_TYPE_LABEL, type DocStatus, type DocType } from "@/lib/types";
 import type { AssetUrls } from "@/lib/asset-types";
-import { deleteDocument, saveDocument, type SaveResult } from "./actions";
+import { deleteDocument, loadDocForImport, saveDocument, type SaveResult } from "./actions";
 import { StampUnlock } from "./stamp-unlock";
 import { ShareLink } from "./share-link";
 import { PdfButton } from "@/components/pdf-button";
 
 export type CustomerOption = { name: string; rd: string; address: string; phone: string; email: string };
+export type RecentDoc = { id: string; doc_type: DocType; number: string; customer_name: string; doc_date: string; total: number };
 
 const TYPES: DocType[] = ["quote", "invoice", "dispatch", "letter"];
 
@@ -27,6 +28,7 @@ export function DocumentEditor({
   issuers,
   customers,
   assets,
+  recentDocs = [],
   initial,
   canEdit,
   canDelete,
@@ -36,6 +38,7 @@ export function DocumentEditor({
   issuers: Issuer[];
   customers: CustomerOption[];
   assets: Record<string, AssetUrls>;
+  recentDocs?: RecentDoc[];
   initial: DocState;
   canEdit: boolean;
   canDelete: boolean;
@@ -78,6 +81,33 @@ export function DocumentEditor({
     setDirty(true);
     setResult(null);
   };
+
+  // Өмнөх баримтаас бараа, харилцагчийг татна — хоосон талбаруудыг бөглөж, барааны жагсаалтыг солино
+  const [importing, startImport] = useTransition();
+  const importFrom = (id: string) =>
+    startImport(async () => {
+      const src = await loadDocForImport(tenantId, id);
+      if (!src) return;
+      const d = src.data;
+      const rows = (d.rows ?? []).filter(r => r.name || r.price);
+      setS(prev => {
+        const keepRows = prev.rows.some(r => r.name.trim() || r.price);
+        return {
+          ...prev,
+          rows: rows.length ? (keepRows ? [...prev.rows.filter(r => r.name.trim() || r.price), ...rows] : rows) : prev.rows,
+          customerName: prev.customerName || src.customerName,
+          custRD: prev.custRD || d.custRD || "",
+          custAddress: prev.custAddress || d.custAddress || "",
+          custPhone: prev.custPhone || d.custPhone || "",
+          custEmail: prev.custEmail || d.custEmail || "",
+          contractNo: prev.contractNo || d.contractNo || "",
+          payDue: prev.payDue || d.payDue || "",
+          note: prev.note || d.note || "",
+        };
+      });
+      setDirty(true);
+      setResult(null);
+    });
 
   const save = () =>
     startTransition(async () => {
@@ -170,6 +200,49 @@ export function DocumentEditor({
             Баримтад РД, банк, дансны мэдээлэл гарахгүй байна.{" "}
             <Link href="/settings" className="font-semibold underline">Тохиргоонд бөглөх →</Link>
           </Notice>
+        )}
+
+        {canEdit && !isLetter && !s.id && recentDocs.length > 0 && (
+          <Card className="space-y-2 p-4">
+            <p className="text-sm font-semibold">📥 Өмнөх баримтаас бараа татах</p>
+            <Select
+              value=""
+              disabled={importing}
+              onChange={e => e.target.value && importFrom(e.target.value)}
+              aria-label="Өмнөх баримт сонгох"
+            >
+              <option value="">{importing ? "Татаж байна…" : "Баримт сонгох — бараа, харилцагч хуулагдана"}</option>
+              {recentDocs.map(d => (
+                <option key={d.id} value={d.id}>
+                  {DOC_TYPE_LABEL[d.doc_type]} №{d.number} · {d.customer_name || "—"} · {fmtMoney(d.total)}₮
+                </option>
+              ))}
+            </Select>
+          </Card>
+        )}
+
+        {canEdit && !isLetter && s.id && (
+          <Card className="space-y-2 p-4">
+            <p className="text-sm font-semibold">Энэ баримтаас үүсгэх</p>
+            <div className="flex flex-wrap gap-2">
+              {(["quote", "invoice", "dispatch"] as DocType[])
+                .filter(t => t !== s.docType)
+                .map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={dirty}
+                    onClick={() => router.push(`/documents/new?from=${s.id}&type=${t}`)}
+                    className={buttonClass("light", "px-3 py-1.5 text-sm")}
+                  >
+                    → {DOC_TYPE_LABEL[t]}
+                  </button>
+                ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              {dirty ? "Эхлээд хадгална уу." : "Бараа, харилцагч, үнэ бүгд хуулагдана — дахин шивэх шаардлагагүй."}
+            </p>
+          </Card>
         )}
 
         {result?.error && (

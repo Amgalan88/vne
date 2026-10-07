@@ -100,3 +100,16 @@ export async function shareDocument(tenantId: string, id: string, enable: boolea
   void tenantId;
   return { url: data ? rootUrl(`/d/${data}`) : null };
 }
+
+/** «Өмнөх баримтаас татах» — бараа, харилцагчийн мэдээллийг авна (эрхийг RLS шалгана) */
+export async function loadDocForImport(tenantId: string, id: string): Promise<{ customerName: string; data: Partial<DocState> } | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("documents")
+    .select("customer_name, data")
+    .eq("id", id)
+    .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
+    .maybeSingle<{ customer_name: string; data: Partial<DocState> }>();
+  return data ? { customerName: data.customer_name, data: data.data } : null;
+}

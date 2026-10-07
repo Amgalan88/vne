@@ -16,7 +16,7 @@ export default async function NewDocumentPage({ params, searchParams }: PageProp
   const { tenant, role } = await requireTenant(slug);
   if (!canEdit(role)) redirect("/documents");
 
-  const { issuers, customers, assets } = await loadEditorData(tenant.id);
+  const { issuers, customers, assets, recentDocs } = await loadEditorData(tenant.id);
   const sp = await searchParams;
   const type = sp.type;
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Ulaanbaatar" });
@@ -38,7 +38,9 @@ export default async function NewDocumentPage({ params, searchParams }: PageProp
         ...src.data,
         rows: src.data.rows?.length ? src.data.rows : emptyFields().rows,
         id: null,
-        docType: src.doc_type,
+        // ?type=... — үнийн саналаас нэхэмжлэх, зарлагын баримт гэх мэт өөр төрөл болгон хөрвүүлнэ
+        docType:
+          TYPES.includes(type as DocType) && type !== "letter" && src.doc_type !== "letter" ? (type as DocType) : src.doc_type,
         issuerId: src.issuer_id,
         number: "",
         docDate: today,
@@ -85,6 +87,7 @@ export default async function NewDocumentPage({ params, searchParams }: PageProp
       issuers={issuers}
       customers={customers}
       assets={assets}
+      recentDocs={recentDocs}
       initial={initial}
       canEdit
       canDelete={canManage(role)}
