@@ -2,7 +2,8 @@ import { SUPABASE_URL } from "./env";
 
 export type SiteColor = "indigo" | "emerald" | "rose" | "amber" | "sky" | "slate";
 export type SiteTemplate = "modern" | "clean" | "bold" | "dark";
-export type Service = { title: string; text: string };
+/** price — чөлөөт текст ("45,000₮", "Үнэ тохиролцоно"), image — "sites" bucket доторх зам */
+export type Service = { title: string; text: string; price?: string; image?: string | null };
 
 export type PublicSiteData = {
   name: string;
@@ -18,6 +19,8 @@ export type PublicSiteData = {
   color?: SiteColor;
   template?: SiteTemplate;
   cover_path?: string | null;
+  logo_path?: string | null;
+  about_image_path?: string | null;
 };
 
 export const SITE_COLORS: SiteColor[] = ["indigo", "emerald", "rose", "amber", "sky", "slate"];
@@ -46,7 +49,8 @@ export function initials(name: string): string {
   return (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
 }
 
-/** Нийтийн "sites" bucket-ийн зургийн холбоос */
-export function coverUrl(path: string | null | undefined): string | null {
+/** Нийтийн "sites" bucket-ийн зургийн холбоос (нүүр зураг, лого, үйлчилгээний зураг) */
+export function siteImageUrl(path: string | null | undefined): string | null {
   return path ? `${SUPABASE_URL}/storage/v1/object/public/sites/${path}` : null;
 }
+export const coverUrl = siteImageUrl;

@@ -16,7 +16,7 @@ export default async function SitePage({ params }: PageProps<"/t/[tenant]/site">
 
   const supabase = await createClient();
   // "*" — 008_site_templates.sql ажиллаагүй ч (template, cover_path багана байхгүй) уншина
-  const { data } = await supabase.from("tenant_sites").select("*").eq("tenant_id", tenant.id).maybeSingle<Partial<SiteValues> & { cover_path?: string | null }>();
+  const { data } = await supabase.from("tenant_sites").select("*").eq("tenant_id", tenant.id).maybeSingle<Partial<SiteValues> & { cover_path?: string | null; logo_path?: string | null; about_image_path?: string | null }>();
   const values: SiteValues = {
     published: data?.published ?? false,
     headline: data?.headline ?? "",
@@ -29,6 +29,8 @@ export default async function SitePage({ params }: PageProps<"/t/[tenant]/site">
     color: data?.color ?? "indigo",
     template: data?.template ?? "modern",
     cover: coverUrl(data?.cover_path),
+    logo: coverUrl(data?.logo_path),
+    aboutImage: coverUrl(data?.about_image_path),
   };
 
   return (

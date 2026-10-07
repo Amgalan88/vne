@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { rootUrl } from "@/lib/hosts";
-import { coverUrl, initials, THEME, type PublicSiteData, type SiteTemplate } from "@/lib/site";
+import { coverUrl, initials, siteImageUrl, THEME, type PublicSiteData, type Service, type SiteTemplate } from "@/lib/site";
 import { LogoMark } from "@/components/logo";
 
 /* slug.hhk.mn — компанийн нийтийн хуудас. 4 загвар: Орчин үе, Цэвэр, Тод, Харанхуй */
@@ -34,7 +34,9 @@ export function PublicSite({ site, member }: { site: PublicSiteData; member: boo
     site.facebook && { icon: "💬", label: "Facebook", value: "Facebook хуудас", href: site.facebook.startsWith("http") ? site.facebook : `https://${site.facebook}` },
   ].filter(Boolean) as Contact[];
   const cover = coverUrl(site.cover_path);
-  const props = { site, t, member, services, contacts, cover };
+  const aboutImage = siteImageUrl(site.about_image_path);
+  const order = contacts.find(c => c.label === "Утас")?.href;
+  const props = { site, t, member, services, contacts, cover, aboutImage, order };
 
   return (
     <div className={`flex-1 ${tpl === "dark" ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"}`}>
@@ -47,7 +49,7 @@ export function PublicSite({ site, member }: { site: PublicSiteData; member: boo
   );
 }
 
-type P = { site: PublicSiteData; t: T; member: boolean; services: { title: string; text: string }[]; contacts: Contact[]; cover: string | null };
+type P = { site: PublicSiteData; t: T; member: boolean; services: Service[]; contacts: Contact[]; cover: string | null; aboutImage: string | null; order?: string };
 
 /* ───────────── Нийтлэг хэсгүүд ───────────── */
 
@@ -59,9 +61,14 @@ function Header({ site, t, member, tone }: { site: PublicSiteData; t: T; member:
     <header className={`${wrap} ${tone !== "overlay" ? "sticky top-0 z-20" : ""}`}>
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black text-white shadow-lg ${t.solid} ${onDark ? "ring-2 ring-white/30" : ""}`}>
-            {initials(site.name)}
-          </span>
+          {site.logo_path ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={siteImageUrl(site.logo_path)!} alt={site.name} className={`h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-0.5 shadow-lg ${onDark ? "ring-2 ring-white/30" : "ring-1 ring-slate-200"}`} />
+          ) : (
+            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black text-white shadow-lg ${t.solid} ${onDark ? "ring-2 ring-white/30" : ""}`}>
+              {initials(site.name)}
+            </span>
+          )}
           <span className={`truncate text-lg font-extrabold ${onDark ? "text-white" : ""}`}>{site.name}</span>
         </div>
         <nav className="flex items-center gap-1 text-sm font-semibold">
@@ -135,6 +142,27 @@ function Eyebrow({ children, className }: { children: React.ReactNode; className
   return <p className={`text-sm font-bold uppercase tracking-[0.18em] ${className}`}>{children}</p>;
 }
 
+function ServiceImg({ s, className = "" }: { s: Service; className?: string }) {
+  const url = siteImageUrl(s.image);
+  if (!url) return null;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt={s.title} className={`w-full object-cover ${className}`} />;
+}
+
+function Price({ s, className }: { s: Service; className: string }) {
+  return s.price ? <span className={`inline-flex rounded-full px-3 py-1 text-sm font-bold ${className}`}>{s.price}</span> : null;
+}
+
+function OrderLink({ href, className }: { href?: string; className: string }) {
+  return href ? <a href={href} className={`inline-flex text-sm font-bold ${className}`}>Захиалах →</a> : null;
+}
+
+function AboutImg({ url, className = "" }: { url: string | null; className?: string }) {
+  if (!url) return null;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt="" className={`w-full object-cover ${className}`} />;
+}
+
 function Footer({ tone }: { tone: "light" | "dark" }) {
   return (
     <footer className={tone === "dark" ? "border-t border-white/10 bg-slate-950" : "border-t border-slate-100 bg-white"}>
@@ -148,7 +176,7 @@ function Footer({ tone }: { tone: "light" | "dark" }) {
 
 /* ───────────── 1. Орчин үе ───────────── */
 
-function Modern({ site, t, member, services, contacts, cover }: P) {
+function Modern({ site, t, member, services, contacts, cover, aboutImage, order }: P) {
   return (
     <>
       <section className={`relative overflow-hidden bg-gradient-to-br ${t.grad} text-white`}>
@@ -169,12 +197,24 @@ function Modern({ site, t, member, services, contacts, cover }: P) {
 
       {site.about && (
         <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="grid gap-10 lg:grid-cols-[1fr_2fr]">
+          <div className={`grid items-center gap-10 ${aboutImage ? "lg:grid-cols-2" : "lg:grid-cols-[1fr_2fr]"}`}>
+            {aboutImage ? (
+              <AboutImg url={aboutImage} className="aspect-[4/3] rounded-3xl shadow-xl" />
+            ) : (
+              <div>
+                <Eyebrow className={t.text}>Бидний тухай</Eyebrow>
+                <h2 className="mt-3 text-3xl font-black tracking-tight">Танд итгэлтэй түнш</h2>
+              </div>
+            )}
             <div>
-              <Eyebrow className={t.text}>Бидний тухай</Eyebrow>
-              <h2 className="mt-3 text-3xl font-black tracking-tight">Танд итгэлтэй түнш</h2>
+              {aboutImage && (
+                <>
+                  <Eyebrow className={t.text}>Бидний тухай</Eyebrow>
+                  <h2 className="mt-3 mb-5 text-3xl font-black tracking-tight">Танд итгэлтэй түнш</h2>
+                </>
+              )}
+              <p className="whitespace-pre-line text-lg leading-relaxed text-slate-600">{site.about}</p>
             </div>
-            <p className="whitespace-pre-line text-lg leading-relaxed text-slate-600">{site.about}</p>
           </div>
         </section>
       )}
@@ -186,10 +226,19 @@ function Modern({ site, t, member, services, contacts, cover }: P) {
             <h2 className="mt-3 text-3xl font-black tracking-tight">Бидний санал болгох зүйлс</h2>
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((s, i) => (
-                <div key={s.title} className="group rounded-2xl border border-slate-200 bg-white p-7 transition hover:-translate-y-1 hover:shadow-xl">
-                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${t.grad} text-lg font-black text-white`}>{i + 1}</span>
-                  <h3 className="mt-5 text-lg font-bold">{s.title}</h3>
-                  {s.text && <p className="mt-2 leading-relaxed text-slate-600">{s.text}</p>}
+                <div key={s.title} className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
+                  <ServiceImg s={s} className="aspect-[16/10]" />
+                  <div className="flex flex-1 flex-col p-7">
+                    {!s.image && <span className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${t.grad} text-lg font-black text-white`}>{i + 1}</span>}
+                    <h3 className="text-lg font-bold">{s.title}</h3>
+                    {s.text && <p className="mt-2 flex-1 whitespace-pre-line leading-relaxed text-slate-600">{s.text}</p>}
+                    {(s.price || order) && (
+                      <div className="mt-5 flex items-center justify-between gap-3">
+                        <Price s={s} className={`${t.soft} ${t.text}`} />
+                        <OrderLink href={order} className={t.text} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -217,7 +266,7 @@ function Modern({ site, t, member, services, contacts, cover }: P) {
 
 /* ───────────── 2. Цэвэр ───────────── */
 
-function Clean({ site, t, member, services, contacts, cover }: P) {
+function Clean({ site, t, member, services, contacts, cover, aboutImage, order }: P) {
   return (
     <>
       <Header site={site} t={t} member={member} tone="light" />
@@ -238,9 +287,12 @@ function Clean({ site, t, member, services, contacts, cover }: P) {
 
       {site.about && (
         <section className={`${t.soft} py-20`}>
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-            <Eyebrow className={t.text}>Бидний тухай</Eyebrow>
-            <p className="mt-6 whitespace-pre-line text-xl leading-relaxed text-slate-700 sm:text-2xl">{site.about}</p>
+          <div className={`mx-auto px-4 sm:px-6 ${aboutImage ? "grid max-w-6xl items-center gap-10 lg:grid-cols-2" : "max-w-3xl text-center"}`}>
+            <AboutImg url={aboutImage} className="aspect-[4/3] rounded-3xl shadow-lg" />
+            <div>
+              <Eyebrow className={t.text}>Бидний тухай</Eyebrow>
+              <p className="mt-6 whitespace-pre-line text-xl leading-relaxed text-slate-700 sm:text-2xl">{site.about}</p>
+            </div>
           </div>
         </section>
       )}
@@ -250,10 +302,20 @@ function Clean({ site, t, member, services, contacts, cover }: P) {
           <Eyebrow className={t.text}>Бүтээгдэхүүн, үйлчилгээ</Eyebrow>
           <ol className="mt-8 divide-y divide-slate-200 border-y border-slate-200">
             {services.map((s, i) => (
-              <li key={s.title} className="grid gap-2 py-7 sm:grid-cols-[80px_1fr_2fr] sm:items-baseline">
-                <span className={`font-mono text-sm font-bold ${t.text}`}>{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="text-xl font-bold">{s.title}</h3>
-                {s.text && <p className="leading-relaxed text-slate-600">{s.text}</p>}
+              <li key={s.title} className="grid gap-5 py-7 sm:grid-cols-[160px_1fr] sm:items-start">
+                {s.image ? (
+                  <ServiceImg s={s} className="aspect-square rounded-2xl" />
+                ) : (
+                  <span className={`font-mono text-3xl font-black ${t.text}`}>{String(i + 1).padStart(2, "0")}</span>
+                )}
+                <div>
+                  <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <h3 className="text-xl font-bold">{s.title}</h3>
+                    <Price s={s} className={`${t.soft} ${t.text}`} />
+                  </div>
+                  {s.text && <p className="mt-2 whitespace-pre-line leading-relaxed text-slate-600">{s.text}</p>}
+                  <OrderLink href={order} className={`mt-3 ${t.text}`} />
+                </div>
               </li>
             ))}
           </ol>
@@ -274,7 +336,7 @@ function Clean({ site, t, member, services, contacts, cover }: P) {
 
 /* ───────────── 3. Тод ───────────── */
 
-function Bold({ site, t, member, services, contacts, cover }: P) {
+function Bold({ site, t, member, services, contacts, cover, aboutImage, order }: P) {
   return (
     <>
       <section className={`relative overflow-hidden ${t.solid} text-white`}>
@@ -297,10 +359,15 @@ function Bold({ site, t, member, services, contacts, cover }: P) {
         <section id="services" className="scroll-mt-20">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3">
             {services.map((s, i) => (
-              <div key={s.title} className={`p-10 ${i % 2 === 0 ? "bg-slate-900 text-white" : `${t.soft} text-slate-900`}`}>
-                <span className={`text-5xl font-black ${i % 2 === 0 ? t.light : t.text}`}>{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="mt-4 text-2xl font-black uppercase tracking-tight">{s.title}</h3>
-                {s.text && <p className={`mt-3 leading-relaxed ${i % 2 === 0 ? "text-slate-300" : "text-slate-600"}`}>{s.text}</p>}
+              <div key={s.title} className={`flex flex-col ${i % 2 === 0 ? "bg-slate-900 text-white" : `${t.soft} text-slate-900`}`}>
+                <ServiceImg s={s} className="aspect-[16/10]" />
+                <div className="flex flex-1 flex-col p-10">
+                  <span className={`text-5xl font-black ${i % 2 === 0 ? t.light : t.text}`}>{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="mt-4 text-2xl font-black uppercase tracking-tight">{s.title}</h3>
+                  {s.text && <p className={`mt-3 flex-1 whitespace-pre-line leading-relaxed ${i % 2 === 0 ? "text-slate-300" : "text-slate-600"}`}>{s.text}</p>}
+                  {s.price && <p className={`mt-5 text-2xl font-black ${i % 2 === 0 ? "text-white" : t.text}`}>{s.price}</p>}
+                  <OrderLink href={order} className={`mt-3 ${i % 2 === 0 ? t.light : t.text}`} />
+                </div>
               </div>
             ))}
           </div>
@@ -309,10 +376,11 @@ function Bold({ site, t, member, services, contacts, cover }: P) {
 
       {site.about && (
         <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="grid gap-8 lg:grid-cols-[auto_1fr]">
+          <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr]">
             <h2 className={`text-5xl font-black uppercase tracking-tight ${t.text}`}>Бид</h2>
             <p className="whitespace-pre-line text-xl leading-relaxed text-slate-700">{site.about}</p>
           </div>
+          <AboutImg url={aboutImage} className="mt-10 aspect-[21/9] rounded-none" />
         </section>
       )}
 
@@ -332,7 +400,7 @@ function Bold({ site, t, member, services, contacts, cover }: P) {
 
 /* ───────────── 4. Харанхуй ───────────── */
 
-function Dark({ site, t, member, services, contacts, cover }: P) {
+function Dark({ site, t, member, services, contacts, cover, aboutImage, order }: P) {
   return (
     <>
       <Header site={site} t={t} member={member} tone="dark" />
@@ -358,6 +426,7 @@ function Dark({ site, t, member, services, contacts, cover }: P) {
         <section className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
           <Eyebrow className={t.light}>Бидний тухай</Eyebrow>
           <p className="mt-6 whitespace-pre-line text-xl leading-relaxed text-slate-300">{site.about}</p>
+          <AboutImg url={aboutImage} className="mt-10 aspect-[16/9] rounded-3xl ring-1 ring-white/10" />
         </section>
       )}
 
@@ -366,10 +435,19 @@ function Dark({ site, t, member, services, contacts, cover }: P) {
           <Eyebrow className={t.light}>Бүтээгдэхүүн, үйлчилгээ</Eyebrow>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {services.map(s => (
-              <div key={s.title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-7 transition hover:border-white/25 hover:bg-white/[0.07]">
-                <span className={`block h-1 w-10 rounded-full ${t.solid}`} />
-                <h3 className="mt-5 text-lg font-bold text-white">{s.title}</h3>
-                {s.text && <p className="mt-2 leading-relaxed text-slate-400">{s.text}</p>}
+              <div key={s.title} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition hover:border-white/25 hover:bg-white/[0.07]">
+                <ServiceImg s={s} className="aspect-[16/10] opacity-90" />
+                <div className="flex flex-1 flex-col p-7">
+                  <span className={`block h-1 w-10 rounded-full ${t.solid}`} />
+                  <h3 className="mt-5 text-lg font-bold text-white">{s.title}</h3>
+                  {s.text && <p className="mt-2 flex-1 whitespace-pre-line leading-relaxed text-slate-400">{s.text}</p>}
+                  {(s.price || order) && (
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      {s.price ? <span className={`text-lg font-bold ${t.light}`}>{s.price}</span> : <span />}
+                      <OrderLink href={order} className="text-white/80 hover:text-white" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

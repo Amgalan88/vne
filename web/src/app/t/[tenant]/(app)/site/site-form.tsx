@@ -3,8 +3,8 @@
 import { useActionState, useState, useTransition } from "react";
 import { buttonClass, Card, Field, Input, Notice } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
-import { SITE_COLORS, SITE_TEMPLATES, THEME, type Service, type SiteColor, type SiteTemplate } from "@/lib/site";
-import { removeCover, saveSite, uploadCover, type SiteState } from "./actions";
+import { SITE_COLORS, SITE_TEMPLATES, THEME, siteImageUrl, type Service, type SiteColor, type SiteTemplate } from "@/lib/site";
+import { removeSiteImage, saveSite, uploadServiceImage, uploadSiteImage, type ImageKind, type SiteState } from "./actions";
 
 export type SiteValues = {
   published: boolean;
@@ -18,6 +18,8 @@ export type SiteValues = {
   color: SiteColor;
   template: SiteTemplate;
   cover: string | null;
+  logo: string | null;
+  aboutImage: string | null;
 };
 
 const textarea =
@@ -69,13 +71,98 @@ function TemplateThumb({ tpl, color }: { tpl: SiteTemplate; color: SiteColor }) 
   );
 }
 
+/** Нэг зураг оруулах, солих, устгах (лого, нүүр зураг, «Бидний тухай» зураг) */
+function ImageSlot({ tenantId, kind, url, label, hint, shape }: { tenantId: string; kind: ImageKind; url: string | null; label: string; hint: string; shape: string }) {
+  const [msg, setMsg] = useState<SiteState>({});
+  const [pending, start] = useTransition();
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-semibold">{label}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className={`flex items-center justify-center overflow-hidden bg-slate-100 text-xs text-slate-400 ring-1 ring-slate-200 ${shape}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {url ? <img src={url} alt="" className="h-full w-full object-cover" /> : "Зураггүй"}
+        </div>
+        <div className="space-y-1">
+          <label className={buttonClass("light", "cursor-pointer py-1.5")}>
+            {pending ? "Хадгалж байна…" : url ? "Солих" : "Оруулах"}
+            <input
+              id={`site-${kind}`}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="sr-only"
+              disabled={pending}
+              onChange={e => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (!f) return;
+                const fd = new FormData();
+                fd.set("file", f);
+                start(async () => setMsg(await uploadSiteImage(tenantId, kind, fd)));
+              }}
+            />
+          </label>
+          {url && (
+            <button type="button" disabled={pending} onClick={() => start(async () => setMsg(await removeSiteImage(tenantId, kind)))} className="block text-xs font-semibold text-red-600 hover:underline">
+              Устгах
+            </button>
+          )}
+        </div>
+      </div>
+      <p className="text-xs text-slate-500">{hint}</p>
+      {msg.error && <Notice tone="error">{msg.error}</Notice>}
+      {msg.message && <Notice tone="success">{msg.message}</Notice>}
+    </div>
+  );
+}
+
+/** Үйлчилгээний зургийн жижиг хайрцаг */
+function ServiceImage({ tenantId, path, onChange }: { tenantId: string; path: string | null | undefined; onChange: (p: string | null) => void }) {
+  const [pending, start] = useTransition();
+  const [err, setErr] = useState("");
+  const url = siteImageUrl(path);
+  return (
+    <div className="w-24 shrink-0 space-y-1">
+      <label className="flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-center text-[11px] text-slate-400 ring-1 ring-slate-200 hover:ring-slate-400">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {pending ? "…" : url ? <img src={url} alt="" className="h-full w-full object-cover" /> : "＋ Зураг"}
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="sr-only"
+          disabled={pending}
+          onChange={e => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (!f) return;
+            const fd = new FormData();
+            fd.set("file", f);
+            start(async () => {
+              const r = await uploadServiceImage(tenantId, fd);
+              if (r.error) setErr(r.error);
+              else {
+                setErr("");
+                onChange(r.path!);
+              }
+            });
+          }}
+        />
+      </label>
+      {url && (
+        <button type="button" onClick={() => onChange(null)} className="block w-full text-center text-[11px] text-red-600 hover:underline">
+          Хасах
+        </button>
+      )}
+      {err && <p className="text-[11px] text-red-600">{err}</p>}
+    </div>
+  );
+}
+
 export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteValues }) {
   const [state, action] = useActionState(saveSite.bind(null, tenantId), {} as SiteState);
   const [services, setServices] = useState<Service[]>(values.services.length ? values.services : [{ title: "", text: "" }]);
   const [color, setColor] = useState<SiteColor>(values.color);
   const [template, setTemplate] = useState<SiteTemplate>(values.template);
-  const [coverMsg, setCoverMsg] = useState<SiteState>({});
-  const [coverPending, startCover] = useTransition();
   const setService = (i: number, patch: Partial<Service>) =>
     setServices(services.map((s, j) => (j === i ? { ...s, ...patch } : s)));
 
@@ -127,40 +214,10 @@ export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteV
         </div>
       </Card>
 
-      <Card className="p-5">
-        <p className="mb-1 text-sm font-bold">2. Нүүр зураг</p>
-        <p className="mb-3 text-xs text-slate-500">Оффис, бүтээгдэхүүн, багийн зураг. Байхгүй бол компанийн нэрийн үсгээр гоё дэвсгэр гарна.</p>
-        {coverMsg.error && <Notice tone="error">{coverMsg.error}</Notice>}
-        {coverMsg.message && <Notice tone="success">{coverMsg.message}</Notice>}
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          {values.cover && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={values.cover} alt="" className="h-20 w-32 rounded-lg object-cover ring-1 ring-slate-200" />
-          )}
-          <label className={buttonClass("light", "cursor-pointer")}>
-            {coverPending ? "Хадгалж байна…" : values.cover ? "Зураг солих" : "Зураг оруулах"}
-            <input
-              id="site-cover"
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="sr-only"
-              disabled={coverPending}
-              onChange={e => {
-                const f = e.target.files?.[0];
-                e.target.value = "";
-                if (!f) return;
-                const fd = new FormData();
-                fd.set("file", f);
-                startCover(async () => setCoverMsg(await uploadCover(tenantId, fd)));
-              }}
-            />
-          </label>
-          {values.cover && (
-            <button type="button" disabled={coverPending} onClick={() => startCover(async () => setCoverMsg(await removeCover(tenantId)))} className="text-sm font-semibold text-red-600 hover:underline">
-              Устгах
-            </button>
-          )}
-        </div>
+      <Card className="grid gap-6 p-5 sm:grid-cols-2">
+        <p className="text-sm font-bold sm:col-span-2">2. Лого ба нүүр зураг</p>
+        <ImageSlot tenantId={tenantId} kind="logo" url={values.logo} label="Лого" hint="Дөрвөлжин, ил тод дэвсгэртэй PNG хамгийн сайн. Цэсний зүүн талд гарна." shape="h-20 w-20 rounded-xl" />
+        <ImageSlot tenantId={tenantId} kind="cover" url={values.cover} label="Нүүр зураг" hint="Оффис, бүтээгдэхүүн, багийн өргөн зураг. Байхгүй бол нэрийн үсгээр гоё дэвсгэр гарна." shape="h-20 w-32 rounded-xl" />
       </Card>
 
       <Card className="space-y-3 p-5">
@@ -171,21 +228,27 @@ export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteV
         <Field label="Бидний тухай">
           <textarea name="about" defaultValue={values.about} className={`${textarea} min-h-28`} placeholder="Манай компани 2015 оноос хойш…" />
         </Field>
+        <ImageSlot tenantId={tenantId} kind="about" url={values.aboutImage} label="«Бидний тухай» хэсгийн зураг" hint="Багийн, оффисын эсвэл ажлын зураг." shape="h-20 w-32 rounded-xl" />
       </Card>
 
       <Card className="p-5">
-        <p className="mb-3 text-sm font-bold">4. Бүтээгдэхүүн, үйлчилгээ</p>
+        <p className="mb-1 text-sm font-bold">4. Бүтээгдэхүүн, үйлчилгээ</p>
+        <p className="mb-3 text-xs text-slate-500">Зураг, үнэ, тайлбартай. Үнэ хоосон бол харагдахгүй. «Үнэ тохиролцоно» гэж бичиж болно.</p>
         <div className="space-y-2">
           {services.map((s, i) => (
-            <div key={i} className="flex gap-2 rounded-lg border border-slate-200 p-2">
-              <div className="flex-1 space-y-2">
-                <Input value={s.title} onChange={e => setService(i, { title: e.target.value })} placeholder="Нэр (жишээ нь: Хэвлэлийн цаас)" />
-                <Input value={s.text} onChange={e => setService(i, { text: e.target.value })} placeholder="Товч тайлбар" />
+            <div key={i} className="flex gap-3 rounded-xl border border-slate-200 p-3">
+              <ServiceImage tenantId={tenantId} path={s.image} onChange={p => setService(i, { image: p })} />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex gap-2">
+                  <Input value={s.title} onChange={e => setService(i, { title: e.target.value })} placeholder="Нэр (жишээ нь: Хэвлэлийн цаас)" className="flex-1" />
+                  <Input value={s.price ?? ""} onChange={e => setService(i, { price: e.target.value })} placeholder="Үнэ (45,000₮)" className="w-32" />
+                </div>
+                <textarea value={s.text} onChange={e => setService(i, { text: e.target.value })} placeholder="Тайлбар — юу багтдаг, хугацаа, онцлог…" className={`${textarea} min-h-16`} />
               </div>
               <button
                 type="button"
                 onClick={() => setServices(services.filter((_, j) => j !== i))}
-                className="px-2 text-slate-400 hover:text-red-600"
+                className="self-start px-1 text-slate-400 hover:text-red-600"
                 aria-label="Устгах"
               >
                 ✕
@@ -193,7 +256,7 @@ export function SiteForm({ tenantId, values }: { tenantId: string; values: SiteV
             </div>
           ))}
         </div>
-        {services.length < 9 && (
+        {services.length < 12 && (
           <button type="button" onClick={() => setServices([...services, { title: "", text: "" }])} className={buttonClass("light", "mt-2 w-full")}>
             ＋ Нэмэх
           </button>
