@@ -1041,6 +1041,48 @@
       visibility: hidden;
     }
 
+    /* ══ Тамга/гарын үсгийн PIN ══ */
+    .lock-box {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .lock-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .modal-overlay.center {
+      align-items: center;
+    }
+
+    .modal-sheet.pin-sheet {
+      border-radius: 20px;
+      max-width: 340px;
+      margin: 0 16px;
+      padding-top: 16px;
+    }
+
+    .field input.pin-input {
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 10px;
+    }
+
+    .field input.pin-input.shake {
+      animation: shake .4s;
+      border-color: #dc2626;
+    }
+
+    /* PIN оруулаагүй үеийн орлуулагч — дарвал PIN асууна, хэвлэлтэнд гарахгүй */
+    img.locked-ph {
+      cursor: pointer;
+      opacity: 1 !important;
+    }
+
     /* ══ Албан ёсны маягт (НХМаягт БМ-3 / ТМ-1) ══ */
     .of-sheet {
       width: 210mm;
@@ -1251,6 +1293,10 @@
       #lockScreen,
       #toast {
         display: none !important;
+      }
+
+      img.locked-ph {
+        visibility: hidden !important;
       }
 
       /* Хуудсыг тойрсон зай хоосон 2-р хуудас үүсгэдэг тул цэвэрлэнэ */
@@ -1600,6 +1646,32 @@
               onchange="pickCompanyImage(event,'signature')" />
           </div>
         </div>
+        <div class="lock-box">
+          <div class="modal-section-title">🔒 Тамга, гарын үсгийн хамгаалалт</div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Тамга</label>
+              <select id="co_stampMode" onchange="changeImgMode('stamp', this)">
+                <option value="on">Үргэлж гарна</option>
+                <option value="pin">PIN-ээр нээнэ</option>
+                <option value="off">Унтраасан</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Гарын үсэг</label>
+              <select id="co_sigMode" onchange="changeImgMode('signature', this)">
+                <option value="on">Үргэлж гарна</option>
+                <option value="pin">PIN-ээр нээнэ</option>
+                <option value="off">Унтраасан</option>
+              </select>
+            </div>
+          </div>
+          <div class="lock-row">
+            <span id="pinStatus" style="font-size:12.5px; color:var(--muted); flex:1; min-width:150px;"></span>
+            <button class="btn btn-sm" id="pinSetBtn" onclick="setupPin()">PIN тохируулах</button>
+            <button class="btn btn-sm" id="pinLockBtn" onclick="togglePinLock()">🔓 Нээх</button>
+          </div>
+        </div>
         <div style="font-size:11.5px; color:var(--muted); margin-top:6px;">
           Өөрчлөлт шууд хадгалагдаж, бүх баримтад хэрэглэгдэнэ.
         </div>
@@ -1795,7 +1867,7 @@
             <button class="modal-btn green" onclick="saveToHistory();closeFinish()">
               💾<br /><span style="font-size:12px;font-weight:500;">Хадгалах</span>
             </button>
-            <button class="modal-btn dark" onclick="window.print()">
+            <button class="modal-btn dark" onclick="printDoc()">
               🖨<br /><span style="font-size:12px;font-weight:500;">Хэвлэх / PDF</span>
             </button>
             <button class="modal-btn" onclick="newInvoice();closeFinish()">
@@ -1816,6 +1888,29 @@
               <button class="btn" style="flex:1;" onclick="deleteTemplate()">Устгах</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Тамга/гарын үсгийн PIN -->
+    <div class="modal-overlay center" id="pinModal" onclick="if(event.target===this)pinDone(null)">
+      <div class="modal-sheet pin-sheet">
+        <div class="modal-title" id="pinTitle">PIN оруулах</div>
+        <div class="modal-body" style="padding-bottom:18px;">
+          <div id="pinMsg" style="font-size:13px; color:var(--muted); margin-bottom:10px;"></div>
+          <div class="field">
+            <input id="pinInput" class="pin-input" type="password" inputmode="numeric" maxlength="6"
+              autocomplete="off" />
+          </div>
+          <div id="pinErr" style="color:#dc2626; font-size:12.5px; min-height:18px; margin-top:6px;"></div>
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button class="btn" style="flex:1;" onclick="pinDone(null)">Болих</button>
+            <button class="btn" id="pinSkipBtn" style="flex:1;" onclick="pinDone('skip')">Тамгагүй</button>
+            <button class="btn btn-dark" style="flex:1;" onclick="pinSubmit()">OK</button>
+          </div>
+          <button id="pinForgotBtn" onclick="pinForgot()"
+            style="background:none; border:none; color:var(--muted); font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; font-family:inherit;">PIN
+            мартсан уу?</button>
         </div>
       </div>
     </div>
@@ -2201,8 +2296,9 @@
       const c = currentCompany();
       CO_FIELDS.forEach(f => document.getElementById("co_" + f).value = c[f] || "");
       setImgSrc(document.getElementById("co_logo_prev"), c.logo);
-      setImgSrc(document.getElementById("co_stamp_prev"), c.stamp);
-      setImgSrc(document.getElementById("co_sig_prev"), c.signature);
+      setProtectedImg(document.getElementById("co_stamp_prev"), c, "stamp", true);
+      setProtectedImg(document.getElementById("co_sig_prev"), c, "signature", true);
+      fillPinUi(c);
     }
 
     /* Зураг байхгүй бол <img>-г нууна — өөр байгууллагад тамга/лого байхгүй байж болно */
@@ -2248,10 +2344,11 @@
       showToast("✅ Байгууллага нэмэгдлээ");
     }
 
-    function deleteCompany() {
+    async function deleteCompany() {
       const list = getCompanies();
       if (list.length < 2) { showToast("⚠️ Сүүлчийн байгууллагыг устгах боломжгүй"); return; }
       const c = currentCompany();
+      if (c.pinHash && await requireUnlock("Байгууллага устгахын тулд PIN оруулна уу.") !== "ok") return;
       if (!confirm(`"${c.name}" устгах уу?`)) return;
       const rest = list.filter(x => x.id !== c.id);
       setCompanies(rest);
@@ -2264,11 +2361,13 @@
     }
 
     /* Лого/тамга/гарын үсгийг data URL болгож хадгална — файл зөөх шаардлагагүй */
-    function pickCompanyImage(e, key) {
+    async function pickCompanyImage(e, key) {
       const file = e.target.files && e.target.files[0];
       e.target.value = "";
       if (!file) return;
       if (file.size > 1.5 * 1024 * 1024) { showToast("⚠️ Зураг 1.5MB-аас бага байх ёстой"); return; }
+      if (PROTECTED[key] && currentCompany().pinHash &&
+          await requireUnlock("Зураг солихын тулд PIN оруулна уу.") !== "ok") return;
       const fr = new FileReader();
       fr.onload = () => {
         const list = getCompanies();
@@ -2286,7 +2385,9 @@
       fr.readAsDataURL(file);
     }
 
-    function clearCompanyImage(key) {
+    async function clearCompanyImage(key) {
+      if (PROTECTED[key] && currentCompany().pinHash &&
+          await requireUnlock("Зураг арилгахын тулд PIN оруулна уу.") !== "ok") return;
       const list = getCompanies();
       const c = list.find(x => x.id === currentCompany().id);
       if (!c || !c[key]) return;
@@ -2316,12 +2417,247 @@
       ["logo_topbar", "logo_lock", "logo_editor", "logo_preview"]
         .forEach(id => setImgSrc(document.getElementById(id), c.logo));
       ["stamp_preview", "stamp_preview_letter", "stamp_of1", "stamp_of3"]
-        .forEach(id => setImgSrc(document.getElementById(id), c.stamp));
+        .forEach(id => setProtectedImg(document.getElementById(id), c, "stamp"));
       ["sig_preview", "sig_letter", "sig_of1"]
-        .forEach(id => setImgSrc(document.getElementById(id), c.signature));
+        .forEach(id => setProtectedImg(document.getElementById(id), c, "signature"));
 
       applyScales();
     }
+
+    /* ── Тамга, гарын үсгийн хамгаалалт ──
+       Горим: "on" үргэлж гарна, "pin" PIN оруулж нээнэ, "off" огт гарахгүй.
+       Прототип: зураг болон PIN-ийн hash localStorage-д байгаа тул DevTools мэддэг хүнээс
+       хамгаалахгүй — бодит хамгаалалт серверт (private bucket + PIN шалгалт) шилжсэний дараа. */
+    const PROTECTED = { stamp: "stampMode", signature: "sigMode" };
+    const PIN_UNLOCK_MS = 15 * 60 * 1000;
+    const PIN_MAX_TRIES = 5;
+    const PIN_LOCKOUT_MS = 15 * 60 * 1000;
+    const pinUnlocked = {};   // companyId → нээлттэй байх хугацаа (зөвхөн санах ойд, refresh хийхэд түгжигдэнэ)
+    const pinTimers = {};
+
+    function lockSvg(w, h, label, round) {
+      const cx = w / 2, cy = h / 2 - (round ? 14 : 10);
+      const frame = round
+        ? `<circle cx="${cx}" cy="${h / 2}" r="${w / 2 - 4}" fill="#f8fafc" stroke="#94a3b8" stroke-width="3" stroke-dasharray="10 7"/>`
+        : `<rect x="2" y="2" width="${w - 4}" height="${h - 4}" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8 6"/>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${frame}` +
+        `<path d="M${cx - 9} ${cy - 2}v-7a9 9 0 0 1 18 0v7" fill="none" stroke="#64748b" stroke-width="3.5"/>` +
+        `<rect x="${cx - 14}" y="${cy - 2}" width="28" height="22" rx="4" fill="#64748b"/>` +
+        `<text x="${cx}" y="${cy + 46}" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#64748b">${label}</text></svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+    const LOCK_PH = { stamp: lockSvg(200, 200, "Тамга · PIN", true), signature: lockSvg(240, 110, "Гарын үсэг · PIN", false) };
+
+    function imgMode(c, key) { return c[PROTECTED[key]] || "on"; }
+    function isUnlocked(c) { return (pinUnlocked[c.id] || 0) > Date.now(); }
+    /* PIN-ээр хамгаалагдсан, зурагтай зүйл байгаа эсэх */
+    function hasPinImages(c) {
+      return !!c.pinHash && Object.keys(PROTECTED).some(k => c[k] && imgMode(c, k) === "pin");
+    }
+
+    /* Баримт дээр (эсвэл тохиргоонд) юу харуулахыг шийднэ. Тохиргоонд "off" горимд ч зургийг үзүүлнэ. */
+    function protectedSrc(c, key, inSettings) {
+      const mode = imgMode(c, key);
+      if (!c[key] || (mode === "off" && !inSettings)) return { src: "" };
+      if (mode === "pin" && c.pinHash && !isUnlocked(c)) return { src: LOCK_PH[key], locked: true };
+      return { src: c[key] };
+    }
+    function setProtectedImg(img, c, key, inSettings) {
+      const p = protectedSrc(c, key, inSettings);
+      setImgSrc(img, p.src);
+      img.classList.toggle("locked-ph", !!p.locked);
+      img.title = p.locked ? "PIN оруулж нээх" : "";
+    }
+
+    function updateCompany(id, fn) {
+      const list = getCompanies();
+      const c = list.find(x => x.id === id);
+      if (!c) return;
+      fn(c);
+      setCompanies(list);
+    }
+
+    function hhmm(t) { return new Date(t).toTimeString().slice(0, 5); }
+
+    function fillPinUi(c) {
+      document.getElementById("co_stampMode").value = imgMode(c, "stamp");
+      document.getElementById("co_sigMode").value = imgMode(c, "signature");
+      const st = document.getElementById("pinStatus");
+      const lockBtn = document.getElementById("pinLockBtn");
+      document.getElementById("pinSetBtn").textContent = c.pinHash ? "PIN солих" : "PIN тохируулах";
+      lockBtn.style.display = c.pinHash ? "" : "none";
+      lockBtn.textContent = isUnlocked(c) ? "🔒 Түгжих" : "🔓 Нээх";
+      if (!c.pinHash) st.textContent = "PIN тохируулаагүй";
+      else if ((c.pinLockUntil || 0) > Date.now()) st.textContent = `⛔ Олон буруу оролдлого — ${hhmm(c.pinLockUntil)} хүртэл түгжээтэй`;
+      else if (isUnlocked(c)) st.textContent = `🔓 Нээлттэй — ${hhmm(pinUnlocked[c.id])} хүртэл`;
+      else st.textContent = "🔒 Түгжээтэй";
+    }
+
+    function refreshProtected() {
+      const c = currentCompany();
+      applyCompany();
+      setProtectedImg(document.getElementById("co_stamp_prev"), c, "stamp", true);
+      setProtectedImg(document.getElementById("co_sig_prev"), c, "signature", true);
+      fillPinUi(c);
+    }
+
+    function setUnlocked(id) {
+      pinUnlocked[id] = Date.now() + PIN_UNLOCK_MS;
+      clearTimeout(pinTimers[id]);
+      pinTimers[id] = setTimeout(() => { delete pinUnlocked[id]; refreshProtected(); }, PIN_UNLOCK_MS);
+      refreshProtected();
+    }
+    function lockNow(id) {
+      delete pinUnlocked[id];
+      clearTimeout(pinTimers[id]);
+      refreshProtected();
+    }
+
+    async function hashPin(pin, salt) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + ":" + pin));
+      return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    /* PIN шалгана — буруу бол алдааны текст, зөв бол null буцаана */
+    async function checkCompanyPin(id, v) {
+      const c = getCompanies().find(x => x.id === id);
+      if (!c) return "Байгууллага олдсонгүй.";
+      if ((c.pinLockUntil || 0) > Date.now()) return `Түр түгжигдсэн. ${hhmm(c.pinLockUntil)}-аас хойш дахин оролдоно уу.`;
+      if (await hashPin(v, c.pinSalt) === c.pinHash) {
+        updateCompany(id, x => { x.pinFails = 0; x.pinLockUntil = 0; });
+        return null;
+      }
+      const fails = (c.pinFails || 0) + 1;
+      if (fails >= PIN_MAX_TRIES) {
+        updateCompany(id, x => { x.pinFails = 0; x.pinLockUntil = Date.now() + PIN_LOCKOUT_MS; });
+        refreshProtected();
+        return `${PIN_MAX_TRIES} удаа буруу оруулсан тул 15 минут түгжигдлээ.`;
+      }
+      updateCompany(id, x => { x.pinFails = fails; });
+      return `PIN буруу байна (${PIN_MAX_TRIES - fails} оролдлого үлдлээ).`;
+    }
+
+    /* PIN асуух цонх: оруулсан утга, "skip" эсвэл null (болих) буцаана */
+    let pinState = null;
+    function pinPrompt(o) {
+      return new Promise(resolve => {
+        if (pinState) pinState.resolve(null);
+        pinState = { ...o, resolve };
+        document.getElementById("pinTitle").textContent = o.title;
+        document.getElementById("pinMsg").textContent = o.msg || "";
+        document.getElementById("pinErr").textContent = "";
+        document.getElementById("pinSkipBtn").style.display = o.skip ? "" : "none";
+        document.getElementById("pinForgotBtn").style.display = o.forgot ? "" : "none";
+        const inp = document.getElementById("pinInput");
+        inp.value = "";
+        document.getElementById("pinModal").classList.add("open");
+        setTimeout(() => inp.focus(), 50);
+      });
+    }
+    function pinDone(result) {
+      document.getElementById("pinModal").classList.remove("open");
+      const s = pinState;
+      pinState = null;
+      if (s) s.resolve(result);
+    }
+    async function pinSubmit() {
+      if (!pinState) return;
+      const inp = document.getElementById("pinInput");
+      const v = inp.value.trim();
+      let err = /^\d{4,6}$/.test(v) ? null : "PIN нь 4–6 оронтой тоо байна.";
+      if (!err && pinState.check) err = await pinState.check(v);
+      if (err) {
+        document.getElementById("pinErr").textContent = err;
+        inp.value = "";
+        inp.classList.add("shake");
+        setTimeout(() => inp.classList.remove("shake"), 500);
+        return;
+      }
+      pinDone(v);
+    }
+    document.getElementById("pinInput").addEventListener("keydown", e => { if (e.key === "Enter") pinSubmit(); });
+
+    /* Сонгосон байгууллагыг нээнэ: "ok", "skip" эсвэл null буцаана */
+    async function requireUnlock(msg, skip) {
+      const c = currentCompany();
+      if (!c.pinHash || isUnlocked(c)) return "ok";
+      const r = await pinPrompt({ title: "🔒 PIN оруулах", msg, skip, forgot: true, check: v => checkCompanyPin(c.id, v) });
+      if (r === null || r === "skip") return r;
+      setUnlocked(c.id);
+      return "ok";
+    }
+
+    async function setupPin() {
+      const c = currentCompany();
+      if (c.pinHash && await requireUnlock("Одоогийн PIN-ээ оруулна уу.") !== "ok") return false;
+      const p1 = await pinPrompt({ title: c.pinHash ? "Шинэ PIN" : "PIN тохируулах", msg: "4–6 оронтой тоо сонгоно уу." });
+      if (!p1) return false;
+      const p2 = await pinPrompt({
+        title: "PIN давтах", msg: "Баталгаажуулахын тулд дахин оруулна уу.",
+        check: v => v === p1 ? null : "Эхний PIN-тэй таарахгүй байна.",
+      });
+      if (!p2) return false;
+      const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
+      const hash = await hashPin(p1, salt);
+      updateCompany(c.id, x => { x.pinSalt = salt; x.pinHash = hash; x.pinFails = 0; x.pinLockUntil = 0; });
+      setUnlocked(c.id);
+      showToast("✅ PIN хадгалагдлаа");
+      return true;
+    }
+
+    async function changeImgMode(key, sel) {
+      const c = currentCompany();
+      const prev = imgMode(c, key), next = sel.value;
+      sel.value = prev;   // зөвшөөрөл авах хүртэл хуучнаараа үлдэнэ
+      if (c.pinHash) {
+        if (await requireUnlock("Тохиргоо өөрчлөхийн тулд PIN оруулна уу.") !== "ok") return;
+      } else if (next === "pin") {
+        if (!await setupPin()) return;
+      }
+      updateCompany(c.id, x => { x[PROTECTED[key]] = next; });
+      refreshProtected();
+      sync();
+    }
+
+    function togglePinLock() {
+      const c = currentCompany();
+      if (isUnlocked(c)) lockNow(c.id);
+      else requireUnlock("Тамга, гарын үсгийг нээхийн тулд PIN оруулна уу.");
+    }
+
+    /* PIN мартвал хамгаалсан зургийг устгаж байж шинэчилнэ — тамгаа дахин оруулах эрхтэй хүн л үргэлжлүүлж чадна */
+    function pinForgot() {
+      const c = currentCompany();
+      if (!confirm("PIN-ийг шинэчлэхэд энэ байгууллагын тамга, гарын үсгийн зураг устгагдана. " +
+        "Дараа нь зургаа дахин оруулж, шинэ PIN тохируулна. Үргэлжлүүлэх үү?")) return;
+      updateCompany(c.id, x => {
+        x.stamp = ""; x.signature = "";
+        ["pinHash", "pinSalt", "pinFails", "pinLockUntil"].forEach(k => delete x[k]);
+        Object.values(PROTECTED).forEach(m => { if (x[m] === "pin") x[m] = "on"; });
+      });
+      pinDone(null);
+      lockNow(c.id);
+      sync();
+      showToast("PIN болон тамга, гарын үсгийн зураг устгагдлаа");
+    }
+
+    /* Хэвлэхийн өмнө: түгжээтэй бол PIN асууна, эсвэл тамгагүй хэвлэнэ */
+    async function printDoc() {
+      const c = currentCompany();
+      if (hasPinImages(c) && !isUnlocked(c)) {
+        const r = await requireUnlock("Тамга, гарын үсэгтэй хэвлэхийн тулд PIN оруулна уу.", true);
+        if (!r) return;
+      }
+      // Шинээр орсон зураг ачаалж дуусахаас өмнө хэвлэвэл хоосон гарна
+      await Promise.all(Array.from(document.querySelectorAll("img.sh-stamp, img.sh-sig, img.of-stamp, img.of-sig"))
+        .map(img => img.getAttribute("src") ? img.decode().catch(() => {}) : null));
+      window.print();
+    }
+
+    document.addEventListener("click", e => {
+      if (e.target instanceof HTMLImageElement && e.target.classList.contains("locked-ph"))
+        requireUnlock("Тамга, гарын үсгийг нээхийн тулд PIN оруулна уу.");
+    });
 
     /* ── Нэвтрэх ── */
     document.getElementById("lockInput").addEventListener("keydown", e => { if (e.key === "Enter") checkLock(); });
