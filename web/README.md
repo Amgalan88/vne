@@ -12,7 +12,8 @@ npm install
 npm run dev
 ```
 
-- Үндсэн домэйн: http://localhost:3000
+- Үндсэн домэйн (зөвхөн танилцуулга): http://localhost:3000
+- Админ (компаниуд, шинэ компани нээх): http://app.localhost:3000
 - Компанийн хэсэг: http://umgm.localhost:3000 (Chrome, Edge, Firefox `*.localhost`-г автоматаар таньдаг)
 
 Хөгжүүлэлтийн үед нэвтрэлтийн cookie дэд домэйн бүрт тусдаа байдаг (хөтчүүд `localhost`-д domain cookie зөвшөөрдөггүй).

@@ -1,18 +1,26 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/env";
-import { COOKIE_DOMAIN, tenantFromHost } from "@/lib/hosts";
+import { appUrl, COOKIE_DOMAIN, isAppHost, tenantFromHost } from "@/lib/hosts";
 
 // Дэд домэйн дээр ч компанийн хуудас руу дахин чиглүүлэхгүй, бүх компанид нийтлэг замууд
 const SHARED_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", "/auth"];
 
 /**
+ * 0) app.hhk.mn/ → /dashboard (админ), hhk.mn/ → танилцуулга
  * 1) umgm.hhk.mn/xyz → дотооддоо /t/umgm/xyz руу rewrite (хөтчийн хаяг өөрчлөгдөхгүй)
  * 2) Supabase session-ийн хугацаа дуусахаас өмнө шинэчилж cookie-д бичнэ
  */
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const tenant = tenantFromHost(request.headers.get("host"));
+  const host = request.headers.get("host");
+  const tenant = tenantFromHost(host);
+  const appHost = isAppHost(host);
+
+  // Үндсэн домэйн зөвхөн танилцуулга — админ хэсэг app дэд домэйн дээр
+  if (!tenant && !appHost && (pathname === "/dashboard" || pathname === "/new")) {
+    return NextResponse.redirect(appUrl(pathname === "/new" ? `/new${search}` : "/"));
+  }
 
   // Үндсэн домэйноос /t/... руу шууд хандахыг хаана — компанийн хуудас зөвхөн дэд домэйноор
   if (!tenant && pathname.startsWith("/t/")) {
@@ -20,7 +28,11 @@ export async function proxy(request: NextRequest) {
   }
 
   const isShared = SHARED_PATHS.some(p => pathname === p || pathname.startsWith(p + "/"));
-  const rewriteTo = tenant && !isShared ? new URL(`/t/${tenant}${pathname === "/" ? "" : pathname}${search}`, request.url) : null;
+  const rewriteTo = tenant && !isShared
+    ? new URL(`/t/${tenant}${pathname === "/" ? "" : pathname}${search}`, request.url)
+    : appHost && pathname === "/"
+      ? new URL(`/dashboard${search}`, request.url)
+      : null;
 
   const makeResponse = () =>
     rewriteTo

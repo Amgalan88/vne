@@ -3,14 +3,15 @@ import { Logo } from "@/components/logo";
 import { FREE_FEATURES, PRO_FEATURES, PRO_PRICE } from "@/lib/billing";
 import { fmtMoney } from "@/lib/format";
 import { ROOT_DOMAIN } from "@/lib/env";
+import { appUrl } from "@/lib/hosts";
 import { SlugClaim } from "@/components/slug-claim";
 
 /* hhk.mn нүүр хуудас (нэвтрээгүй хэрэглэгчид). Харанхуй горимоос үл хамааран цайвар өнгөтэй. */
 
-export function Landing() {
+export function Landing({ signedIn = false }: { signedIn?: boolean }) {
   return (
     <div className="flex-1 bg-white text-slate-900">
-      <Nav />
+      <Nav signedIn={signedIn} />
       <Hero />
       <DocTypes />
       <Features />
@@ -24,7 +25,7 @@ export function Landing() {
   );
 }
 
-function Nav() {
+function Nav({ signedIn }: { signedIn: boolean }) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-100 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
@@ -36,12 +37,20 @@ function Nav() {
           <a href="#faq" className="hover:text-slate-900">Асуулт</a>
         </nav>
         <div className="flex items-center gap-2">
-          <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
-            Нэвтрэх
-          </Link>
-          <Link href="/signup" className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-slate-700">
-            Үнэгүй эхлэх
-          </Link>
+          {signedIn ? (
+            <a href={appUrl()} className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+              Ажлын хэсэг рүү →
+            </a>
+          ) : (
+            <>
+              <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                Нэвтрэх
+              </Link>
+              <Link href="/signup" className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                Үнэгүй эхлэх
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

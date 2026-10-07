@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { safeNext } from "@/lib/hosts";
+import { homeFor, safeNext } from "@/lib/hosts";
 import { isValidSlug, normalizeSlug } from "@/lib/slug";
 import { finishOnboarding } from "@/lib/onboarding";
 
@@ -17,6 +17,11 @@ export type FormState = {
 };
 
 /** Имэйлийн холбоос хэрэглэгчийн одоо байгаа хаяг руу (дэд домэйн ч бай) буцаж ирнэ */
+async function currentHome() {
+  const h = await headers();
+  return homeFor(h.get("x-forwarded-host") ?? h.get("host"));
+}
+
 async function currentOrigin() {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
@@ -55,7 +60,7 @@ export async function login(_: FormState, fd: FormData): Promise<FormState> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: String(fd.get("password") ?? "") });
   if (error) return { error: authError(error), email };
-  redirect(safeNext(fd.get("next")));
+  redirect(safeNext(fd.get("next"), await currentHome()));
 }
 
 /**
@@ -81,7 +86,7 @@ export async function signup(_: FormState, fd: FormData): Promise<FormState> {
     if (!free) return { error: `${slug} хаяг авагдсан байна. Өөр хаяг сонгоно уу.`, ...keep };
   }
 
-  const next = safeNext(fd.get("next"));
+  const next = safeNext(fd.get("next"), await currentHome());
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -121,5 +126,5 @@ export async function updatePassword(_: FormState, fd: FormData): Promise<FormSt
   if (!data?.claims) return { error: "Холбоосын хугацаа дууссан байна. Нууц үг сэргээх хүсэлтээ дахин илгээнэ үү." };
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: authError(error) };
-  redirect("/");
+  redirect(await currentHome());
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { tenantUrl } from "./hosts";
+import { appUrl, tenantUrl } from "./hosts";
 
 /**
  * Бүртгүүлэхдээ сонгосон компанийг (user_metadata.company_slug) анх нэвтрэх үед үүсгэнэ.
@@ -22,6 +22,6 @@ export async function finishOnboarding(supabase: SupabaseClient): Promise<string
   const name = String(user.user_metadata.company_name || slug);
   const { error } = await supabase.rpc("create_tenant", { p_slug: slug, p_name: name });
   // Баталгаажуулах хооронд өөр хүн авчихсан бол шинээр сонгуулна
-  if (error) return `/new?${new URLSearchParams({ slug, name, taken: "1" })}`;
+  if (error) return appUrl(`/new?${new URLSearchParams({ slug, name, taken: "1" })}`);
   return tenantUrl(slug);
 }

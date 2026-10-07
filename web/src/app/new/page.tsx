@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Компани нээх" };
 export default async function NewTenantPage({ searchParams }: PageProps<"/new">) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
-  if (!data?.claims) redirect("/signup");
+  if (!data?.claims) redirect("/login");
 
   const sp = await searchParams;
   const defaults = {

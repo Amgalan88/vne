@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/tenant";
-import { rootUrl } from "@/lib/hosts";
+import { appUrl } from "@/lib/hosts";
 import { canManage, ROLE_LABEL } from "@/lib/types";
 import { isPro } from "@/lib/billing";
 import { Card } from "@/components/ui";
@@ -23,7 +23,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
             <b>{ctx.email}</b> энэ компанийн гишүүн биш байна. Компанийн эзэмшигчээс энэ имэйл рүү урилга явуулахыг хүсээрэй.
           </p>
           <div className="mt-5 flex justify-center gap-2">
-            <a href={rootUrl()} className="rounded-lg border px-3 py-1.5 text-sm font-semibold">
+            <a href={appUrl()} className="rounded-lg border px-3 py-1.5 text-sm font-semibold">
               Миний компаниуд
             </a>
             <SignOutButton />
@@ -62,7 +62,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
                 {pro ? "Төлбөртэй" : "Үнэгүй"}
               </Link>
             </p>
-            <a href={rootUrl("/?companies")} className="text-xs text-slate-400 hover:underline">
+            <a href={appUrl("/?companies")} className="text-xs text-slate-400 hover:underline">
               Миний компаниуд
             </a>
           </div>

@@ -1,7 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { safeNext } from "@/lib/hosts";
+import { homeFor, safeNext } from "@/lib/hosts";
 import { finishOnboarding } from "@/lib/onboarding";
 
 /**
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const tokenHash = sp.get("token_hash");
   const type = sp.get("type") as EmailOtpType | null;
   const code = sp.get("code");
-  const next = safeNext(sp.get("next"));
+  const next = safeNext(sp.get("next"), homeFor(request.headers.get("host")));
 
   const supabase = await createClient();
   let ok = false;
