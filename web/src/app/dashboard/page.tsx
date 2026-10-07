@@ -3,12 +3,11 @@ import { redirect } from "next/navigation";
 import { mustChangePassword } from "@/lib/password";
 import { finishOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
-import { rootUrl, tenantHost, tenantUrl } from "@/lib/hosts";
+import { tenantHost, tenantUrl } from "@/lib/hosts";
 import { ROLE_LABEL, type Role } from "@/lib/types";
 import { buttonClass, Card } from "@/components/ui";
 import { PushToggle } from "@/components/push-toggle";
-import { SignOutButton } from "@/components/sign-out-button";
-import { Logo } from "@/components/logo";
+import { AppShell } from "@/components/app-shell";
 import { initials } from "@/lib/site";
 
 type MyTenant = { role: Role; tenants: { slug: string; name: string } };
@@ -46,22 +45,11 @@ export default async function Home({ searchParams }: PageProps<"/dashboard">) {
   const name = String((claims.user_metadata as { full_name?: string } | undefined)?.full_name ?? "");
 
   return (
-    <div className="flex-1">
-    <section className="bg-brand-dark text-white">
-      <div className="mx-auto w-full max-w-2xl px-4 pt-6 pb-10">
-        <header className="mb-10 flex items-center justify-between">
-          <Logo light />
-          <div className="flex items-center gap-3 text-sm text-white/70">
-            <span className="hidden sm:inline">{String(claims.email ?? "")}</span>
-            <a href={rootUrl("/guide")} className="hover:text-white">Гарын авлага</a>
-            <SignOutButton onDark />
-          </div>
-        </header>
-        <h1 className="text-3xl font-black tracking-tight">Сайн байна уу{name ? `, ${name}` : ""}!</h1>
-        <p className="mt-2 text-white/70">Аль компанийнхаа ажлын хэсэг рүү орох вэ?</p>
-      </div>
-    </section>
-    <main className="mx-auto -mt-6 w-full max-w-2xl px-4 pb-10">
+    <AppShell
+      email={String(claims.email ?? "")}
+      title={`Сайн байна уу${name ? `, ${name}` : ""}!`}
+      subtitle="Аль компанийнхаа ажлын хэсэг рүү орох вэ?"
+    >
       {rows?.length ? (
         <>
           <div className="space-y-3">
@@ -101,7 +89,6 @@ export default async function Home({ searchParams }: PageProps<"/dashboard">) {
       <div className="mt-8">
         <PushToggle />
       </div>
-    </main>
-    </div>
+    </AppShell>
   );
 }

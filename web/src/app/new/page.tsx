@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ROOT_DOMAIN } from "@/lib/env";
 import { normalizeSlug } from "@/lib/slug";
-import { Logo } from "@/components/logo";
+import { AppShell } from "@/components/app-shell";
+import { Card } from "@/components/ui";
 import { NewTenantForm } from "./new-tenant-form";
 
 export const metadata: Metadata = { title: "Компани нээх" };
@@ -22,20 +23,29 @@ export default async function NewTenantPage({ searchParams }: PageProps<"/new">)
   };
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-white px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="mb-8">
-          <Logo />
-        </div>
-        <h1 className="mb-1 text-2xl font-extrabold tracking-tight">Компани нээх</h1>
-        <p className="mb-6 text-sm text-slate-500">Компани бүр өөрийн хаягтай. Ажилтнуудаа дараа нь урьж нэмнэ.</p>
-        <NewTenantForm rootDomain={ROOT_DOMAIN} defaults={defaults} />
-        <p className="mt-5 text-center text-sm">
-          <Link href="/" className="text-slate-500 underline">
-            ← Миний компаниуд
-          </Link>
-        </p>
+    <AppShell email={String(data.claims.email ?? "")} title="Шинэ компани нээх" subtitle="Компани бүр өөрийн хаяг, баримт, ажилтан, нийтийн хуудастай.">
+      <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+        <Card className="p-6">
+          <NewTenantForm rootDomain={ROOT_DOMAIN} defaults={defaults} />
+        </Card>
+        <Card className="space-y-3 p-5 text-sm">
+          <p className="font-bold">Юу авах вэ</p>
+          <ul className="space-y-2 text-slate-600">
+            {["Өөрийн хаяг: нэр.hhk.mn", "Нэхэмжлэх, ТМ-1, БМ-3, албан бичиг", "Тамга, гарын үсэг PIN-ээр", "Үнэгүй нийтийн вэб хуудас", "Ажилтан урих (төлбөртэй багц)"].map(t => (
+              <li key={t} className="flex gap-2">
+                <span className="text-teal-600">✓</span>
+                {t}
+              </li>
+            ))}
+          </ul>
+          <p className="border-t border-slate-100 pt-3 text-xs text-slate-400">Хаягийг дараа солих боломжгүй тул сайн бодож сонгоорой.</p>
+        </Card>
       </div>
-    </main>
+      <p className="mt-6 text-center text-sm">
+        <Link href="/?companies" className="font-semibold text-slate-500 hover:text-slate-800">
+          ← Миний компаниуд
+        </Link>
+      </p>
+    </AppShell>
   );
 }
