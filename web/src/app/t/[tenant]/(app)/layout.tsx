@@ -62,8 +62,8 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
                 {pro ? "Төлбөртэй" : "Үнэгүй"}
               </Link>
             </p>
-            <a href={rootUrl()} className="text-xs text-slate-400 hover:underline">
-              hhk.mn
+            <a href={rootUrl("/?companies")} className="text-xs text-slate-400 hover:underline">
+              Миний компаниуд
             </a>
           </div>
           <div className="flex items-center gap-3">

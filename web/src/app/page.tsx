@@ -4,15 +4,19 @@ import { finishOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
 import { tenantHost, tenantUrl } from "@/lib/hosts";
 import { ROLE_LABEL, type Role } from "@/lib/types";
-import { buttonClass, Card, EmptyState } from "@/components/ui";
+import { buttonClass, Card } from "@/components/ui";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Logo } from "@/components/logo";
 import { Landing } from "./landing";
 
 type MyTenant = { role: Role; tenants: { slug: string; name: string } };
 
-// hhk.mn — нэвтрээгүй бол танилцуулга, нэвтэрсэн бол өөрийн компаниуд
-export default async function Home() {
+/**
+ * hhk.mn — нэвтрээгүй бол танилцуулга.
+ * Нэвтэрсэн, ганц компанитай бол шууд тэр компанийн ажлын хэсэг рүү; олон бол сонгуулна.
+ * ?companies — жагсаалтыг үргэлж харуулна (компанийн толгой хэсгийн "Миний компаниуд" холбоос).
+ */
+export default async function Home({ searchParams }: PageProps<"/">) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
@@ -31,10 +35,13 @@ export default async function Home() {
     const dest = await finishOnboarding(supabase);
     if (dest) redirect(dest);
   }
+  if (rows?.length === 1 && !("companies" in (await searchParams))) redirect(tenantUrl(rows[0].tenants.slug));
+
+  const name = String((claims.user_metadata as { full_name?: string } | undefined)?.full_name ?? "");
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-10">
-      <header className="mb-8 flex items-center justify-between">
+      <header className="mb-10 flex items-center justify-between">
         <Logo />
         <div className="flex items-center gap-3 text-sm text-slate-500">
           <span className="hidden sm:inline">{String(claims.email ?? "")}</span>
@@ -42,35 +49,44 @@ export default async function Home() {
         </div>
       </header>
 
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-lg font-bold">Миний компаниуд</h1>
-        <Link href="/new" className={buttonClass("dark")}>
-          ＋ Компани нээх
-        </Link>
-      </div>
+      <h1 className="text-2xl font-extrabold tracking-tight">Сайн байна уу{name ? `, ${name}` : ""}!</h1>
 
       {rows?.length ? (
-        <div className="space-y-2">
-          {rows.map(r => (
-            <a key={r.tenants.slug} href={tenantUrl(r.tenants.slug)} className="block">
-              <Card className="flex items-center justify-between p-4 transition hover:border-slate-400">
-                <div>
-                  <p className="font-semibold">{r.tenants.name}</p>
-                  <p className="text-sm text-slate-500">{tenantHost(r.tenants.slug)}</p>
-                </div>
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
-                  {ROLE_LABEL[r.role]}
-                </span>
-              </Card>
-            </a>
-          ))}
-        </div>
+        <>
+          <p className="mt-2 text-slate-500">Аль компанийнхаа ажлын хэсэг рүү орох вэ? Компани дээр дарж баримтаа гаргана.</p>
+          <div className="mt-6 space-y-3">
+            {rows.map(r => (
+              <a key={r.tenants.slug} href={tenantUrl(r.tenants.slug)} className="group block">
+                <Card className="flex items-center justify-between gap-4 p-5 transition group-hover:border-indigo-300 group-hover:shadow-md">
+                  <div className="min-w-0">
+                    <p className="truncate text-lg font-bold">{r.tenants.name}</p>
+                    <p className="text-sm text-slate-500">
+                      {tenantHost(r.tenants.slug)} · {ROLE_LABEL[r.role]}
+                    </p>
+                  </div>
+                  <span className={buttonClass("primary", "shrink-0")}>Орох →</span>
+                </Card>
+              </a>
+            ))}
+          </div>
+          <p className="mt-8 text-center text-sm text-slate-500">
+            Өөр компани нэмж нээх үү?{" "}
+            <Link href="/new" className="font-semibold text-indigo-600 hover:underline">
+              Шинэ компани нээх
+            </Link>
+          </p>
+        </>
       ) : (
-        <EmptyState title="Танд одоогоор компани алга">
-          Шинэ компани нээх эсвэл компанийнхаа эзэмшигчээс урилга авна уу.
-        </EmptyState>
+        <Card className="mt-6 p-6 text-center">
+          <p className="font-semibold">Танд одоогоор компани алга</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Өөрийн компанийг нээх эсвэл ажлынхаа эзэмшигчээс энэ имэйл рүү урилга явуулахыг хүсээрэй.
+          </p>
+          <Link href="/new" className={buttonClass("primary", "mt-5")}>
+            ＋ Компани нээх
+          </Link>
+        </Card>
       )}
     </main>
   );
 }
-
