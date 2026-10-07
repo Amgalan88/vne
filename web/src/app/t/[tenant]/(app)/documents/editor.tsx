@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { DocumentSheet } from "@/components/sheets";
 import { buttonClass, Card, Field, Input, Notice, Select } from "@/components/ui";
 import { fmtMoney } from "@/lib/format";
@@ -42,6 +42,8 @@ export function DocumentEditor({
   const [dirty, setDirty] = useState(false);
   const [result, setResult] = useState<SaveResult | null>(null);
   const [pending, startTransition] = useTransition();
+  // Утсан дээр засах, харах хоёрыг шилжүүлж харуулна (том дэлгэц дээр зэрэг харагдана)
+  const [view, setView] = useState<"edit" | "preview">("edit");
 
   const issuer = issuers.find(i => i.id === s.issuerId) ?? issuers[0];
   const issuerAssets = issuer ? assets[issuer.id] : undefined;
@@ -85,6 +87,29 @@ export function DocumentEditor({
       }
     });
 
+  // Ctrl/⌘+S хадгална; хадгалаагүй өөрчлөлттэй хуудас хаахад анхааруулна
+  const saveRef = useRef(save);
+  useEffect(() => {
+    saveRef.current = save;
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && canEdit) {
+        e.preventDefault();
+        saveRef.current();
+      }
+    };
+    const onLeave = (e: BeforeUnloadEvent) => {
+      if (dirty && canEdit) e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("beforeunload", onLeave);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("beforeunload", onLeave);
+    };
+  }, [dirty, canEdit]);
+
   const remove = () => {
     if (!s.id || !confirm(`${s.number} баримтыг устгах уу?`)) return;
     startTransition(async () => {
@@ -97,7 +122,20 @@ export function DocumentEditor({
   return (
     <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
       {/* ── Засварлах хэсэг ── */}
-      <div className="w-full space-y-4 print:hidden lg:w-[400px] lg:shrink-0">
+      <div className="sticky top-0 z-20 -mx-4 flex gap-1 border-b border-slate-200 bg-slate-50/95 px-4 py-2 backdrop-blur print:hidden lg:hidden">
+        {(["edit", "preview"] as const).map(v => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={`flex-1 rounded-lg py-2 text-sm font-semibold ${view === v ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}
+          >
+            {v === "edit" ? "✎ Засах" : "👁 Урьдчилж харах"}
+          </button>
+        ))}
+      </div>
+
+      <div className={`w-full space-y-4 print:hidden lg:block lg:w-[400px] lg:shrink-0 ${view === "preview" ? "hidden" : ""}`}>
         <div className="flex items-center justify-between">
           <Link href="/documents" className="text-sm font-semibold text-slate-500 hover:text-slate-800">
             ← Баримтууд
@@ -122,6 +160,13 @@ export function DocumentEditor({
         </div>
 
         {issuer && issuerAssets?.locked && <StampUnlock issuerId={issuer.id} />}
+
+        {issuer && !isLetter && !(issuer.rd && (issuer.bank || issuer.account)) && (
+          <Notice tone="info">
+            Баримтад РД, банк, дансны мэдээлэл гарахгүй байна.{" "}
+            <Link href="/settings" className="font-semibold underline">Тохиргоонд бөглөх →</Link>
+          </Notice>
+        )}
 
         {result?.error && (
           <Notice tone="error">
@@ -309,6 +354,11 @@ export function DocumentEditor({
           <button type="button" onClick={() => window.print()} className={buttonClass("dark", "flex-1 py-2.5")}>
             🖨 Хэвлэх / PDF
           </button>
+          {canEdit && s.id && (
+            <button type="button" onClick={() => router.push(`/documents/new?from=${s.id}`)} className={buttonClass("light", "px-3")} title="Хуулбарлаж шинэ баримт үүсгэх">
+              ⧉ Хуулах
+            </button>
+          )}
           {canDelete && s.id && (
             <button type="button" onClick={remove} disabled={pending} className={buttonClass("light", "px-3 text-red-600")} aria-label="Устгах">
               🗑
@@ -318,7 +368,7 @@ export function DocumentEditor({
       </div>
 
       {/* ── Урьдчилан харах (хэвлэхэд зөвхөн энэ гарна) ── */}
-      <div className="min-w-0 flex-1 overflow-x-auto print:overflow-visible">
+      <div className={`min-w-0 flex-1 overflow-x-auto print:block print:overflow-visible lg:block ${view === "edit" ? "hidden" : ""}`}>
         <div className="doc-zoom [zoom:0.46] sm:[zoom:0.8] lg:[zoom:0.62] xl:[zoom:0.78]">
           <DocumentSheet s={s} issuer={issuer} assets={issuerAssets} />
         </div>
