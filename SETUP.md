@@ -21,6 +21,7 @@ Supabase → **SQL Editor** → New query. Дараах файлуудыг GitHu
 5. `supabase/005_admin_overview.sql`
 6. `supabase/006_push.sql`
 7. `supabase/007_platform.sql`
+8. `supabase/008_site_templates.sql`
 
 (Нэг файлыг хоёр удаа Run хийвэл "already exists" алдаа гарна. Тэр тохиолдолд дараагийнх руу шилж.)
 
