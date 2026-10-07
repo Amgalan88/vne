@@ -4,7 +4,7 @@ import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/env";
 import { appUrl, COOKIE_DOMAIN, isAppHost, rootUrl, tenantFromHost } from "@/lib/hosts";
 
 // Дэд домэйн дээр ч компанийн хуудас руу дахин чиглүүлэхгүй, бүх компанид нийтлэг замууд
-const SHARED_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", "/auth"];
+const SHARED_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", "/change-password", "/auth"];
 
 /**
  * 0) app.hhk.mn/ → /dashboard (админ), hhk.mn/ → танилцуулга

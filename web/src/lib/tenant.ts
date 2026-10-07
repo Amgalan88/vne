@@ -3,9 +3,10 @@ import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Role, Tenant } from "@/lib/types";
+import { mustChangePassword } from "@/lib/password";
 
 export type TenantContext =
-  | { status: "ok"; tenant: Tenant; role: Role; userId: string; email: string }
+  | { status: "ok"; tenant: Tenant; role: Role; userId: string; email: string; mustChangePassword: boolean }
   | { status: "forbidden"; slug: string; email: string }
   | { status: "missing" }
   | { status: "anon" };
@@ -37,7 +38,7 @@ export const getTenantContext = cache(async (slug: string): Promise<TenantContex
     .eq("user_id", claims.sub)
     .single<{ role: Role }>();
   if (!m) return { status: "forbidden", slug, email };
-  return { status: "ok", tenant, role: m.role, userId: claims.sub, email };
+  return { status: "ok", tenant, role: m.role, userId: claims.sub, email, mustChangePassword: mustChangePassword(claims) };
 });
 
 /** Компанийн хуудсанд: нэвтрээгүй бол login, компани байхгүй/гишүүн биш бол 404 */

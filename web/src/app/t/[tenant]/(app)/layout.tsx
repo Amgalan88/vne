@@ -34,6 +34,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
     );
   }
 
+  if (ctx.mustChangePassword) redirect("/change-password");
   const { tenant, role, email } = ctx;
   const links = [
     { href: "/documents", label: "Баримтууд" },

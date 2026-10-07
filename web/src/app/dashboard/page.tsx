@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { mustChangePassword } from "@/lib/password";
 import { finishOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
 import { tenantHost, tenantUrl } from "@/lib/hosts";
@@ -21,6 +22,7 @@ export default async function Home({ searchParams }: PageProps<"/dashboard">) {
   const claims = data?.claims;
 
   if (!claims) redirect("/login");
+  if (mustChangePassword(claims)) redirect("/change-password");
 
   const { data: rows } = await supabase
     .from("memberships")
@@ -31,6 +33,9 @@ export default async function Home({ searchParams }: PageProps<"/dashboard">) {
 
   // Өөр төхөөрөмж дээр имэйлээ баталгаажуулаад энд нэвтэрсэн бол компанийг нь одоо үүсгэнэ
   if (!rows?.length) {
+    // Урилгатай бол энд нэгдээд жагсаалтаа дахин ачаална
+    const { data: joined } = await supabase.rpc("accept_invitations");
+    if (joined) redirect("/");
     const dest = await finishOnboarding(supabase);
     if (dest) redirect(dest);
   }

@@ -124,7 +124,7 @@ export async function updatePassword(_: FormState, fd: FormData): Promise<FormSt
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) return { error: "Холбоосын хугацаа дууссан байна. Нууц үг сэргээх хүсэлтээ дахин илгээнэ үү." };
-  const { error } = await supabase.auth.updateUser({ password });
+  const { error } = await supabase.auth.updateUser({ password, data: { must_change_password: false } });
   if (error) return { error: authError(error) };
   redirect(await currentHome());
 }
