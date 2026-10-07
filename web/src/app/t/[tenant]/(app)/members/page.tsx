@@ -6,6 +6,7 @@ import { canManage, ROLE_LABEL, type Role } from "@/lib/types";
 import { buttonClass, Card } from "@/components/ui";
 import { cancelInvitation, changeRole, removeMember } from "./actions";
 import { InviteForm } from "./invite-form";
+import { Avatar } from "@/components/doc-icon";
 import { isPro } from "@/lib/billing";
 import { UpgradeNotice } from "@/components/upgrade-notice";
 
@@ -14,6 +15,13 @@ export const metadata: Metadata = { title: "Гишүүд" };
 type Member = { user_id: string; role: Role; created_at: string };
 type Profile = { id: string; full_name: string; email: string | null };
 type Invitation = { id: string; email: string; role: Role; created_at: string };
+
+const ROLE_BADGE: Record<Role, string> = {
+  owner: "bg-indigo-100 text-indigo-700",
+  admin: "bg-teal-100 text-teal-700",
+  staff: "bg-sky-100 text-sky-700",
+  viewer: "bg-slate-100 text-slate-600",
+};
 
 const ROLE_HELP: [Role, string][] = [
   ["owner", "Бүх эрх, эзэмшил шилжүүлэх, PIN мартсан үед шинэчлэх"],
@@ -64,6 +72,7 @@ export default async function MembersPage({ params }: PageProps<"/t/[tenant]/mem
               m.role !== "owner" && (isMe || myRole === "owner" || (myRole === "admin" && m.role !== "admin"));
             return (
               <div key={m.user_id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <Avatar name={p?.full_name || p?.email || "?"} />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">
                     {p?.full_name || p?.email} {isMe && <span className="text-xs font-normal text-slate-400">(та)</span>}
@@ -80,7 +89,7 @@ export default async function MembersPage({ params }: PageProps<"/t/[tenant]/mem
                     <button className={buttonClass("light", "px-2 py-1 text-xs")}>Хадгалах</button>
                   </form>
                 ) : (
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${ROLE_BADGE[m.role]}`}>
                     {ROLE_LABEL[m.role]}
                   </span>
                 )}

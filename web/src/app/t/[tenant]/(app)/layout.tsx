@@ -4,6 +4,7 @@ import { getTenantContext } from "@/lib/tenant";
 import { fmtDate } from "@/lib/format";
 import { appUrl, rootUrl } from "@/lib/hosts";
 import { canManage, ROLE_LABEL } from "@/lib/types";
+import { initials } from "@/lib/site";
 import { daysLeft as daysUntil, isPro } from "@/lib/billing";
 import { Card } from "@/components/ui";
 import { PushToggle } from "@/components/push-toggle";
@@ -57,30 +58,34 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-slate-200 bg-white print:hidden">
-        <div className="h-1 bg-brand" />
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <p className="flex items-center gap-2 font-bold">
-              <span className="truncate">{tenant.name}</span>
-              <Link
-                href="/billing"
-                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${pro ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500"}`}
-              >
-                {pro ? "Төлбөртэй" : "Үнэгүй"}
-              </Link>
-            </p>
-            <span className="flex gap-3 text-xs text-slate-400">
-              <a href={appUrl("/?companies")} className="hover:underline">Миний компаниуд</a>
-              <a href={rootUrl("/guide")} className="hover:underline">Гарын авлага</a>
+      <header className="bg-brand-dark text-white print:hidden">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 pt-4 pb-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-sm font-black shadow-lg ring-2 ring-white/20">
+              {initials(tenant.name)}
             </span>
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 font-bold">
+                <span className="truncate">{tenant.name}</span>
+                <Link
+                  href="/billing"
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${pro ? "bg-teal-400/20 text-teal-200 ring-1 ring-teal-300/40" : "bg-white/10 text-white/70"}`}
+                >
+                  {pro ? "Төлбөртэй" : "Үнэгүй"}
+                </Link>
+              </p>
+              <span className="flex gap-3 text-xs text-white/60">
+                <a href={appUrl("/?companies")} className="hover:text-white">Миний компаниуд</a>
+                <a href={rootUrl("/guide")} className="hover:text-white">Гарын авлага</a>
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right text-xs sm:block">
-              <p className="font-medium text-slate-600 dark:text-slate-300">{email}</p>
-              <p className="text-slate-400">{ROLE_LABEL[role]}</p>
+              <p className="font-medium text-white/90">{email}</p>
+              <p className="text-white/50">{ROLE_LABEL[role]}</p>
             </div>
-            <SignOutButton />
+            <SignOutButton onDark />
           </div>
         </div>
         <TenantNav links={links} slug={slug} />

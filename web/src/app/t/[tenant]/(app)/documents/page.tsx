@@ -6,6 +6,7 @@ import { isPro } from "@/lib/billing";
 import { canEdit, canManage, DOC_TYPE_LABEL, type DocStatus, type DocType } from "@/lib/types";
 import { buttonClass, Card } from "@/components/ui";
 import { DocList } from "./doc-list";
+import { DocIconTile } from "@/components/doc-icon";
 
 export const metadata: Metadata = { title: "Баримтууд" };
 
@@ -84,14 +85,18 @@ export default async function DocumentsPage({ params }: PageProps<"/t/[tenant]/d
       )}
 
       {editable && (
-        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {(Object.keys(DOC_TYPE_LABEL) as DocType[]).map(t => (
             <Link
               key={t}
               href={`/documents/new?type=${t}`}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold transition hover:border-indigo-300 hover:shadow-sm"
+              className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
             >
-              ＋ {DOC_TYPE_LABEL[t]}
+              <DocIconTile className="transition group-hover:scale-105" />
+              <span className="min-w-0">
+                <span className="block text-sm font-bold leading-tight">{DOC_TYPE_LABEL[t]}</span>
+                <span className="block text-xs text-slate-500">＋ Шинээр үүсгэх</span>
+              </span>
             </Link>
           ))}
         </div>
