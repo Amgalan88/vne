@@ -5,7 +5,7 @@ import { ROOT_DOMAIN } from "@/lib/env";
 export const metadata: Metadata = { title: "Системийн шалгалт", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-type Check = { name: string; ok: boolean; fix: string; optional?: boolean };
+type Check = { name: string; ok: boolean; fix: string; optional?: boolean; unknown?: boolean };
 
 /** Функц өгөгдлийн санд байгаа эсэх (PGRST202 = олдсонгүй). Нууц зүйл харуулахгүй, зөвхөн ✓/✗ */
 async function hasFn(fn: string, args: Record<string, unknown>) {
@@ -14,7 +14,17 @@ async function hasFn(fn: string, args: Record<string, unknown>) {
   return error?.code !== "PGRST202";
 }
 
+/** Нэвтэрсэн хэрэглэгчид л нээлттэй функцүүд (anon-д хаалттай тул нэвтрээгүй үед шалгаж болохгүй) */
+async function hasAuthFn(loggedIn: boolean, fn: string, args: Record<string, unknown>): Promise<boolean | undefined> {
+  return loggedIn ? hasFn(fn, args) : undefined;
+}
+
 export default async function SetupPage() {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getClaims();
+  const loggedIn = !!auth?.claims;
+  const adminFn = await hasAuthFn(loggedIn, "admin_tenants", {});
+  const pushFn = await hasAuthFn(loggedIn, "save_push_subscription", { p_endpoint: "", p_p256dh: "", p_auth: "" });
   const checks: Check[] = [
     {
       name: "Үндсэн домэйн (NEXT_PUBLIC_ROOT_DOMAIN)",
@@ -33,12 +43,14 @@ export default async function SetupPage() {
     },
     {
       name: "Админ хяналт: 005_admin_overview.sql",
-      ok: await hasFn("admin_tenants", {}),
-      fix: "Supabase → SQL Editor дээр supabase/005_admin_overview.sql-ийг Run.",
+      ok: adminFn === true,
+      unknown: adminFn === undefined,
+      fix: "Supabase → SQL Editor дээр supabase/005_admin_overview.sql-ийг Run. (Энэ мөрийг шалгахын тулд эхлээд нэвтэрсэн байх ёстой.)",
     },
     {
       name: "Push мэдэгдлийн хүснэгт: 006_push.sql",
-      ok: await hasFn("save_push_subscription", { p_endpoint: "", p_p256dh: "", p_auth: "" }),
+      ok: pushFn === true,
+      unknown: pushFn === undefined,
       fix: "Supabase → SQL Editor дээр supabase/006_push.sql-ийг Run.",
       optional: true,
     },
@@ -61,7 +73,7 @@ export default async function SetupPage() {
       optional: true,
     },
   ];
-  const bad = checks.filter(c => !c.ok && !c.optional).length;
+  const bad = checks.filter(c => !c.ok && !c.optional && !c.unknown).length;
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -73,11 +85,12 @@ export default async function SetupPage() {
         {checks.map(c => (
           <li key={c.name} className="rounded-xl border border-slate-200 bg-white p-4">
             <p className="font-semibold">
-              <span className={c.ok ? "text-emerald-600" : c.optional ? "text-amber-600" : "text-red-600"}>{c.ok ? "✓" : c.optional ? "○" : "✗"}</span>{" "}
+              <span className={c.ok ? "text-emerald-600" : c.optional || c.unknown ? "text-amber-600" : "text-red-600"}>{c.ok ? "✓" : c.optional || c.unknown ? "○" : "✗"}</span>{" "}
               {c.name}
               {c.optional && !c.ok && <span className="ml-2 text-xs font-normal text-slate-400">(заавал биш)</span>}
             </p>
-            {!c.ok && <p className="mt-1 text-sm text-slate-500">{c.fix}</p>}
+            {c.unknown && <p className="mt-1 text-sm text-slate-500">Нэвтэрсний дараа шалгагдана — <a href="/login?next=/setup" className="font-semibold underline">нэвтрэх</a> (админ бол <a href="/admin/login" className="font-semibold underline">энд</a>), дараа нь энэ хуудсыг дахин нээнэ үү.</p>}
+            {!c.ok && !c.unknown && <p className="mt-1 text-sm text-slate-500">{c.fix}</p>}
           </li>
         ))}
       </ul>
