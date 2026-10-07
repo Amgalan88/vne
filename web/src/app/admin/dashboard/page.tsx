@@ -76,7 +76,8 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
 
   return (
     <div className="space-y-6">
-      <AutoRefresh active seconds={30} />
+      {/* Нүүр хуудасны таб дээр маягт бөглөж байхад шинэчлэхгүй */}
+      <AutoRefresh active={tab === "overview" || tab === "payments"} seconds={30} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Платформын удирдлага</h1>
