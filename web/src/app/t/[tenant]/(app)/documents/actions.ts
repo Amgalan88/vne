@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { rootUrl } from "@/lib/hosts";
 import { docTotal, filledRows, formatDocNumber, type DocState } from "@/lib/documents";
 import type { DocStatus, DocType } from "@/lib/types";
 
@@ -88,4 +89,14 @@ export async function deleteDocument(tenantId: string, id: string): Promise<Save
   if (error) return { error: error.code === "42501" ? "Устгах эрх хүрэлцэхгүй байна." : error.message };
   revalidatePath("/t/[tenant]/documents", "page");
   return {};
+}
+
+/** Баримтыг холбоосоор хуваалцах / холбоосыг хаах. Холбоостой хэн ч нэвтрэлгүй харж, PDF татна. */
+export async function shareDocument(tenantId: string, id: string, enable: boolean): Promise<{ url?: string | null; error?: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("share_document", { p_id: id, p_enable: enable });
+  if (error) return { error: error.code === "PGRST202" ? "Эхлээд supabase/010_v2.sql-ийг Run хийнэ үү." : error.code === "42501" ? "Эрх хүрэлцэхгүй байна." : error.message };
+  revalidatePath("/t/[tenant]/documents/[id]", "page");
+  void tenantId;
+  return { url: data ? rootUrl(`/d/${data}`) : null };
 }

@@ -12,6 +12,8 @@ import { DOC_STATUS_LABEL, DOC_TYPE_LABEL, type DocStatus, type DocType } from "
 import type { AssetUrls } from "@/lib/asset-types";
 import { deleteDocument, saveDocument, type SaveResult } from "./actions";
 import { StampUnlock } from "./stamp-unlock";
+import { ShareLink } from "./share-link";
+import { PdfButton } from "@/components/pdf-button";
 
 export type CustomerOption = { name: string; rd: string; address: string; phone: string; email: string };
 
@@ -28,6 +30,7 @@ export function DocumentEditor({
   initial,
   canEdit,
   canDelete,
+  shareUrl = null,
 }: {
   tenantId: string;
   issuers: Issuer[];
@@ -36,6 +39,7 @@ export function DocumentEditor({
   initial: DocState;
   canEdit: boolean;
   canDelete: boolean;
+  shareUrl?: string | null;
 }) {
   const router = useRouter();
   const [s, setS] = useState<DocState>(initial);
@@ -351,8 +355,9 @@ export function DocumentEditor({
               {pending ? "Хадгалж байна…" : s.id ? "Хадгалах" : "Хадгалах"}
             </button>
           )}
-          <button type="button" onClick={() => window.print()} className={buttonClass("dark", "flex-1 py-2.5")}>
-            🖨 Хэвлэх / PDF
+          <PdfButton targetId="doc-sheet" filename={`${DOC_TYPE_LABEL[s.docType]} ${s.number || "ноорог"}`} variant="dark" className="flex-1 py-2.5" />
+          <button type="button" onClick={() => window.print()} className={buttonClass("light", "px-3")} title="Хэвлэх" aria-label="Хэвлэх">
+            🖨
           </button>
           {canEdit && s.id && (
             <button type="button" onClick={() => router.push(`/documents/new?from=${s.id}`)} className={buttonClass("light", "px-3")} title="Хуулбарлаж шинэ баримт үүсгэх">
@@ -365,15 +370,16 @@ export function DocumentEditor({
             </button>
           )}
         </div>
+        {s.id && canEdit && <ShareLink tenantId={tenantId} docId={s.id} initialUrl={shareUrl} />}
         <p className="text-xs text-slate-500">
-          Баримт «Хадгалах» дармагц энд, «Баримтууд» жагсаалтад хадгалагдана. PDF файл авах бол «Хэвлэх / PDF» → хэвлэгчийн оронд
-          «PDF хэлбэрээр хадгалах» (Save as PDF) сонгоно — файл төхөөрөмжийн «Татаж авсан» (Downloads) хавтсанд орно.
+          «Хадгалах» дармагц баримт «Баримтууд» жагсаалтад хадгалагдана. «⬇ PDF татах» дарахад PDF файл төхөөрөмжийн «Татаж авсан»
+          (Downloads) хавтсанд шууд орно.
         </p>
       </div>
 
       {/* ── Урьдчилан харах (хэвлэхэд зөвхөн энэ гарна) ── */}
       <div className={`min-w-0 flex-1 overflow-x-auto print:block print:overflow-visible lg:block ${view === "edit" ? "hidden" : ""}`}>
-        <div className="doc-zoom [zoom:0.46] sm:[zoom:0.8] lg:[zoom:0.62] xl:[zoom:0.78]">
+        <div id="doc-sheet" className="doc-zoom [zoom:0.46] sm:[zoom:0.8] lg:[zoom:0.62] xl:[zoom:0.78]">
           <DocumentSheet s={s} issuer={issuer} assets={issuerAssets} />
         </div>
       </div>
