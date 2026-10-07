@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
-import { buttonClass, Card, Field, Input, Notice, Select } from "@/components/ui";
+import { buttonClass, Card, Field, Input, Notice, Select, Spinner } from "@/components/ui";
 import {
   lockStamp,
   removeAsset,
@@ -79,7 +79,7 @@ export function StampPanel({
           {info.lockedUntil && !info.unlocked && <span className="text-xs text-red-600">Хэт олон буруу оролдлоо — түр түгжигдсэн</span>}
           {info.unlocked ? (
             <button type="button" disabled={pending} onClick={() => run(() => lockStamp(issuerId))} className={buttonClass("light", "ml-auto px-3 py-1.5")}>
-              Түгжих
+              {pending ? <Spinner /> : "Түгжих"}
             </button>
           ) : (
             <form
@@ -90,7 +90,7 @@ export function StampPanel({
               }}
             >
               <Input ref={pinRef} type="password" inputMode="numeric" maxLength={6} placeholder="PIN" className="w-28" required />
-              <button disabled={pending} className={buttonClass("dark", "px-3 py-1.5")}>Нээх</button>
+              <button disabled={pending} className={buttonClass("dark", "px-3 py-1.5")}>{pending ? <Spinner /> : "Нээх"}</button>
             </form>
           )}
         </div>
@@ -168,7 +168,7 @@ export function StampPanel({
         onClick={() => run(() => saveModes(tenantId, issuerId, stampMode, sigMode))}
         className={buttonClass("primary", "py-2")}
       >
-        Горим хадгалах
+        {pending ? <><Spinner /> Хадгалж байна…</> : "Горим хадгалах"}
       </button>
 
       <div className="border-t border-slate-100 pt-4">
@@ -184,7 +184,7 @@ export function StampPanel({
             <Field label={info.hasPin ? "Шинэ PIN (4–6 орон)" : "PIN (4–6 орон)"}>
               <Input ref={newPinRef} type="password" inputMode="numeric" pattern="[0-9]{4,6}" maxLength={6} required className="w-40" />
             </Field>
-            <button disabled={pending || needsUnlock} className={buttonClass("dark", "py-2")}>{info.hasPin ? "PIN солих" : "PIN тохируулах"}</button>
+            <button disabled={pending || needsUnlock} className={buttonClass("dark", "py-2")}>{pending ? <Spinner /> : info.hasPin ? "PIN солих" : "PIN тохируулах"}</button>
             {info.hasPin && isOwner && (
               <button
                 type="button"

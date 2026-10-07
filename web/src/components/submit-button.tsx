@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { buttonClass, type ButtonVariant } from "./ui";
+import { buttonClass, Spinner, type ButtonVariant } from "./ui";
 
 export function SubmitButton({
   children,
@@ -17,7 +17,7 @@ export function SubmitButton({
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className={buttonClass(variant, className)}>
-      {pending ? pendingText : children}
+      {pending ? <><Spinner /> {pendingText}</> : children}
     </button>
   );
 }

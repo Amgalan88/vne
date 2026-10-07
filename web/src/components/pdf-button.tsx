@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { buttonClass, type ButtonVariant } from "@/components/ui";
+import { buttonClass, Spinner, type ButtonVariant } from "@/components/ui";
 import { downloadSheetPdf } from "@/lib/pdf";
 
 /** «⬇ PDF татах» — targetId бүхий элемент доторх баримтыг PDF болгоно */
@@ -28,7 +28,7 @@ export function PdfButton({ targetId, filename, variant = "primary", className =
         }}
         className={buttonClass(variant, className)}
       >
-        {busy ? "PDF бэлдэж байна…" : "⬇ PDF татах"}
+        {busy ? <><Spinner /> PDF бэлдэж байна…</> : "⬇ PDF татах"}
       </button>
       {err && <span className="text-xs text-red-600">{err}</span>}
     </>

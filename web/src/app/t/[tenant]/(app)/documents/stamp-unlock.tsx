@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { Input, Notice } from "@/components/ui";
+import { Input, Notice, Spinner } from "@/components/ui";
 import { buttonClass } from "@/components/ui";
 import { unlockStamp } from "../settings/stamp-actions";
 
@@ -28,7 +28,7 @@ export function StampUnlock({ issuerId }: { issuerId: string }) {
         }}
       >
         <Input ref={ref} type="password" inputMode="numeric" maxLength={6} placeholder="PIN" required className="w-28" />
-        <button disabled={pending} className={buttonClass("dark", "px-3 py-1.5")}>Нээх</button>
+        <button disabled={pending} className={buttonClass("dark", "px-3 py-1.5")}>{pending ? <><Spinner /> Шалгаж байна…</> : "Нээх"}</button>
       </form>
     </div>
   );

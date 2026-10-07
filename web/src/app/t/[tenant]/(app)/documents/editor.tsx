@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { DocumentSheet } from "@/components/sheets";
-import { buttonClass, Card, Field, Input, Notice, Select } from "@/components/ui";
+import { buttonClass, Card, Field, Input, Notice, Select, Spinner } from "@/components/ui";
 import { fmtMoney } from "@/lib/format";
 import { toWordsMn } from "@/lib/money";
 import { docTotal, emptyRow, rowAmount, type DocState, type Issuer, type Row } from "@/lib/documents";
@@ -49,6 +49,9 @@ export function DocumentEditor({
   const [dirty, setDirty] = useState(false);
   const [result, setResult] = useState<SaveResult | null>(null);
   const [pending, startTransition] = useTransition();
+  // Аль үйлдэл ажиллаж байгаа, дууссаны дараа юу хийхийг доод мөрөнд харуулна
+  const [busy, setBusy] = useState<"draft" | "issue" | "status" | "unlock" | "delete" | "nav" | null>(null);
+  const [done, setDone] = useState<string | null>(null);
   // Хадгалагдсан төлөв: ноорог биш бол тамга дарагдсан → агуулга түгжээтэй (DB-ийн trigger мөн хамгаална)
   const [savedStatus, setSavedStatus] = useState<DocStatus>(initial.id ? initial.status : "draft");
   const locked = !!s.id && savedStatus !== "draft";
@@ -66,6 +69,7 @@ export function DocumentEditor({
     setS(prev => ({ ...prev, [key]: value }));
     setDirty(true);
     setResult(null);
+    setDone(null);
   };
   const setRow = (i: number, patch: Partial<Row>) =>
     set("rows", s.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
@@ -122,12 +126,20 @@ export function DocumentEditor({
     setBeforeImport(null);
   };
 
-  const save = (status: DocStatus = "draft") =>
+  const save = (status: DocStatus = "draft") => {
+    if (locked) return;
+    setBusy(status === "draft" ? "draft" : "issue");
+    setDone(null);
     startTransition(async () => {
-      if (locked) return;
       const r = await saveDocument(tenantId, { ...s, status });
       setResult(r);
       if (r.id) {
+        const no = r.number ?? s.number;
+        setDone(
+          status === "draft"
+            ? `✓ Ноорог хадгалагдлаа · №${no}. Бэлэн болмогц «✅ Гаргах» дарна.`
+            : `✅ Гаргалаа · №${no} — тамга дарагдлаа. Одоо «⬇ PDF татах» дарж харилцагчид илгээнэ.`,
+        );
         setSavedStatus(status);
         setS(prev => ({ ...prev, id: r.id!, number: r.number ?? prev.number, status }));
         setDirty(false);
@@ -135,6 +147,7 @@ export function DocumentEditor({
         if (!s.id) window.history.replaceState(null, "", `/documents/${r.id}`);
       }
     });
+  };
 
   // Ctrl/⌘+S хадгална; хадгалаагүй өөрчлөлттэй хуудас хаахад анхааруулна
   const saveRef = useRef(save);
@@ -168,20 +181,31 @@ export function DocumentEditor({
     if (!confirm("Баримтыг гаргах уу?\n\n• Тамга, гарын үсэг дарагдана.\n• Баримт түгжигдэж, дахин засах боломжгүй болно.\n• Засах шаардлагатай бол «⧉ Хуулах»-аар шинэ баримт үүсгэнэ.")) return;
     save("issued");
   };
-  const changeStatus = (status: DocStatus) =>
+  const changeStatus = (status: DocStatus) => {
+    if (!s.id) return;
+    setBusy("status");
+    setDone(null);
     startTransition(async () => {
-      if (!s.id) return;
-      const r = await setDocStatus(tenantId, s.id, status);
-      if (r.error) setResult(r);
-      else {
+      const r = await setDocStatus(tenantId, s.id!, status);
+      setResult(r.error ? r : null);
+      if (!r.error) {
         setSavedStatus(status);
         setS(prev => ({ ...prev, status }));
+        setDone(`✓ Төлөв хадгалагдлаа: ${DOC_STATUS_LABEL[status]}`);
       }
     });
+  };
+  // Өөр хуудас руу шилжихэд «Нээж байна…» харагдана
+  const go = (href: string) => {
+    setBusy("nav");
+    startTransition(() => router.push(href));
+  };
   const unlock = () => {
     if (!s.id) return;
     const reason = prompt("Яагаад засахаар нээх вэ? (аудит логт бүртгэгдэнэ)\nЖишээ: үнийн алдаа засах");
     if (!reason || reason.trim().length < 3) return;
+    setBusy("unlock");
+    setDone(null);
     startTransition(async () => {
       const r = await unlockDocument(tenantId, s.id!, reason.trim());
       if (r.error) setResult(r);
@@ -189,12 +213,14 @@ export function DocumentEditor({
         setSavedStatus("draft");
         setS(prev => ({ ...prev, status: "draft" }));
         setResult(null);
+        setDone("🔓 Засахаар нээгдлээ. Засаад дахин «✅ Гаргах» дарна.");
       }
     });
   };
 
   const remove = () => {
     if (!s.id || !confirm(`${s.number} баримтыг устгах уу?`)) return;
+    setBusy("delete");
     startTransition(async () => {
       const r = await deleteDocument(tenantId, s.id!);
       if (r.error) setResult(r);
@@ -288,8 +314,8 @@ export function DocumentEditor({
                   <button
                     key={t}
                     type="button"
-                    disabled={dirty}
-                    onClick={() => router.push(`/documents/new?from=${s.id}&type=${t}`)}
+                    disabled={dirty || pending}
+                    onClick={() => go(`/documents/new?from=${s.id}&type=${t}`)}
                     className={buttonClass("light", "px-3 py-1.5 text-sm")}
                   >
                     → {DOC_TYPE_LABEL[t]}
@@ -301,18 +327,6 @@ export function DocumentEditor({
             </p>
           </Card>
         )}
-
-        {result?.error && (
-          <Notice tone="error">
-            {result.error}{" "}
-            {result.upgrade && (
-              <Link href="/billing" className="font-semibold underline">
-                Төлбөртэй багц →
-              </Link>
-            )}
-          </Notice>
-        )}
-        {result?.id && !dirty && <Notice tone="success">✓ Хадгалагдлаа · {s.number}</Notice>}
 
         {locked && (
           <Card className="space-y-3 border-emerald-200 bg-emerald-50/60 p-4">
@@ -500,43 +514,73 @@ export function DocumentEditor({
           )}
         </fieldset>
 
-        <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
-          {canEdit && !locked && (
-            <>
-              <button type="button" onClick={() => save("draft")} disabled={pending} className={buttonClass("light", "flex-1 py-2.5")}>
-                {pending ? "…" : "Ноорог хадгалах"}
+        <div className="sticky bottom-0 z-10 -mx-4 space-y-2 border-t border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
+          {/* Одоо юу болж байгаа, дараа нь юу хийх — үргэлж товчны дээр харагдана */}
+          <div role="status" aria-live="polite" className="text-sm">
+            {pending && busy ? (
+              <p className="flex items-center gap-2 font-semibold text-slate-700">
+                <Spinner />
+                {{ draft: "Хадгалж байна…", issue: "Гаргаж байна — тамга дарж байна…", status: "Төлөв хадгалж байна…", unlock: "Нээж байна…", delete: "Устгаж байна…", nav: "Шинэ баримт нээж байна…" }[busy]}
+              </p>
+            ) : result?.error ? (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">
+                {result.error}{" "}
+                {result.upgrade && (
+                  <Link href="/billing" className="font-semibold underline">
+                    Төлбөртэй багц →
+                  </Link>
+                )}
+              </p>
+            ) : done && !dirty ? (
+              <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 font-medium text-emerald-800">{done}</p>
+            ) : !canEdit ? null : locked ? (
+              <p className="font-medium text-emerald-800">🔒 Гаргасан · хадгалагдсан. Засах шаардлагагүй — «⬇ PDF татах» эсвэл «⧉ Хуулах».</p>
+            ) : dirty ? (
+              <p className="font-medium text-amber-700">● Хадгалаагүй өөрчлөлт байна.</p>
+            ) : s.id ? (
+              <p className="text-slate-600">📝 Ноорог хадгалагдсан. Бэлэн болмогц «✅ Гаргах» дарна.</p>
+            ) : (
+              <p className="text-slate-600">Бөглөж дуусаад «✅ Гаргах». Дараа үргэлжлүүлэх бол «Ноорог хадгалах».</p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {canEdit && !locked && (
+              <>
+                <button type="button" onClick={() => save("draft")} disabled={pending} className={buttonClass("light", "flex-1 py-2.5")}>
+                  {pending && busy === "draft" ? <><Spinner /> Хадгалж байна…</> : "Ноорог хадгалах"}
+                </button>
+                <button type="button" onClick={issue} disabled={pending} className={buttonClass("primary", "flex-1 py-2.5")} title="Тамга дарж, баримтыг түгжинэ">
+                  {pending && busy === "issue" ? <><Spinner /> Гаргаж байна…</> : "✅ Гаргах"}
+                </button>
+              </>
+            )}
+            <PdfButton targetId="doc-sheet" filename={`${DOC_TYPE_LABEL[s.docType]} ${s.number || "ноорог"}`} variant="dark" className="flex-1 py-2.5" />
+            <button type="button" onClick={() => window.print()} className={buttonClass("light", "px-3")} title="Хэвлэх" aria-label="Хэвлэх">
+              🖨
+            </button>
+            {canEdit && s.id && (locked || shareUrl) && (
+              <button
+                type="button"
+                onClick={() => setShareOpen(o => !o)}
+                className={buttonClass(shareOpen ? "dark" : "light", "px-3")}
+                title="Харилцагчид холбоосоор илгээх"
+                aria-label="Холбоосоор илгээх"
+                aria-expanded={shareOpen}
+              >
+                🔗
               </button>
-              <button type="button" onClick={issue} disabled={pending} className={buttonClass("primary", "flex-1 py-2.5")} title="Тамга дарж, баримтыг түгжинэ">
-                ✅ Гаргах
+            )}
+            {canEdit && s.id && (
+              <button type="button" onClick={() => go(`/documents/new?from=${s.id}`)} disabled={pending} className={buttonClass("light", "px-3")} title="Хуулбарлаж шинэ баримт үүсгэх">
+                {pending && busy === "nav" ? <Spinner /> : "⧉"} Хуулах
               </button>
-            </>
-          )}
-          <PdfButton targetId="doc-sheet" filename={`${DOC_TYPE_LABEL[s.docType]} ${s.number || "ноорог"}`} variant="dark" className="flex-1 py-2.5" />
-          <button type="button" onClick={() => window.print()} className={buttonClass("light", "px-3")} title="Хэвлэх" aria-label="Хэвлэх">
-            🖨
-          </button>
-          {canEdit && s.id && (locked || shareUrl) && (
-            <button
-              type="button"
-              onClick={() => setShareOpen(o => !o)}
-              className={buttonClass(shareOpen ? "dark" : "light", "px-3")}
-              title="Харилцагчид холбоосоор илгээх"
-              aria-label="Холбоосоор илгээх"
-              aria-expanded={shareOpen}
-            >
-              🔗
-            </button>
-          )}
-          {canEdit && s.id && (
-            <button type="button" onClick={() => router.push(`/documents/new?from=${s.id}`)} className={buttonClass("light", "px-3")} title="Хуулбарлаж шинэ баримт үүсгэх">
-              ⧉ Хуулах
-            </button>
-          )}
-          {canDelete && s.id && (
-            <button type="button" onClick={remove} disabled={pending} className={buttonClass("light", "px-3 text-red-600")} aria-label="Устгах">
-              🗑
-            </button>
-          )}
+            )}
+            {canDelete && s.id && (
+              <button type="button" onClick={remove} disabled={pending} className={buttonClass("light", "px-3 text-red-600")} aria-label="Устгах">
+                {pending && busy === "delete" ? <Spinner /> : "🗑"}
+              </button>
+            )}
+          </div>
         </div>
         {shareOpen && s.id && canEdit && <ShareLink tenantId={tenantId} docId={s.id} initialUrl={shareUrl ?? null} />}
         <p className="text-xs text-slate-500">

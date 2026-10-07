@@ -60,6 +60,11 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "error" | 
   );
 }
 
+/** Ажиллаж байгааг харуулах жижиг эргэлддэг дугуй */
+export function Spinner({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return <span aria-hidden className={`inline-block shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent ${className}`} />;
+}
+
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-300 px-6 py-12 text-center dark:border-slate-600">
