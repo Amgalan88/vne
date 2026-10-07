@@ -57,6 +57,7 @@ export async function saveDocument(tenantId: string, s: DocState): Promise<SaveR
 
   if (res.error) {
     if (res.error.code === "HK402") return { error: res.error.message, upgrade: true };
+    if (res.error.code === "HK423") return { error: res.error.message };
     if (res.error.code === "23505") return { error: `${number} дугаартай баримт аль хэдийн байна. Өөр дугаар оруулна уу.` };
     if (res.error.code === "42501" || res.error.code === "PGRST116") return { error: "Баримт засах эрх хүрэлцэхгүй байна." };
     return { error: "Хадгалж чадсангүй: " + res.error.message };
@@ -112,4 +113,27 @@ export async function loadDocForImport(tenantId: string, id: string): Promise<{ 
     .is("deleted_at", null)
     .maybeSingle<{ customer_name: string; data: Partial<DocState> }>();
   return data ? { customerName: data.customer_name, data: data.data } : null;
+}
+
+/** Гаргасан (түгжээтэй) баримтын зөвхөн төлвийг солино: гаргасан → төлөгдсөн / цуцалсан */
+export async function setDocStatus(tenantId: string, id: string, status: DocStatus): Promise<SaveResult> {
+  if (!["issued", "paid", "cancelled"].includes(status)) return { error: "Буруу төлөв." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("documents").update({ status }).eq("id", id).eq("tenant_id", tenantId);
+  if (error) return { error: error.code === "42501" ? "Эрх хүрэлцэхгүй байна." : error.message };
+  revalidatePath("/t/[tenant]/documents", "layout");
+  return { id };
+}
+
+/** Эзэмшигч/админ: гаргасан баримтыг шалтгаантайгаар засахаар нээнэ (ноорог болж, тамга түр алга болно) */
+export async function unlockDocument(tenantId: string, id: string, reason: string): Promise<SaveResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("unlock_document", { p_id: id, p_reason: reason });
+  if (error) {
+    if (error.code === "PGRST202") return { error: "Эхлээд supabase/011_document_lock.sql-ийг Run хийнэ үү." };
+    return { error: error.message };
+  }
+  revalidatePath("/t/[tenant]/documents", "layout");
+  void tenantId;
+  return { id };
 }

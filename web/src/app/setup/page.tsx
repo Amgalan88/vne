@@ -28,6 +28,7 @@ export default async function SetupPage() {
   const { data: auth } = await supabase.auth.getClaims();
   const loggedIn = !!auth?.claims;
   const adminFn = await hasAuthFn(loggedIn, "admin_tenants", {});
+  const lockFn = await hasAuthFn(loggedIn, "unlock_document", { p_id: "00000000-0000-0000-0000-000000000000", p_reason: "" });
   const pushFn = await hasAuthFn(loggedIn, "save_push_subscription", { p_endpoint: "", p_p256dh: "", p_auth: "" });
   const checks: Check[] = [
     {
@@ -68,6 +69,12 @@ export default async function SetupPage() {
       name: "Алдааны бүртгэл, хуваалцах холбоос, импорт: 010_v2.sql",
       ok: await hasFn("public_document", { p_token: "00000000-0000-0000-0000-000000000000" }),
       fix: "Supabase → SQL Editor дээр supabase/010_v2.sql-ийг Run.",
+    },
+    {
+      name: "Тамга дарсан баримтын түгжээ: 011_document_lock.sql",
+      ok: lockFn === true,
+      unknown: lockFn === undefined,
+      fix: "Supabase → SQL Editor дээр supabase/011_document_lock.sql-ийг Run.",
     },
     {
       name: "Нүүр хуудасны баннер: 007_platform.sql",

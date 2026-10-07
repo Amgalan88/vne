@@ -14,9 +14,20 @@ const n = (v: number) => (v ? fmtMoney(v) : "");
 
 export function DocumentSheet({ s, issuer, assets }: { s: DocState; issuer: Issuer | undefined; assets?: AssetUrls }) {
   const co = issuer ?? { id: "", name: "", address: "", rd: "", phone: "", email: "", bank: "", account: "", director: "" };
-  if (s.docType === "invoice") return <Tm1 s={s} co={co} a={assets} />;
-  if (s.docType === "dispatch") return <Bm3 s={s} co={co} a={assets} />;
-  return <Brand s={s} co={co} a={assets} />;
+  // Ноорогт тамга, гарын үсэг гарахгүй, «НООРОГ» усан тэмдэг гарна — тамга зөвхөн «Гаргах» үед дарагдана
+  const draft = s.status === "draft";
+  const a = draft && assets ? { ...assets, stamp: null, signature: null } : assets;
+  if (s.docType === "invoice") return <Tm1 s={s} co={co} a={a} wm={draft} />;
+  if (s.docType === "dispatch") return <Bm3 s={s} co={co} a={a} wm={draft} />;
+  return <Brand s={s} co={co} a={a} wm={draft} />;
+}
+
+function Watermark() {
+  return (
+    <div className="sheet-watermark" aria-hidden>
+      НООРОГ
+    </div>
+  );
 }
 
 /** Хэвлэхэд зургууд хамт гарахын тулд энгийн <img> */
@@ -48,13 +59,14 @@ function StampArea({ a }: { a?: AssetUrls }) {
   );
 }
 
-function Brand({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
+function Brand({ s, co, a, wm }: { s: DocState; co: Issuer; a?: AssetUrls; wm?: boolean }) {
   const isLetter = s.docType === "letter";
   const rows = filledRows(s.rows);
   const total = docTotal(s.rows);
   const info = [co.address, co.rd ? "РД: " + co.rd : ""].filter(Boolean).join("\n");
   return (
     <main className="sheet">
+      {wm && <Watermark />}
       <div className="sh-accent-bar" />
       <div className="sh-body">
         <div className="sh-header">
@@ -196,12 +208,13 @@ function LegalHead({ code }: { code: string }) {
   );
 }
 
-function Bm3({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
+function Bm3({ s, co, a, wm }: { s: DocState; co: Issuer; a?: AssetUrls; wm?: boolean }) {
   const rows = filledRows(s.rows);
   const total = docTotal(s.rows);
   const [yy, mm, dd] = (s.docDate || "").split("-");
   return (
     <section className="of-sheet">
+      {wm && <Watermark />}
       <LegalHead code="БМ-3" />
       <div className="of-title">
         ЗАРЛАГЫН БАРИМТ № <span className="of-fill">{s.number}</span>
@@ -278,7 +291,7 @@ function Bm3({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
   );
 }
 
-function Tm1({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
+function Tm1({ s, co, a, wm }: { s: DocState; co: Issuer; a?: AssetUrls; wm?: boolean }) {
   const rows = filledRows(s.rows);
   const total = docTotal(s.rows);
   // НӨАТ: "none" = маягт дээрх шиг задлахгүй, "incl" = үнэд багтсан 10%-г задална
@@ -286,6 +299,7 @@ function Tm1({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
   const net = split ? total / 1.1 : total;
   return (
     <section className="of-sheet">
+      {wm && <Watermark />}
       <LegalHead code="ТМ-1" />
       <div className="of-title">
         НЭХЭМЖЛЭХ № <span className="of-fill">{s.number}</span>

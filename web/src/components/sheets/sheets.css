@@ -136,3 +136,12 @@
   .of-sheet { padding: 10mm 12mm !important; }
   .of-table tr { page-break-inside: avoid; }
 }
+
+/* Ноорог баримтын усан тэмдэг — тамга дарагдаагүйг илтгэнэ */
+.sheet, .of-sheet { position: relative; }
+.sheet-watermark {
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  font: 800 140px/1 "Segoe UI", Arial, sans-serif; letter-spacing: 12px;
+  color: rgba(220, 38, 38, 0.10); transform: rotate(-30deg);
+}

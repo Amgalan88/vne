@@ -10,7 +10,7 @@ import { toWordsMn } from "@/lib/money";
 import { docTotal, emptyRow, rowAmount, type DocState, type Issuer, type Row } from "@/lib/documents";
 import { DOC_STATUS_LABEL, DOC_TYPE_LABEL, type DocStatus, type DocType } from "@/lib/types";
 import type { AssetUrls } from "@/lib/asset-types";
-import { deleteDocument, loadDocForImport, saveDocument, type SaveResult } from "./actions";
+import { deleteDocument, loadDocForImport, saveDocument, setDocStatus, unlockDocument, type SaveResult } from "./actions";
 import { StampUnlock } from "./stamp-unlock";
 import { ShareLink } from "./share-link";
 import { PdfButton } from "@/components/pdf-button";
@@ -49,6 +49,9 @@ export function DocumentEditor({
   const [dirty, setDirty] = useState(false);
   const [result, setResult] = useState<SaveResult | null>(null);
   const [pending, startTransition] = useTransition();
+  // Хадгалагдсан төлөв: ноорог биш бол тамга дарагдсан → агуулга түгжээтэй (DB-ийн trigger мөн хамгаална)
+  const [savedStatus, setSavedStatus] = useState<DocStatus>(initial.id ? initial.status : "draft");
+  const locked = !!s.id && savedStatus !== "draft";
   // Утсан дээр засах, харах хоёрыг шилжүүлж харуулна (том дэлгэц дээр зэрэг харагдана)
   const [view, setView] = useState<"edit" | "preview">("edit");
 
@@ -117,12 +120,14 @@ export function DocumentEditor({
     setBeforeImport(null);
   };
 
-  const save = () =>
+  const save = (status: DocStatus = "draft") =>
     startTransition(async () => {
-      const r = await saveDocument(tenantId, s);
+      if (locked) return;
+      const r = await saveDocument(tenantId, { ...s, status });
       setResult(r);
       if (r.id) {
-        setS(prev => ({ ...prev, id: r.id!, number: r.number ?? prev.number }));
+        setSavedStatus(status);
+        setS(prev => ({ ...prev, id: r.id!, number: r.number ?? prev.number, status }));
         setDirty(false);
         // Хуудсыг дахин ачаалалгүйгээр хаягийг шинэчилнэ
         if (!s.id) window.history.replaceState(null, "", `/documents/${r.id}`);
@@ -138,7 +143,7 @@ export function DocumentEditor({
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && canEdit) {
         e.preventDefault();
-        saveRef.current();
+        saveRef.current("draft");
       }
     };
     const onLeave = (e: BeforeUnloadEvent) => {
@@ -151,6 +156,36 @@ export function DocumentEditor({
       window.removeEventListener("beforeunload", onLeave);
     };
   }, [dirty, canEdit]);
+
+  // «Гаргах»: тамга дарагдаж, баримт түгжигдэнэ
+  const issue = () => {
+    if (!confirm("Баримтыг гаргах уу?\n\n• Тамга, гарын үсэг дарагдана.\n• Баримт түгжигдэж, дахин засах боломжгүй болно.\n• Засах шаардлагатай бол «⧉ Хуулах»-аар шинэ баримт үүсгэнэ.")) return;
+    save("issued");
+  };
+  const changeStatus = (status: DocStatus) =>
+    startTransition(async () => {
+      if (!s.id) return;
+      const r = await setDocStatus(tenantId, s.id, status);
+      if (r.error) setResult(r);
+      else {
+        setSavedStatus(status);
+        setS(prev => ({ ...prev, status }));
+      }
+    });
+  const unlock = () => {
+    if (!s.id) return;
+    const reason = prompt("Яагаад засахаар нээх вэ? (аудит логт бүртгэгдэнэ)\nЖишээ: үнийн алдаа засах");
+    if (!reason || reason.trim().length < 3) return;
+    startTransition(async () => {
+      const r = await unlockDocument(tenantId, s.id!, reason.trim());
+      if (r.error) setResult(r);
+      else {
+        setSavedStatus("draft");
+        setS(prev => ({ ...prev, status: "draft" }));
+        setResult(null);
+      }
+    });
+  };
 
   const remove = () => {
     if (!s.id || !confirm(`${s.number} баримтыг устгах уу?`)) return;
@@ -190,7 +225,7 @@ export function DocumentEditor({
             <button
               key={t}
               type="button"
-              disabled={!canEdit || (!!s.id && t !== s.docType)}
+              disabled={!canEdit || locked || (!!s.id && t !== s.docType)}
               onClick={() => set("docType", t)}
               className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed ${
                 s.docType === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 enabled:hover:text-slate-800 disabled:opacity-40"
@@ -273,7 +308,30 @@ export function DocumentEditor({
         )}
         {result?.id && !dirty && <Notice tone="success">✓ Хадгалагдлаа · {s.number}</Notice>}
 
-        <fieldset disabled={!canEdit} className="space-y-4">
+        {locked && (
+          <Card className="space-y-3 border-emerald-200 bg-emerald-50/60 p-4">
+            <p className="text-sm font-bold text-emerald-900">🔒 Тамга дарагдсан — гаргасан баримт</p>
+            <p className="text-xs text-emerald-900/80">
+              Агуулгыг засах боломжгүй (хуурамчаар өөрчлөхөөс хамгаална). Өөрчлөх бол «⧉ Хуулах»-аар шинэ баримт үүсгэнэ үү.
+            </p>
+            {canEdit && (
+              <Field label="Төлөв">
+                <Select value={savedStatus} disabled={pending} onChange={e => changeStatus(e.target.value as DocStatus)}>
+                  {(["issued", "paid", "cancelled"] as DocStatus[]).map(k => (
+                    <option key={k} value={k}>{DOC_STATUS_LABEL[k]}</option>
+                  ))}
+                </Select>
+              </Field>
+            )}
+            {canDelete && (
+              <button type="button" disabled={pending} onClick={unlock} className="text-xs font-semibold text-slate-600 underline">
+                🔓 Засахаар нээх (эзэмшигч, админ — шалтгаан аудит логт бүртгэгдэнэ)
+              </button>
+            )}
+          </Card>
+        )}
+
+        <fieldset disabled={!canEdit || locked} className="space-y-4">
           <Card className="space-y-3 p-4">
             {issuers.length > 1 && (
               <Field label="Баримт гаргагч">
@@ -292,13 +350,11 @@ export function DocumentEditor({
                 <Input type="date" value={s.docDate} onChange={e => set("docDate", e.target.value)} />
               </Field>
             </div>
-            <Field label="Төлөв">
-              <Select value={s.status} onChange={e => set("status", e.target.value as DocStatus)}>
-                {(Object.keys(DOC_STATUS_LABEL) as DocStatus[]).map(k => (
-                  <option key={k} value={k}>{DOC_STATUS_LABEL[k]}</option>
-                ))}
-              </Select>
-            </Field>
+            {!locked && (
+              <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                📝 <b>Ноорог</b> — тамга, гарын үсэг гарахгүй. Бэлэн болмогц доорх «✅ Гаргах» дарж тамга дарна.
+              </p>
+            )}
           </Card>
 
           {isLetter ? (
@@ -438,11 +494,16 @@ export function DocumentEditor({
           )}
         </fieldset>
 
-        <div className="sticky bottom-0 z-10 -mx-4 flex gap-2 border-t border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
-          {canEdit && (
-            <button type="button" onClick={save} disabled={pending} className={buttonClass("primary", "flex-1 py-2.5")}>
-              {pending ? "Хадгалж байна…" : s.id ? "Хадгалах" : "Хадгалах"}
-            </button>
+        <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
+          {canEdit && !locked && (
+            <>
+              <button type="button" onClick={() => save("draft")} disabled={pending} className={buttonClass("light", "flex-1 py-2.5")}>
+                {pending ? "…" : "Ноорог хадгалах"}
+              </button>
+              <button type="button" onClick={issue} disabled={pending} className={buttonClass("primary", "flex-1 py-2.5")} title="Тамга дарж, баримтыг түгжинэ">
+                ✅ Гаргах
+              </button>
+            </>
           )}
           <PdfButton targetId="doc-sheet" filename={`${DOC_TYPE_LABEL[s.docType]} ${s.number || "ноорог"}`} variant="dark" className="flex-1 py-2.5" />
           <button type="button" onClick={() => window.print()} className={buttonClass("light", "px-3")} title="Хэвлэх" aria-label="Хэвлэх">
