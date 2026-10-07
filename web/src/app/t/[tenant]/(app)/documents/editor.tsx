@@ -9,7 +9,9 @@ import { fmtMoney } from "@/lib/format";
 import { toWordsMn } from "@/lib/money";
 import { docTotal, emptyRow, rowAmount, type DocState, type Issuer, type Row } from "@/lib/documents";
 import { DOC_STATUS_LABEL, DOC_TYPE_LABEL, type DocStatus, type DocType } from "@/lib/types";
+import type { AssetUrls } from "@/lib/asset-types";
 import { deleteDocument, saveDocument, type SaveResult } from "./actions";
+import { StampUnlock } from "./stamp-unlock";
 
 export type CustomerOption = { name: string; rd: string; address: string; phone: string; email: string };
 
@@ -22,6 +24,7 @@ export function DocumentEditor({
   tenantId,
   issuers,
   customers,
+  assets,
   initial,
   canEdit,
   canDelete,
@@ -29,6 +32,7 @@ export function DocumentEditor({
   tenantId: string;
   issuers: Issuer[];
   customers: CustomerOption[];
+  assets: Record<string, AssetUrls>;
   initial: DocState;
   canEdit: boolean;
   canDelete: boolean;
@@ -40,6 +44,7 @@ export function DocumentEditor({
   const [pending, startTransition] = useTransition();
 
   const issuer = issuers.find(i => i.id === s.issuerId) ?? issuers[0];
+  const issuerAssets = issuer ? assets[issuer.id] : undefined;
   const total = docTotal(s.rows);
   const isLetter = s.docType === "letter";
 
@@ -115,6 +120,8 @@ export function DocumentEditor({
             </button>
           ))}
         </div>
+
+        {issuer && issuerAssets?.locked && <StampUnlock issuerId={issuer.id} />}
 
         {result?.error && (
           <Notice tone="error">
@@ -313,7 +320,7 @@ export function DocumentEditor({
       {/* ── Урьдчилан харах (хэвлэхэд зөвхөн энэ гарна) ── */}
       <div className="min-w-0 flex-1 overflow-x-auto print:overflow-visible">
         <div className="doc-zoom [zoom:0.46] sm:[zoom:0.8] lg:[zoom:0.62] xl:[zoom:0.78]">
-          <DocumentSheet s={s} issuer={issuer} />
+          <DocumentSheet s={s} issuer={issuer} assets={issuerAssets} />
         </div>
       </div>
     </div>

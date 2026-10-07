@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ADMIN_EMAIL, getAdminClient } from "@/lib/admin";
+import { sendMail } from "@/lib/mail";
 import { createClient } from "@/lib/supabase/server";
 
 export type CodeState = { step?: "code"; email?: string; error?: string };
@@ -34,8 +35,18 @@ export async function adminLogin(_: CodeState, fd: FormData): Promise<CodeState>
 export async function decidePayment(id: string, approve: boolean) {
   const supabase = await getAdminClient();
   if (!supabase) redirect("/admin/login");
-  await supabase.rpc("admin_decide_payment", { p_id: id, p_approve: approve });
+  const { data: list } = await supabase.rpc("admin_payments");
+  const row = (list as { id: string; requester_email: string | null; tenant_name: string; tenant_slug: string }[] | null)?.find(r => r.id === id);
+  const { error } = await supabase.rpc("admin_decide_payment", { p_id: id, p_approve: approve });
   revalidatePath("/admin/dashboard");
+  if (error || !row?.requester_email) return;
+  await sendMail(
+    row.requester_email,
+    approve ? "hhk.mn — төлбөр баталгаажлаа" : "hhk.mn — төлбөрийн хүсэлт татгалзагдлаа",
+    approve
+      ? `<p>${row.tenant_name} (${row.tenant_slug}.hhk.mn) компанийн төлбөртэй багц идэвхжлээ. Баярлалаа!</p>`
+      : `<p>${row.tenant_name} компанийн төлбөрийн хүсэлтийг баталгаажуулж чадсангүй — гүйлгээ олдоогүй байж болзошгүй. Гүйлгээний утгыг (${row.tenant_slug}.hhk.mn) шалгаад дахин хүсэлт илгээнэ үү.</p>`,
+  );
 }
 
 export async function adminLogout() {

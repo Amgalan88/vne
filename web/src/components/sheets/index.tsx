@@ -3,6 +3,7 @@ import { DOC_TYPE_LABEL } from "@/lib/types";
 import { fmtMoney } from "@/lib/format";
 import { toWordsMn } from "@/lib/money";
 import { docTotal, filledRows, rowAmount, type DocState, type Issuer, type Row } from "@/lib/documents";
+import type { AssetUrls } from "@/lib/asset-types";
 
 /* Баримтын урьдчилан харах / хэвлэх хуудас. Хуучин апп-ын 4 загвар:
    үнийн санал, албан бичиг → брэнд загвар; нэхэмжлэх → ТМ-1; зарлагын баримт → БМ-3 */
@@ -11,26 +12,43 @@ const BM3_MIN_ROWS = 20;
 const TM1_MIN_ROWS = 10;
 const n = (v: number) => (v ? fmtMoney(v) : "");
 
-export function DocumentSheet({ s, issuer }: { s: DocState; issuer: Issuer | undefined }) {
+export function DocumentSheet({ s, issuer, assets }: { s: DocState; issuer: Issuer | undefined; assets?: AssetUrls }) {
   const co = issuer ?? { id: "", name: "", address: "", rd: "", phone: "", email: "", bank: "", account: "", director: "" };
-  if (s.docType === "invoice") return <Tm1 s={s} co={co} />;
-  if (s.docType === "dispatch") return <Bm3 s={s} co={co} />;
-  return <Brand s={s} co={co} />;
+  if (s.docType === "invoice") return <Tm1 s={s} co={co} a={assets} />;
+  if (s.docType === "dispatch") return <Bm3 s={s} co={co} a={assets} />;
+  return <Brand s={s} co={co} a={assets} />;
 }
 
-function StampArea() {
+/** Хэвлэхэд зургууд хамт гарахын тулд энгийн <img> */
+function Imgs({ a }: { a?: AssetUrls }) {
+  if (!a?.stamp && !a?.signature) return null;
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {a.stamp && <img src={a.stamp} alt="" className="sh-stamp-img" />}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {a.signature && <img src={a.signature} alt="" className="sh-sig-img" />}
+    </>
+  );
+}
+
+function StampArea({ a }: { a?: AssetUrls }) {
+  const has = !!(a?.stamp || a?.signature);
   return (
     <div className="sh-stamp-wrap">
+      <Imgs a={a} />
+      {!has && (
       <div className="sh-sign-label">
         <strong>Тамга тэмдэг</strong>
         <br />
         <span style={{ color: "#94a3b8" }}>/Гарын үсэг/</span>
       </div>
+      )}
     </div>
   );
 }
 
-function Brand({ s, co }: { s: DocState; co: Issuer }) {
+function Brand({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
   const isLetter = s.docType === "letter";
   const rows = filledRows(s.rows);
   const total = docTotal(s.rows);
@@ -41,6 +59,8 @@ function Brand({ s, co }: { s: DocState; co: Issuer }) {
       <div className="sh-body">
         <div className="sh-header">
           <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {a?.logo && <img src={a.logo} alt="" className="sh-logo-img" />}
             <div className="sh-co-name">{co.name}</div>
             <div className="sh-co-info">{info}</div>
           </div>
@@ -85,7 +105,7 @@ function Brand({ s, co }: { s: DocState; co: Issuer }) {
                 <div style={{ color: "#64748b", fontSize: 11 }}>{s.position || "Захирал"}</div>
                 <div style={{ fontWeight: 700 }}>{s.signName}</div>
               </div>
-              <StampArea />
+              <StampArea a={a} />
             </div>
           </>
         ) : (
@@ -139,7 +159,7 @@ function Brand({ s, co }: { s: DocState; co: Issuer }) {
                 </div>
                 {total > 0 && <div className="sh-words">{toWordsMn(total)}</div>}
               </div>
-              <StampArea />
+              <StampArea a={a} />
             </div>
           </>
         )}
@@ -176,7 +196,7 @@ function LegalHead({ code }: { code: string }) {
   );
 }
 
-function Bm3({ s, co }: { s: DocState; co: Issuer }) {
+function Bm3({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
   const rows = filledRows(s.rows);
   const total = docTotal(s.rows);
   const [yy, mm, dd] = (s.docDate || "").split("-");
@@ -252,13 +272,13 @@ function Bm3({ s, co }: { s: DocState; co: Issuer }) {
         <div className="of-sign-row">Хүлээлгэн өгсөн эд хариуцагч <span className="of-sign">{s.issuerName}</span></div>
         <div className="of-sign-row">Хүлээн авагч <span className="of-sign">{s.receiverName}</span></div>
         <div className="of-sign-row">Шалгасан нягтлан бодогч <span className="of-sign">{s.accountantName}</span></div>
-        <div className="of-stamp-box" />
+        <div className="of-stamp-box"><Imgs a={a} /></div>
       </div>
     </section>
   );
 }
 
-function Tm1({ s, co }: { s: DocState; co: Issuer }) {
+function Tm1({ s, co, a }: { s: DocState; co: Issuer; a?: AssetUrls }) {
   const rows = filledRows(s.rows);
   const total = docTotal(s.rows);
   // НӨАТ: "none" = маягт дээрх шиг задлахгүй, "incl" = үнэд багтсан 10%-г задална
@@ -335,7 +355,7 @@ function Tm1({ s, co }: { s: DocState; co: Issuer }) {
         <div className="of-sign-row">Дарга <span className="of-sign">{s.director}</span></div>
         <div className="of-sign-row">Хүлээн авсан <span className="of-sign">{s.receiver}</span></div>
         <div className="of-sign-row">Нягтлан бодогч <span className="of-sign">{s.accountant}</span></div>
-        <div className="of-stamp-box" />
+        <div className="of-stamp-box"><Imgs a={a} /></div>
       </div>
     </section>
   );

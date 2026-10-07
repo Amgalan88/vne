@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/tenant";
+import { fmtDate } from "@/lib/format";
 import { appUrl } from "@/lib/hosts";
 import { canManage, ROLE_LABEL } from "@/lib/types";
-import { isPro } from "@/lib/billing";
+import { daysLeft as daysUntil, isPro } from "@/lib/billing";
 import { Card } from "@/components/ui";
 import { SignOutButton } from "@/components/sign-out-button";
 import { TenantNav } from "./nav";
@@ -36,6 +37,7 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
   const { tenant, role, email } = ctx;
   const links = [
     { href: "/documents", label: "Баримтууд" },
+    { href: "/customers", label: "Харилцагчид" },
     { href: "/members", label: "Гишүүд" },
     ...(canManage(role)
       ? [
@@ -47,6 +49,9 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
     { href: "/billing", label: "Багц" },
   ];
   const pro = isPro(tenant);
+  const daysLeft = daysUntil(tenant.paid_until);
+  const expiry =
+    tenant.plan === "pro" && daysLeft !== null && daysLeft <= 7 ? { expired: !pro, days: Math.max(daysLeft, 0) } : null;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -76,6 +81,16 @@ export default async function TenantLayout({ children, params }: LayoutProps<"/t
         </div>
         <TenantNav links={links} slug={slug} />
       </header>
+      {expiry && (
+        <div className={`print:hidden ${expiry.expired ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-900"}`}>
+          <p className="mx-auto max-w-6xl px-4 py-2 text-sm">
+            {expiry.expired
+              ? `Төлбөртэй багцын хугацаа ${fmtDate(tenant.paid_until!)}-нд дууссан тул үнэгүй багц руу шилжлээ. `
+              : `Төлбөртэй багцын хугацаа ${expiry.days} хоногийн дараа (${fmtDate(tenant.paid_until!)}) дуусна. `}
+            <Link href="/billing" className="font-semibold underline">Сунгах →</Link>
+          </p>
+        </div>
+      )}
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:max-w-none print:p-0">{children}</main>
     </div>
   );

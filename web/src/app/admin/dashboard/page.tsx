@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/admin";
+import { daysLeft } from "@/lib/billing";
 import { fmtDate, fmtDateTime, fmtMoney } from "@/lib/format";
 import { Card, EmptyState } from "@/components/ui";
 import { adminLogout, decidePayment } from "../actions";
@@ -17,6 +18,11 @@ type Row = {
   requester_email: string | null;
 };
 
+type TenantRow = {
+  slug: string; name: string; plan: string; paid_until: string | null; created_at: string;
+  members: number; documents: number; owner_email: string | null;
+};
+
 const periodLabel = (m: number) => (m === 12 ? "1 жил" : `${m} сар`);
 const STATUS = {
   pending: ["Хүлээгдэж байна", "bg-amber-100 text-amber-800"],
@@ -30,6 +36,9 @@ export default async function AdminDashboard() {
 
   const { data } = await supabase.rpc("admin_payments");
   const rows = (data ?? []) as Row[];
+  const { data: tdata } = await supabase.rpc("admin_tenants");
+  const tenants = (tdata ?? []) as TenantRow[]; // 005_admin_overview.sql ажиллаагүй бол хоосон
+  const proTenants = tenants.filter(t => t.plan === "pro" && (daysLeft(t.paid_until) ?? 0) > 0);
   const pending = rows.filter(r => r.status === "pending");
   const done = rows.filter(r => r.status !== "pending");
 
@@ -81,6 +90,39 @@ export default async function AdminDashboard() {
           </Card>
         ))}
       </section>
+
+      {tenants.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="font-bold">
+            Компаниуд ({tenants.length}) · төлбөртэй {proTenants.length}
+          </h2>
+          <Card className="divide-y divide-slate-100">
+            {tenants.map(t => {
+              const days = daysLeft(t.paid_until);
+              const active = t.plan === "pro" && days !== null && days > 0;
+              return (
+                <div key={t.slug} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-semibold">
+                      {t.name} <span className="font-mono font-normal text-slate-400">{t.slug}.hhk.mn</span>
+                    </p>
+                    <p className="text-slate-500">
+                      {t.owner_email} · {t.members} гишүүн · {t.documents} баримт
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      active ? (days! <= 7 ? "bg-amber-100 text-amber-800" : "bg-indigo-100 text-indigo-700") : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {active ? `Төлбөртэй · ${days} хоног (${fmtDate(t.paid_until!)})` : t.plan === "pro" ? "Хугацаа дууссан" : "Үнэгүй"}
+                  </span>
+                </div>
+              );
+            })}
+          </Card>
+        </section>
+      )}
 
       {done.length > 0 && (
         <section className="space-y-3">
