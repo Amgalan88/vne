@@ -28,12 +28,16 @@ export async function proxy(request: NextRequest) {
   }
 
   // Үндсэн домэйноос /t/... руу шууд хандахыг хаана — компанийн хуудас зөвхөн дэд домэйноор
-  if (!tenant && pathname.startsWith("/t/")) {
+  // (Компанийн апп дүрс, хуваалцах зураг нь metadataBase-ээр үндсэн домэйноос дуудагдах тул зөвшөөрнө)
+  const brandAsset = /^\/t\/[a-z0-9-]+\/(opengraph-image|twitter-image|icon|apple-icon|app-icon)(\/|$)/.test(pathname);
+  if (!tenant && pathname.startsWith("/t/") && !brandAsset) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   const isShared = SHARED_PATHS.some(p => pathname === p || pathname.startsWith(p + "/"));
-  const rewriteTo = tenant && !isShared
+  // Компанийн апп дүрс, хуваалцах зураг (/t/{slug}/icon, /app-icon/...) — аль хэдийн дотоод замтай тул дахин rewrite хийхгүй
+  const ownInternal = !!tenant && pathname.startsWith(`/t/${tenant}/`);
+  const rewriteTo = tenant && !isShared && !ownInternal
     ? new URL(`/t/${tenant}${pathname === "/" ? "" : pathname}${search}`, request.url)
     : appHost && pathname === "/"
       ? new URL(`/dashboard${search}`, request.url)

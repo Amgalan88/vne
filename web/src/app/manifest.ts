@@ -1,7 +1,38 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
+import { tenantFromHost } from "@/lib/hosts";
+import { getTenantBrand } from "@/lib/tenant-brand";
 
-/** Хөтчөөс "Апп болгон суулгах" (PWA) — дүрс, нэр, суулгах цонхны дэлгэцийн зургууд */
-export default function manifest(): MetadataRoute.Manifest {
+/**
+ * Хөтчөөс "Апп болгон суулгах" (PWA).
+ * hhk.mn / app.hhk.mn → HHK.MN апп; компани.hhk.mn → тухайн компанийн нэр, логотой тусдаа апп.
+ */
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const slug = tenantFromHost((await headers()).get("host"));
+
+  if (slug) {
+    const b = await getTenantBrand(slug);
+    return {
+      id: "/",
+      name: b.name,
+      short_name: b.name.length > 14 ? b.name.replace(/\s*(ХХК|ХК|LLC)$/i, "").slice(0, 14) : b.name,
+      description: b.headline || `${b.name} — ажлын хэсэг`,
+      lang: "mn",
+      start_url: "/",
+      scope: "/",
+      display: "standalone",
+      orientation: "portrait",
+      background_color: "#ffffff",
+      theme_color: b.from,
+      categories: ["business", "productivity"],
+      icons: [
+        { src: `/t/${slug}/app-icon/192`, sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: `/t/${slug}/app-icon/512`, sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: `/t/${slug}/app-icon/maskable`, sizes: "512x512", type: "image/png", purpose: "maskable" },
+      ],
+    };
+  }
+
   return {
     id: "/",
     name: "HHK.MN — Бизнесээ өргөжүүлээрэй",
