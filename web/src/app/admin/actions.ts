@@ -21,7 +21,13 @@ export async function adminLogin(_: CodeState, fd: FormData): Promise<CodeState>
   if (!token) {
     if (email === ADMIN_EMAIL) {
       const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-      if (error?.code?.startsWith("over_")) return { error: "Хэт олон оролдлого хийлээ. Хэдэн минутын дараа дахин оролдоно уу." };
+      // Админы имэйл дээр л бодит алдааг харуулна (өөр имэйлд хариу ижил хэвээр)
+      if (error) {
+        if (error.code?.startsWith("over_")) return { error: "Хэт олон оролдлого хийлээ. Хэдэн минутын дараа дахин оролдоно уу." };
+        if (error.code === "otp_disabled" || error.message.toLowerCase().includes("signups not allowed"))
+          return { error: "Энэ имэйлээр бүртгэл олдсонгүй. Эхлээд hhk.mn/signup дээр бүртгүүлж, имэйлээ баталгаажуулаад дахин оролдоно уу." };
+        return { error: `Код илгээж чадсангүй: ${error.message}. Supabase-ийн SMTP тохиргоог шалгана уу.` };
+      }
     }
     return { step: "code", email };
   }
