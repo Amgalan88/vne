@@ -1,7 +1,12 @@
 import type { Tenant } from "./types";
 
-// Төлбөр дансаар шилжүүлж, гараар баталгаажуулна (supabase/002_billing.sql → activate_pro)
+// Төлбөр дансаар шилжүүлж, хүсэлт илгээнэ → hhk.mn/admin/dashboard дээр админ баталгаажуулна (supabase/004_payments.sql)
+// Үнэ supabase/004_payments.sql-ийн plan_price()-тэй таарах ёстой
 export const PRO_PRICE = 49900;
+export const PLANS = [
+  { months: 1, price: PRO_PRICE, label: "1 сар" },
+  { months: 12, price: 400000, label: "1 жил" },
+] as const;
 export const PAYMENT = {
   bank: "Хаан банк",
   account: "5119007473",

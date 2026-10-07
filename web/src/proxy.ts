@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/env";
-import { appUrl, COOKIE_DOMAIN, isAppHost, tenantFromHost } from "@/lib/hosts";
+import { appUrl, COOKIE_DOMAIN, isAppHost, rootUrl, tenantFromHost } from "@/lib/hosts";
 
 // Дэд домэйн дээр ч компанийн хуудас руу дахин чиглүүлэхгүй, бүх компанид нийтлэг замууд
 const SHARED_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", "/auth"];
@@ -16,6 +16,11 @@ export async function proxy(request: NextRequest) {
   const host = request.headers.get("host");
   const tenant = tenantFromHost(host);
   const appHost = isAppHost(host);
+
+  // Платформын админ зөвхөн үндсэн домэйн дээр (hhk.mn/admin/dashboard)
+  if (appHost && (pathname === "/admin" || pathname.startsWith("/admin/"))) {
+    return NextResponse.redirect(rootUrl(pathname));
+  }
 
   // Үндсэн домэйн зөвхөн танилцуулга — админ хэсэг app дэд домэйн дээр
   if (!tenant && !appHost && (pathname === "/dashboard" || pathname === "/new")) {
