@@ -177,8 +177,6 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="font-bold">Түүх</h2>
-                {/* Файл татах — клиент навигаци биш */}
-                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a download href="/admin/export/payments" className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-100">⬇ Excel (CSV)</a>
               </div>
               <Card className="divide-y divide-slate-100">
@@ -201,9 +199,7 @@ export default async function AdminDashboard({ searchParams }: PageProps<"/admin
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-bold">Компаниуд ({tenants.length}) · төлбөртэй {proTenants.length}</h2>
-            {/* Файл татах — клиент навигаци биш */}
-                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-                <a download href="/admin/export/companies" className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-100">⬇ Excel (CSV)</a>
+            <a download href="/admin/export/companies" className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-100">⬇ Excel (CSV)</a>
           </div>
           <form className="flex gap-2">
             <input type="hidden" name="tab" value="companies" />
